@@ -33,27 +33,32 @@ test_dataset = datasets.MNIST(root='data',
                                 train=False,
                                 transform=test_transforms)
 
-train_set_array = train_dataset.data.numpy()
+
+train_set_array = train_dataset.data
 i = 1
 for example in train_set_array[:54000]:
+    example = torch.unsqueeze(example, 0).numpy()
     save('../datasets/mnist/train/' + str(i) + '.npy', example)
     i += 1
+
 i = 1
 for example in train_set_array[54000:]:
+    example = torch.unsqueeze(example, 0).numpy()
     save('../datasets/mnist/valid/' + str(i) + '.npy', example)
     i += 1
 
-test_set_array = test_dataset.data.numpy()
+test_set_array = test_dataset.data
 i = 1
 for example in test_set_array:
+    example = torch.unsqueeze(example, 0).numpy()
     save('../datasets/mnist/test/' + str(i) + '.npy', example)
     i += 1
 
 
+train_set_array = train_dataset.data.numpy()
 train = train_set_array.reshape(train_set_array.shape[0], 28 * 28).tolist()
 test_set_array = test_dataset.data.numpy()
 test = test_set_array.reshape(test_set_array.shape[0], 28 * 28).tolist()
-valid_set_array = valid_dataset.data.numpy()
 features = train + test
 features = np.array(features)
 print(features.shape)
@@ -66,7 +71,6 @@ from numpy import savetxt
 savetxt('../datasets/mnist/labels.csv', labels, delimiter=',')
 savetxt('../datasets/mnist/features.csv', features, delimiter=',')
 '''
-
 
 def ws_LF_labels(features, labels, label_num):
     index = 0
@@ -134,7 +138,23 @@ def pair_pred(label_num, pred_label_list, score_list,
 
 
 if __name__ == "__main__":
-
+    '''
+    features = np.empty((0, 784))
+    for i in range(54000):
+        raw_data = load('../datasets/mnist/train/' + str(i + 1) + '.npy')
+        feature = raw_data.flatten()
+        features = np.append(features, feature, axis=0)
+    
+    for i in range(6000):
+        raw_data = load('../datasets/mnist/valid/' + str(i + 1) + '.npy')
+        feature = raw_data.flatten()
+        features = np.append(features, feature, axis=0)
+    for i in range(10000):
+        raw_data = load('../datasets/mnist/test/' + str(i + 1) + '.npy')
+        feature = raw_data.flatten()
+        features = np.append(features, feature, axis=0)
+    '''
+    
     labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
     features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
     label_list, feature_list = ws_LF_labels(features, labels, 6000)
@@ -196,5 +216,4 @@ if __name__ == "__main__":
     mnist_test = open("../datasets/mnist/test.json", "w")
     json.dump(test_data, mnist_test)
     mnist_test.close()
-
-
+    
