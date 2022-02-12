@@ -160,7 +160,7 @@ if __name__ == "__main__":
     print(type(pred_labels), pred_labels[0])
 
     
-
+    '''
     tennis_valid = open("../datasets/tennis/valid.json", "r")
     valid_data = json.load(tennis_valid)
     tennis_valid.close()
@@ -171,7 +171,7 @@ if __name__ == "__main__":
         i = i + 1
     print(i)
 
-    '''
+
     tennis_valid = open("../datasets/tennis/valid.json", "w")
     json.dump(valid_data, tennis_valid)
     tennis_valid.close()

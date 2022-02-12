@@ -14,7 +14,7 @@ from sklearn.metrics import f1_score
 import json
 
 
-
+'''
 train_transforms = None
 test_transforms=None
 
@@ -49,7 +49,7 @@ for example in test_set_array:
     save('../datasets/mnist/test/' + str(i) + '.npy', example)
     i += 1
 
-'''
+
 train = train_set_array.reshape(train_set_array.shape[0], 28 * 28).tolist()
 test_set_array = test_dataset.data.numpy()
 test = test_set_array.reshape(test_set_array.shape[0], 28 * 28).tolist()
@@ -67,7 +67,7 @@ savetxt('../datasets/mnist/labels.csv', labels, delimiter=',')
 savetxt('../datasets/mnist/features.csv', features, delimiter=',')
 '''
 
-'''
+
 def ws_LF_labels(features, labels, label_num):
     index = 0
     num_list = []
@@ -83,41 +83,49 @@ def ws_LF_labels(features, labels, label_num):
             index += 1
     return label_list, feature_list
 
-def single_pair_pred(label_num, pred_label_list, score_list,
+def pair_pred(label_num, pred_label_list, score_list,
                             label_list, feature_list, func_count):
-    for i in range(func_count):
+    for i in range(20):
         index = 0
         num_list = []
-        labels_select = []
-        features_select = []
+        labels_remain = []
+        features_remain = []
         while(index < label_num):
             num = random.randint(0, len(label_list) - 1)
             if num not in num_list:
                 num_list.append(num)
-                labels_select.append(label_list[num])
-                features_select.append(feature_list[num])
+                labels_remain.append(label_list[num])
+                features_remain.append(feature_list[num])
                 index +=1
-        labels_select = np.array(labels_select)
-        features_select = np.array(features_select)
-        features_remain = copy.deepcopy(feature_list)
+        labels_remain = np.array(labels_remain)
         features_remain = np.array(features_remain)
-        features_remain = np.delete(features_remain, num_list, axis=0)
-        label_remain = copy.deepcopy(label_list)
-        label_remain = np.array(label_remain)
-        label_remain = np.delete(label_remain, num_list)
+        features_select = copy.deepcopy(feature_list)
+        features_select = np.array(features_select)
+        features_select = np.delete(features_select, num_list, axis=0)
+        label_select = copy.deepcopy(label_list)
+        label_select = np.array(label_select)
+        label_select = np.delete(label_select, num_list)
         print(features_select.shape)
         print(features_remain.shape)
 
         clf = OneVsRestClassifier(SVC(kernel="linear", C = 1.0))
-        clf.fit(features_select, labels_select)
-        remain_y_pred = clf.predict(features_remain)
-        score = f1_score(label_remain, remain_y_pred, average='weighted')
-        score_list.append(score)
-        y_pred = clf.predict(features)
-        y_pred = np.array(y_pred)
-        pred_label_list = np.append(pred_label_list, np.array([y_pred]).transpose(), axis=1)
+        clf.fit(features_select, label_select)
+        index = 0
+        for clf_i in clf.estimators_:
+            remain_y_pred = clf_i.predict(features_remain)
+            remain_y_pred = np.where(remain_y_pred == 0, -1, remain_y_pred)
+            remain_y_pred = np.where(remain_y_pred == 1, index, remain_y_pred)
+            score = f1_score(labels_remain, remain_y_pred, average='weighted')
+            score_list.append(score)
+            y_pred = clf_i.predict(features)
+            y_pred = np.where(y_pred == 0, -1, y_pred)
+            y_pred = np.where(y_pred == 1, index, y_pred)
+            index += 1
+            y_pred = np.array(y_pred)
+            pred_label_list = np.append(pred_label_list, np.array([y_pred]).transpose(), axis=1)
     
     score_list = np.array(score_list)
+    print(score_list.shape)
     sort_score = np.argsort(score_list)[-func_count:].tolist()
     pred_label_list = pred_label_list[:,sort_score]
     score_list = np.sort(score_list)[-func_count:]
@@ -125,19 +133,16 @@ def single_pair_pred(label_num, pred_label_list, score_list,
 
 
 
-
-
-
 if __name__ == "__main__":
 
     labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
     features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
-    label_list, feature_list = ws_LF_labels(features, labels, 600)
+    label_list, feature_list = ws_LF_labels(features, labels, 6000)
 
     pred_label_list = np.empty((labels.shape[0], 0), int)
     score_list = []
-    pred_label_list, score_list  = single_pair_pred(100, pred_label_list, score_list,
-                        label_list, feature_list, 5)
+    pred_label_list, score_list  = pair_pred(1000, pred_label_list, score_list,
+                        label_list, feature_list, 50)
     
     print(score_list, score_list.shape)
     print(pred_label_list.shape)
@@ -149,32 +154,47 @@ if __name__ == "__main__":
     print(type(pred_labels), pred_labels[0])
 
 
+
     train_data = {}
-    for i in range(6):
+    for i in range(54000):
         element = {}
         element["label"] = int(labels[i])
         element['weak_labels'] = list(map(int, pred_labels[i].tolist()))
         feature_item = {}
-        feature_item["feature"] = features[i].tolist()
+        feature_item["feature"] = str(i + 1) + '.npy'
         element['data'] = feature_item
         train_data[str(i)] = element
-        print(element)
 
     mnist_train = open("../datasets/mnist/train.json", "w")
     json.dump(train_data, mnist_train)
     mnist_train.close()
 
     valid_data = {}
-    for i in range(6):
+    for i in range(54000, 60000):
         element = {}
         element["label"] = int(labels[i])
         element['weak_labels'] = list(map(int, pred_labels[i].tolist()))
         feature_item = {}
-        feature_item["feature"] = features[i].tolist()
+        feature_item["feature"] = str(i- 54000 + 1) + '.npy'
         element['data'] = feature_item
-        valid_data[str(i)] = element
+        valid_data[str(i - 54000)] = element
 
-    mnist_valid = open("../datasets/mnist/train.json", "w")
+    mnist_valid = open("../datasets/mnist/valid.json", "w")
     json.dump(valid_data, mnist_valid)
     mnist_valid.close()
-'''
+
+    test_data = {}
+    for i in range(60000, 70000):
+        element = {}
+        element["label"] = int(labels[i])
+        element['weak_labels'] = list(map(int, pred_labels[i].tolist()))
+        feature_item = {}
+        feature_item["feature"] = str(i- 60000 + 1) + '.npy'
+        element['data'] = feature_item
+        test_data[str(i - 60000)] = element
+
+    mnist_test = open("../datasets/mnist/test.json", "w")
+    json.dump(test_data, mnist_test)
+    mnist_test.close()
+
+
