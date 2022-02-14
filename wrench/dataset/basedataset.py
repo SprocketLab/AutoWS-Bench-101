@@ -68,7 +68,18 @@ class BaseDataset(ABC):
             self.ids.append(i)
             self.labels.append(item['label'])
             self.weak_labels.append(item['weak_labels'])
-            self.examples.append(item['data'])
+            for key in item['data']:
+                if key == "text":
+                    self.examples.append(item['data'])
+                else:
+                    image_path = item['data']['feature']
+                    if (isinstance(image_path, str)):
+                        file_path = path / f'{split}/{image_path}'
+                        load_dic = {}
+                        load_dic['feature'] = np.load(file_path)
+                        self.examples.append(load_dic)
+                    else:
+                        self.examples.append(item['data'])
 
         label_path = self.path / f'label.json'
         self.id2label = {int(k): v for k, v in json.load(open(label_path, 'r')).items()}

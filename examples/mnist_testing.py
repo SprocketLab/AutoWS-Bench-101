@@ -2,12 +2,14 @@ import logging
 import torch
 import numpy as np
 import fire
+from numpy import load
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
 from wrench.search import grid_search
 from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
+
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',

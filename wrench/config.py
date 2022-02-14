@@ -25,6 +25,10 @@ DEFAULT_MLP_CONFIG = {
     'dropout'    : 0.0,
 }
 
+DEFAULT_LENET_CONFIG = {
+    #to do
+}
+
 DEFAULT_IMAGE_CLASSIFIER_CONFIG = {
     'model_name': 'resnet18',
 }
@@ -45,6 +49,7 @@ DEFAULT_BACKBONE_MAP = {
     'LogReg'         : DEFAULT_LOGREG_CONFIG,
     'ImageClassifier': DEFAULT_IMAGE_CLASSIFIER_CONFIG,
     'BERT'           : DEFAULT_BERT_CONFIG,
+    'LENET'          : DEFAULT_LENET_CONFIG,
 }
 
 DEFAULT_LABEL_MODEL_CONFIG = {
