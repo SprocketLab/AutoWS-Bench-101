@@ -46,6 +46,7 @@ soft_label = label_model.predict_proba(train_data)
 print(soft_label.shape)
 
 model = EndClassifierModel(
+        batch_size = 32,
         test_batch_size=256,
         n_steps=10000,
         backbone='LENET',
@@ -61,6 +62,7 @@ model.fit(
         device=device
     )
 f1_binary = model.test(test_data, 'f1_binary')
+logger.info(f'end model (LENET) test acc: {f1_binary}')
 
 if __name__ == '__main__':
     print('finish')

@@ -77,13 +77,42 @@ class MLP(BackBone):
 
     def forward(self, batch, return_features=False):
         x = batch['features'].to(self.get_device())
+        #print('x shape is ' + str(x.shape))
         h = self.fcs(x)
+        #print('h shape is ' + str(h.shape))
         logits = self.last_layer(h)
         if return_features:
             return logits, h
         else:
             return logits
 
+class LENET(BackBone):
+    def __init__(self, n_class, input_size, dropout=0.0, binary_mode=False, **kwargs):
+        super(LENET, self).__init__(n_class=n_class, binary_mode=binary_mode)
+        self.feature_extractor = nn.Sequential(            
+            nn.Conv2d(1, 6, 5), nn.ReLU(),
+            nn.MaxPool2d(2), nn.Conv2d(6, 16, 5),
+            nn.ReLU(), nn.MaxPool2d(2)
+        )
+
+        self.classifier = nn.Sequential(
+            nn.Linear(256, 120),
+            nn.ReLU(),
+            nn.Linear(120, 84),
+            nn.ReLU(),
+        )
+
+        self.last_layer = nn.Linear(84, 10)
+    def forward(self, batch, return_features=False):
+        #note: x to be the actual image, figure out the right way to fit the pipline
+        x = batch['features'].to(self.get_device())
+        x = self.feature_extractor(x)
+        x = x.view(x.shape[0], -1)
+        features = self.classifier(x)
+        logits = self.last_layer(features)
+        if return_features:
+                return logits, features
+        return logits
 
 """ torchvision for image classification """
 
