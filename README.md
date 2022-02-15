@@ -15,6 +15,10 @@
 
 ## 🔧 New
 
+**2/13/22** 
+
+1. Add [script](https://github.com/JieyuZ2/wrench/tree/main/datasets/tabular_data) to generate LFs for any tabular dataset as well as 5 new tabular datasets, namely, mushroom, spambase, PhishingWebsites, Bioresponse, and bank-marketing.
+
 **11/04/21** 
 
 1. (beta) Add `parallel_fit` for torch model to support pytorch DistributedDataParallel-[example](https://github.com/JieyuZ2/wrench/blob/main/examples/run_torch_ddp.py)
@@ -49,6 +53,8 @@ url={https://openreview.net/forum?id=Q9SKS5k8io}
 **Weak Supervision** is a paradigm for automated training data creation without manual annotations. 
 
 For a brief overview, please check out this [blog](https://www.snorkel.org/blog/weak-supervision).
+
+For more context, please check out this [survey](https://arxiv.org/abs/2202.05433).
 
 To track recent advances in weak supervision, please follow this [repo](https://github.com/JieyuZ2/Awesome-Weak-Supervision).
 
