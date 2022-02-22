@@ -154,10 +154,17 @@ if __name__ == "__main__":
         feature = raw_data.flatten()
         features = np.append(features, feature, axis=0)
     '''
-    
+
+
     labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
     features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
-    label_list, feature_list = ws_LF_labels(features, labels, 6000)
+    valid_feature = features[54000:60000]
+    feature_list = []
+    for i in range(6000):
+        feature_list.append(valid_feature[i])
+    label_list = labels[54000:60000].tolist()
+
+    #label_list, feature_list = ws_LF_labels(features, labels, 6000)
 
     pred_label_list = np.empty((labels.shape[0], 0), int)
     score_list = []
@@ -172,7 +179,7 @@ if __name__ == "__main__":
 
     pred_labels = loadtxt('../datasets/mnist/pred_label.csv', delimiter=',')
     print(type(pred_labels), pred_labels[0])
-
+    
 
 
     train_data = {}
@@ -216,4 +223,3 @@ if __name__ == "__main__":
     mnist_test = open("../datasets/mnist/test.json", "w")
     json.dump(test_data, mnist_test)
     mnist_test.close()
-    

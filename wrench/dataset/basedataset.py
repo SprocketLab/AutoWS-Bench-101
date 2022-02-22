@@ -204,6 +204,18 @@ class BaseDataset(ABC):
             return self.create_subset(idx)
         else:
             return list(idx)
+    
+    def get_merged_set(self, combine):
+        start = len(self.ids)
+        for i in range(len(combine.ids)):
+            self.ids.append(str(i + start))
+            self.labels.append(combine.labels[i])
+            self.examples.append(combine.examples[i])
+            self.weak_labels.append(combine.weak_labels[i])
+        
+        self.features = np.concatenate((self.features, combine.features), axis=0)
+        return self
+
 
     def get_covered_subset(self):
         idx = [i for i in range(len(self)) if np.any(np.array(self.weak_labels[i]) != -1)]

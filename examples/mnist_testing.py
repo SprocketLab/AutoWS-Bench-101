@@ -10,7 +10,6 @@ from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
 
-
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -35,15 +34,15 @@ label_model.fit(
     dataset_train=train_data,
     dataset_valid=valid_data
 )
-f1_binary = label_model.test(test_data, 'f1_binary')
-logger.info(f'majority vote test f1_binary: {f1_binary}')
+acc = label_model.test(test_data, 'acc')
+logger.info(f'majority vote test acc: {acc}')
 
 #### Filter out uncovered training data
 train_data = train_data.get_covered_subset()
 aggregated_hard_labels = label_model.predict(train_data)
 aggregated_soft_labels = label_model.predict_proba(train_data)
-soft_label = label_model.predict_proba(train_data)
-print(soft_label.shape)
+print(aggregated_soft_labels.shape)
+print(aggregated_soft_labels[0])
 
 model = EndClassifierModel(
         batch_size = 32,
@@ -56,13 +55,48 @@ model.fit(
         dataset_train=train_data,
         y_train=aggregated_soft_labels,
         dataset_valid=valid_data,
-        metric='f1_binary',
+        metric='acc',
         evaluation_step=50, # ?
         patience=200, # ?
         device=device
     )
-f1_binary = model.test(test_data, 'f1_binary')
-logger.info(f'end model (LENET) test acc: {f1_binary}')
+acc = model.test(test_data, 'acc')
+logger.info(f'end model (LENET) test acc: {acc}')
+
+
+
+valid_label = np.array(valid_data.labels)
+y_valid = np.empty((0, 10))
+for i in range(valid_label.shape[0]):
+    l = [0] * 10
+    l[valid_label[i]] = 1
+    y_valid = np.append(y_valid, np.array([l]), axis=0)
+
+model.fit(
+        dataset_train=valid_data,
+        y_train=y_valid,
+        metric='acc',
+        evaluation_step=50, # ?
+        patience=200, # ?
+        device=device
+    )
+acc = model.test(test_data, 'acc')
+logger.info(f'end model (LENET) test acc: {acc}')
+
+
+
+merge_data = train_data.get_merged_set(valid_data)
+merge_y_train = np.concatenate((aggregated_soft_labels, y_valid), axis=0)
+model.fit(
+        dataset_train=merge_data,
+        y_train=merge_y_train,
+        metric='acc',
+        evaluation_step=50, # ?
+        patience=200, # ?
+        device=device
+    )
+acc = model.test(test_data, 'acc')
+logger.info(f'end model (LENET) test acc: {acc}')
 
 if __name__ == '__main__':
     print('finish')
