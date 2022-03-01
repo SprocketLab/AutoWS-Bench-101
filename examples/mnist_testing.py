@@ -9,6 +9,10 @@ from wrench.search import grid_search
 from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
+from numpy import loadtxt
+from wrench.synthetic import UnipolarLF
+from sklearn.svm import SVC
+from wrench.synthetic import make_unipolar_lfs
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -17,6 +21,19 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     handlers=[LoggingHandler()])
 logger = logging.getLogger(__name__)
 device = torch.device('cuda')
+
+labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
+features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
+valid_feature = features[54000:60000]
+feature_list = []
+for i in range(600):
+    feature_list.append(valid_feature[i])
+label_list = labels[54000:54600].tolist()
+X_val = np.array(feature_list[:500])
+y_val = np.array(label_list[:500])
+
+lfs = []
+lfs = make_unipolar_lfs(SVC, X_val, y_val, kernel='rbf', random_state=123)
 
 #### Load dataset 
 dataset_path = '../datasets'
@@ -54,7 +71,7 @@ model = EndClassifierModel(
 model.fit(
         dataset_train=train_data,
         y_train=aggregated_soft_labels,
-        dataset_valid=valid_data,
+        #dataset_valid=valid_data,
         metric='acc',
         evaluation_step=50, # ?
         patience=200, # ?
@@ -64,8 +81,10 @@ acc = model.test(test_data, 'acc')
 logger.info(f'end model (LENET) test acc: {acc}')
 
 
-
+l = range(600)
+valid_data = valid_data.create_subset(l)
 valid_label = np.array(valid_data.labels)
+print(valid_label.shape)
 y_valid = np.empty((0, 10))
 for i in range(valid_label.shape[0]):
     l = [0] * 10
@@ -82,7 +101,6 @@ model.fit(
     )
 acc = model.test(test_data, 'acc')
 logger.info(f'end model (LENET) test acc: {acc}')
-
 
 
 merge_data = train_data.get_merged_set(valid_data)

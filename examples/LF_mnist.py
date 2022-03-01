@@ -160,15 +160,15 @@ if __name__ == "__main__":
     features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
     valid_feature = features[54000:60000]
     feature_list = []
-    for i in range(6000):
+    for i in range(600):
         feature_list.append(valid_feature[i])
-    label_list = labels[54000:60000].tolist()
+    label_list = labels[54000:54600].tolist()
 
     #label_list, feature_list = ws_LF_labels(features, labels, 6000)
 
     pred_label_list = np.empty((labels.shape[0], 0), int)
     score_list = []
-    pred_label_list, score_list  = pair_pred(1000, pred_label_list, score_list,
+    pred_label_list, score_list  = pair_pred(100, pred_label_list, score_list,
                         label_list, feature_list, 50)
     
     print(score_list, score_list.shape)
