@@ -10,9 +10,9 @@ from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
 from numpy import loadtxt
-from wrench.synthetic import UnipolarLF
+from wrench.labelfunction import UnipolarSVM_LF, BasicDecisionTreeLF
 from sklearn.svm import SVC
-from wrench.synthetic import make_unipolar_lfs
+from wrench.labelfunction import make_basicDecisionTree_lfs, make_unipolarSVM_lfs
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -24,16 +24,13 @@ device = torch.device('cuda')
 
 labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
 features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
-valid_feature = features[54000:60000]
-feature_list = []
-for i in range(600):
-    feature_list.append(valid_feature[i])
-label_list = labels[54000:54600].tolist()
-X_val = np.array(feature_list[:500])
-y_val = np.array(label_list[:500])
+x_val = features[54000:54600]
+y_val = labels[54000:54600]
+print(x_val.shape)
 
-lfs = []
-lfs = make_unipolar_lfs(SVC, X_val, y_val, kernel='rbf', random_state=123)
+lfs = make_unipolarSVM_lfs(x_val, y_val, kernel='rbf', random_state=0)
+
+print(len(lfs))
 
 #### Load dataset 
 dataset_path = '../datasets'
