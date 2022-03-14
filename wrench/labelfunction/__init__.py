@@ -1,9 +1,11 @@
 from .LF_generator import \
     BasicDecisionTreeLF, \
-    UnipolarSVM_LF, \
-    make_basicDecisionTree_lfs, \
-    make_unipolarSVM_lfs
+    BasicSVM_LF, \
+    UnipolarLF, \
+    BasicLogisticRegressionLF, \
+    MakeAbstractLFs
+    
 
 from .LF_selection import \
-    random_selection, \
-    score_selection
+    RandomSelector, \
+    ScoreSelector

@@ -5,10 +5,25 @@ import random
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import RidgeClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import SGDClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 class BaseGenerator(ABC):
-    def __init__(self, clf):
+    def __init__(self, clf, subList):
         self.clf = clf
+        self.subList = subList
+    
+    def fit(self, x, y):
+        self.clf.fit(x, y)
+        return self.clf
 
     def predict(self,x):
         preds = self.clf.predict(x)
@@ -16,20 +31,76 @@ class BaseGenerator(ABC):
     
     def score(self, x, y):
         return self.clf.score(x, y)
+    
+    def get_subList(self):
+        return self.subList
 
 class BasicDecisionTreeLF(BaseGenerator):
-    def __init__(self, clf):
-        super().__init__(clf) 
+    def __init__(self, subList, **kwargs):
+        clf = DecisionTreeClassifier(**kwargs)
+        super().__init__(clf, subList) 
 
 class BasicLogisticRegressionLF(BaseGenerator):
-    def __init__(self, clf):
-        super().__init__(clf) 
+    def __init__(self, subList, **kwargs):
+        clf = LogisticRegression(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicSVM_LF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = SVC(**kwargs)
+        super().__init__(clf, subList)
+
+class BasicAdaBoost_LF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = AdaBoostClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicBaggingLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = BaggingClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicExtraTreesLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = ExtraTreesClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicRandomForestLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = RandomForestClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicRidgeClassifierLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = RidgeClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicSGDClassifierLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = make_pipeline(StandardScaler(), SGDClassifier(**kwargs))
+        super().__init__(clf, subList) 
+
+class BasicMLPClassifierLF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = MLPClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
+class BasicKNN_LF(BaseGenerator):
+    def __init__(self, subList, **kwargs):
+        clf = KNeighborsClassifier(**kwargs)
+        super().__init__(clf, subList) 
+
 
 
 class UnipolarLF(ABC):
-    def __init__(self, clf, class_ind):
+    def __init__(self, clf, class_ind, subList):
         self.clf = clf
+        self.subList = subList
         self.class_ind = class_ind
+
+    def fit(self, x, y):
+        self.clf.fit(x, y)
+        return self.clf
     
     def predict(self, x):
         ''' Unipolar prediction. Either predict 1 for a given class or abstain.
@@ -55,40 +126,145 @@ class UnipolarLF(ABC):
         preds = self.predict(x)
         return len(np.where((preds != -1))[0]) / len(x)
 
-class UnipolarSVM_LF(UnipolarLF):
-    def __init__(self, clf, class_ind):
-        super().__init__(clf, class_ind) 
-
-class UnipolarDecisionTree_LF(UnipolarLF):
-    def __init__(self, clf, class_ind):
-        super().__init__(clf, class_ind) 
+    def get_subList(self):
+        return self.subList
 
 
 # Create LFs from different hypothesis classes
-def make_unipolarSVM_lfs(x_train, y_train, **kwargs):
-    clf = OneVsRestClassifier(SVC(**kwargs))
-    clf.fit(x_train, y_train)
-    return [UnipolarSVM_LF(e, i) for i, e in enumerate(clf.estimators_)]
+class MakeAbstractLFs(ABC):
+    def __init__(self, x_valid, y_valid):
+        self.x_valid = x_valid
+        self.y_valid = y_valid
 
-def make_unipolarDecisionTree_lfs(x_train, y_train, **kwargs):
-    clf = OneVsRestClassifier(DecisionTreeClassifier(**kwargs))
-    clf.fit(x_train, y_train)
-    return [UnipolarSVM_LF(e, i) for i, e in enumerate(clf.estimators_)]
+    def make_basicDecisionTree_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicDecisionTreeLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+    
+    def make_basicLogisticRegression_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicLogisticRegressionLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicSVM_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicSVM_LF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicAdaBoost_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicAdaBoost_LF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicABagging_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicBaggingLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicExtraTrees_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicExtraTreesLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicRandomForest_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicRandomForestLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicRidgeClassifier_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicRidgeClassifierLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicSGDClassifier_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicSGDClassifierLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicMLPClassifier_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicMLPClassifierLF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
+
+    def make_basicKNN_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            lf = BasicKNN_LF(random_selection, **kwargs)
+            lf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            lfs.append(lf)
+        return lfs
 
 
-def make_basicDecisionTree_lfs(LF_num, x_train, y_train, **kwargs):
-    lfs = []
-    for i in range(LF_num):
-        clf = DecisionTreeClassifier(splitter = "random", **kwargs)
-        clf.fit(x_train, y_train)
-        lfs.append(BasicDecisionTreeLF(clf))
-    return lfs
 
-def make_basicLogisticRegression_lfs(LF_num, x_train, y_train, **kwargs):
-    lfs = []
-    for i in range(LF_num):
-        clf = LogisticRegression(**kwargs)
-        clf.fit(x_train, y_train)
-        lfs.append(BasicLogisticRegressionLF(clf))
-    return lfs
+    def make_unipolarSVM_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            clf = OneVsRestClassifier(SVC(**kwargs))
+            clf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            for i, e in enumerate(clf.estimators_):
+                lfs.append(UnipolarLF(e, i, random_selection))
+        return lfs
+
+    def make_unipolarDecisionTree_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            clf = OneVsRestClassifier(DecisionTreeClassifier(**kwargs))
+            clf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            for i, e in enumerate(clf.estimators_):
+                lfs.append(UnipolarLF(e, i, random_selection))
+        return lfs
+
+    def make_unipolarLogisticRegression_lfs(self, LF_num, **kwargs):
+        lfs = []
+        for i in range(LF_num):
+            random_selection = random.sample(range(self.x_valid.shape[0]), int(self.x_valid.shape[0]*0.1))
+            clf = OneVsRestClassifier(LogisticRegression(**kwargs))
+            clf.fit(self.x_valid[random_selection], self.y_valid[random_selection])
+            for i, e in enumerate(clf.estimators_):
+                lfs.append(UnipolarLF(e, i, random_selection))
+        return lfs
+
 

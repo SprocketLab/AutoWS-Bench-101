@@ -2,17 +2,17 @@ import logging
 import torch
 import numpy as np
 import fire
-from numpy import load
 from wrench.dataset import load_dataset
+from numpy import savetxt
 from wrench.logging import LoggingHandler
 from wrench.search import grid_search
 from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
 from numpy import loadtxt
-from wrench.labelfunction import UnipolarSVM_LF, BasicDecisionTreeLF
+from wrench.labelfunction import UnipolarLF, BasicDecisionTreeLF, ScoreSelector, MakeAbstractLFs
 from sklearn.svm import SVC
-from wrench.labelfunction import make_basicDecisionTree_lfs, make_unipolarSVM_lfs
+import json
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -21,16 +21,71 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     handlers=[LoggingHandler()])
 logger = logging.getLogger(__name__)
 device = torch.device('cuda')
+seed = 123
 
-labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
-features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
-x_val = features[54000:54600]
-y_val = labels[54000:54600]
+# train/valid/test :  54000, 6000, 10000
+x_val = loadtxt('../datasets/mnist/feature_valid.csv', delimiter=',')
+y_val = loadtxt('../datasets/mnist/label_valid.csv', delimiter=',')
 print(x_val.shape)
 
-lfs = make_unipolarSVM_lfs(x_val, y_val, kernel='rbf', random_state=0)
+# generate label functions
+lf_generator = MakeAbstractLFs(x_val, y_val)
+lfs = lf_generator.make_unipolarSVM_lfs(200, kernel='linear', random_state = seed)
+print(type(lfs), len(lfs))
+# lfs_2 = lf_generator.make_basicDecisionTree_lfs(2000, random_state = seed)
+# print(type(lfs_2), len(lfs_2))
 
-print(len(lfs))
+# select label functions
+lf_selector = ScoreSelector(lfs, 50)
+selected_lfs = lf_selector.score_selection(x_val, y_val)
+
+features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
+labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
+pred_label_list = np.empty((labels.shape[0], 0), int)
+for lf in selected_lfs:
+    pred_label_list = np.append(pred_label_list, np.array([lf.predict(features)]).transpose(), axis=1)
+
+#update label functions into json file
+mnist_valid = open("../datasets/mnist/valid.json", "r")
+valid_data = json.load(mnist_valid)
+mnist_valid.close()
+i = 54000
+for key in valid_data:
+    valid_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
+    i = i + 1
+print(i)
+mnist_valid = open("../datasets/mnist/valid.json", "w")
+json.dump(valid_data, mnist_valid)
+mnist_valid.close()
+
+
+mnist_test = open("../datasets/mnist/test.json", "r")
+test_data = json.load(mnist_test)
+mnist_test.close()
+i = 60000
+for key in test_data:
+    test_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
+    i = i + 1
+print(i)
+mnist_test = open("../datasets/mnist/test.json", "w")
+json.dump(test_data, mnist_test)
+mnist_test.close()
+
+
+mnist_train = open("../datasets/mnist/train.json", "r")
+train_data = json.load(mnist_train)
+mnist_train.close()
+i = 0
+for key in train_data:
+    train_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
+    i = i + 1
+print(i)
+mnist_train = open("../datasets/mnist/train.json", "w")
+json.dump(train_data, mnist_train)
+mnist_train.close()
+    
+
+
 
 #### Load dataset 
 dataset_path = '../datasets'
