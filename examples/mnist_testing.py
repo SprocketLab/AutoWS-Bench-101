@@ -10,7 +10,7 @@ from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
 from numpy import loadtxt
-from wrench.labelfunction import UnipolarLF, BasicDecisionTreeLF, ScoreSelector, MakeAbstractLFs
+from wrench.labelfunction import SnubaSelector, BasicDecisionTreeLF, ScoreSelector, MakeAbstractLFs
 from sklearn.svm import SVC
 import json
 
@@ -36,9 +36,10 @@ print(type(lfs), len(lfs))
 # print(type(lfs_2), len(lfs_2))
 
 # select label functions
-lf_selector = ScoreSelector(lfs, 50)
-selected_lfs = lf_selector.score_selection(x_val, y_val)
+lf_selector = SnubaSelector(lfs, 50, False)
+selected_lfs = lf_selector.prune_heuristics(x_val, y_val)
 
+'''
 features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
 labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
 pred_label_list = np.empty((labels.shape[0], 0), int)
@@ -84,7 +85,6 @@ mnist_train = open("../datasets/mnist/train.json", "w")
 json.dump(train_data, mnist_train)
 mnist_train.close()
     
-
 
 
 #### Load dataset 
@@ -170,3 +170,4 @@ logger.info(f'end model (LENET) test acc: {acc}')
 
 if __name__ == '__main__':
     print('finish')
+'''

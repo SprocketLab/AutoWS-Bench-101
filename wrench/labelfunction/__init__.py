@@ -8,4 +8,5 @@ from .LF_generator import \
 
 from .LF_selection import \
     RandomSelector, \
-    ScoreSelector
+    ScoreSelector, \
+    SnubaSelector
