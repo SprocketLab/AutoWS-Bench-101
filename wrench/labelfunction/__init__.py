@@ -3,6 +3,7 @@ from .LF_generator import \
     BasicSVM_LF, \
     UnipolarLF, \
     BasicLogisticRegressionLF, \
+    SnubaDecisionTreeLFs, \
     MakeAbstractLFs
     
 

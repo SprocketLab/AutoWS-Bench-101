@@ -1,6 +1,8 @@
 import numpy as np
 from abc import ABC
 from sklearn.svm import SVC
+import itertools
+from sklearn.metrics import f1_score
 import random
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.tree import DecisionTreeClassifier
@@ -90,7 +92,52 @@ class BasicKNN_LF(BaseGenerator):
         clf = KNeighborsClassifier(**kwargs)
         super().__init__(clf, subList) 
 
+class AbstractSnubaLFs(BaseGenerator):
+    def __init__(self, clf, b, max_cardinality, comb):
+        self.clf = clf
+        self.b = b
+        self.max_cardinality = max_cardinality
+        self.subList = comb
 
+    def find_optimal_beta(self, x, y):
+        marginals = self.clf.predict_proba(x[:,self.subList])[:,1] 
+        beta_params = np.linspace(0.25,0.45,10)
+        f1 = []		
+ 		
+        for beta in beta_params:		
+            labels_cutoff = np.full(np.shape(marginals), -1)	
+            labels_cutoff[marginals <= (self.b-beta)] = 0.		
+            labels_cutoff[marginals >= (self.b+beta)] = 1.		
+            f1.append(f1_score(y, labels_cutoff, average='weighted'))
+         		
+        f1 = np.nan_to_num(f1)
+        return beta_params[np.argsort(np.array(f1))[-1]]
+
+    def predict(self, x, y):
+        marginals = self.clf.predict_proba(x[:,self.subList])[:,1]
+        pred = np.full(np.shape(marginals), -1)
+        pred[marginals <= (self.b-self.find_optimal_beta(x,y))] = 0.
+        pred[marginals >= (self.b+self.find_optimal_beta(x,y))] = 1.
+        return pred
+
+    def score(self, x, y):
+        pred = self.predict(x,y)
+        return f1_score(y, pred, average='micro')
+
+class SnubaDecisionTreeLFs(AbstractSnubaLFs):
+    def __init__(self, b, max_cardinality, comb, **kwargs):
+        clf = DecisionTreeClassifier(max_depth=len(comb), **kwargs)
+        super().__init__(clf, b, max_cardinality, comb)
+
+class SnubaLogisticRegressionLFs(AbstractSnubaLFs):
+    def __init__(self, b, max_cardinality, comb, **kwargs):
+        clf = LogisticRegression(**kwargs)
+        super().__init__(clf, b, max_cardinality, comb)
+
+class SnubaKNN_LFs(AbstractSnubaLFs):
+    def __init__(self, b, max_cardinality, comb, **kwargs):
+        clf = KNeighborsClassifier(algorithm='kd_tree', **kwargs)
+        super().__init__(clf, b, max_cardinality, comb)
 
 class UnipolarLF(ABC):
     def __init__(self, clf, class_ind, subList):
@@ -267,4 +314,51 @@ class MakeAbstractLFs(ABC):
                 lfs.append(UnipolarLF(e, i, random_selection))
         return lfs
 
+    def make_snubaDecisionTree_lfs(self, b = 0.5, max_cardinality = 1, **kwargs):
+        lfs = []
+        for cardinality in range(1, max_cardinality+1):
+            primitive_idx = range(np.shape(self.x_valid)[1])
+            feature_combinations = []
+            for comb in itertools.combinations(primitive_idx, cardinality):
+                feature_combinations.append(comb)
+            for i,comb in enumerate(feature_combinations):
+                lf = SnubaDecisionTreeLFs(b, max_cardinality, comb, **kwargs)
+                X = self.x_valid[:,comb]
+                if np.shape(X)[0] == 1:
+                    X = X.reshape(-1,1)
+                lf.fit(X, self.y_valid)
+                lfs.append(lf)
+        return lfs
 
+    def make_snubaLogisticRegression_lfs(self, b = 0.5, max_cardinality = 1, **kwargs):
+        lfs = []
+        for cardinality in range(1, max_cardinality+1):
+            primitive_idx = range(np.shape(self.x_valid)[1])
+            feature_combinations = []
+            for comb in itertools.combinations(primitive_idx, cardinality):
+                feature_combinations.append(comb)
+            for i,comb in enumerate(feature_combinations):
+                lf = SnubaLogisticRegressionLFs(b, max_cardinality, comb, **kwargs)
+                X = self.x_valid[:,comb]
+                if np.shape(X)[0] == 1:
+                    X = X.reshape(-1,1)
+                lf.fit(X, self.y_valid)
+                lfs.append(lf)
+        return lfs
+                
+
+    def make_snubaKNN_lfs(self, b = 0.5, max_cardinality = 1, **kwargs):
+        lfs = []
+        for cardinality in range(1, max_cardinality+1):
+            primitive_idx = range(np.shape(self.x_valid)[1])
+            feature_combinations = []
+            for comb in itertools.combinations(primitive_idx, cardinality):
+                feature_combinations.append(comb)
+            for i,comb in enumerate(feature_combinations):
+                lf = SnubaKNN_LFs(b, max_cardinality, comb, **kwargs)
+                X = self.x_valid[:,comb]
+                if np.shape(X)[0] == 1:
+                    X = X.reshape(-1,1)
+                lf.fit(X, self.y_valid)
+                lfs.append(lf)
+        return lfs

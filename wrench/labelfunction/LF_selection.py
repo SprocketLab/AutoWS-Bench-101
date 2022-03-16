@@ -38,10 +38,9 @@ class SnubaSelector(BaseSelector):
         self.isbinary = isbinary
 
     def prune_heuristics(self, x_valid, y_valid):
-        pred_label_list = np.empty((y_valid.shape[0], 0), int)
+        acc_cov_scores = []
         for lf in self.lfs:
-            pred_label_list = np.append(pred_label_list, np.array([lf.predict(x_valid)]).transpose(), axis=1)
-        acc_cov_scores = [f1_score(y_valid, pred_label_list[:,i], average='micro') for i in range(np.shape(pred_label_list)[1])] 
+            acc_cov_scores.append(lf.score(x_valid, y_valid))
         acc_cov_scores = np.nan_to_num(acc_cov_scores)
         jaccard_scores = np.ones(np.shape(acc_cov_scores))
         combined_scores = 0.5*acc_cov_scores + 0.5*jaccard_scores
