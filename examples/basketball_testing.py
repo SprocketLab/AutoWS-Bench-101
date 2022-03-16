@@ -34,7 +34,7 @@ x_val = np.array([d['feature'] for d in valid_data.examples])
 y_val = np.array(valid_data.labels)
 
 lf_generator = MakeAbstractLFs(x_val, y_val)
-lfs = lf_generator.make_snubaDecisionTree_lfs(0.5, 1, random_state = seed)
+lfs = lf_generator.make_snubaDecisionTree_lfs(b = 0.5, max_cardinality = 1, random_state = seed)
 print(type(lfs), len(lfs))
 
 lf_selector = SnubaSelector(lfs, 50, True)
