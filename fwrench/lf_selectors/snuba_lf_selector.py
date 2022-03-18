@@ -17,7 +17,7 @@ class SnubaSelector(BaseSelector):
     def __init__(self, lf_generator):
         super().__init__(lf_generator)
 
-    def fit(self, labeled_data, unlabeled_data, b=0.5):
+    def fit(self, labeled_data, unlabeled_data, b=0.5, cardinality=1):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
 
@@ -30,6 +30,7 @@ class SnubaSelector(BaseSelector):
         self.val_primitive_matrix = x_val
         self.val_ground = y_val
         self.b = b
+        self.cardinality = cardinality
 
         validation_accuracy = []
         training_accuracy = []
@@ -45,11 +46,11 @@ class SnubaSelector(BaseSelector):
             #Repeat synthesize-prune-verify at each iterations
             if i == 3:
                 self.hg.run_synthesizer(
-                    max_cardinality=1, idx=idx, keep=3, 
+                    max_cardinality=self.cardinality, idx=idx, keep=3, 
                     model=self.lf_generator)
             else:
                 self.hg.run_synthesizer(
-                    max_cardinality=1, idx=idx, keep=1, 
+                    max_cardinality=self.cardinality, idx=idx, keep=1, 
                     model=self.lf_generator)
 
             self.hg.run_verifier()

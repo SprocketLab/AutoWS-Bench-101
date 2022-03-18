@@ -6,6 +6,7 @@ from functools import partial
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -44,11 +45,11 @@ def main():
     #    kernel=1.0*RBF(1.0), random_state=0)
     #lf_class = partial(RandomForestClassifier, 
     #    max_depth=2, random_state=0)
-    lf_class = partial(RandomForestClassifier, 
-        max_depth=2, random_state=0)
+    lf_class = partial(DecisionTreeClassifier, 
+        max_depth=1) # Equivalent to Snuba with regular decision trees
     snuba = SnubaSelector(lf_class)
     # Use Snuba convention of assuming only validation set labels...
-    snuba.fit(valid_data, train_data, b=0.5)
+    snuba.fit(valid_data, train_data, b=0.5, cardinality=1)
     lf_outputs = snuba.predict(train_data)
 
     # TODO train label model 
