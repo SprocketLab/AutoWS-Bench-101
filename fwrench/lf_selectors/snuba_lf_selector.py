@@ -17,7 +17,8 @@ class SnubaSelector(BaseSelector):
     def __init__(self, lf_generator):
         super().__init__(lf_generator)
 
-    def fit(self, labeled_data, unlabeled_data, b=0.5, cardinality=1):
+    def fit(self, labeled_data, unlabeled_data, 
+            b=0.5, cardinality=1, iters=23, scoring_fn=None):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
 
@@ -31,6 +32,7 @@ class SnubaSelector(BaseSelector):
         self.val_ground = y_val
         self.b = b
         self.cardinality = cardinality
+        self.scoring_fn = scoring_fn
 
         validation_accuracy = []
         training_accuracy = []
@@ -42,16 +44,16 @@ class SnubaSelector(BaseSelector):
         self.hg = HeuristicGenerator(
             self.train_primitive_matrix, self.val_primitive_matrix, 
             self.val_ground, self.train_ground, b=self.b)
-        for i in tqdm(range(3, 26)):
+        for i in tqdm(range(3, iters + 3)):
             #Repeat synthesize-prune-verify at each iterations
             if i == 3:
                 self.hg.run_synthesizer(
                     max_cardinality=self.cardinality, idx=idx, keep=3, 
-                    model=self.lf_generator)
+                    model=self.lf_generator, scoring_fn=self.scoring_fn)
             else:
                 self.hg.run_synthesizer(
                     max_cardinality=self.cardinality, idx=idx, keep=1, 
-                    model=self.lf_generator)
+                    model=self.lf_generator, scoring_fn=self.scoring_fn)
 
             self.hg.run_verifier()
             
@@ -78,7 +80,7 @@ class SnubaSelector(BaseSelector):
 
         beta_opt = self.hg.syn.find_optimal_beta(
             self.hg.hf, self.hg.val_primitive_matrix, 
-            self.hg.feat_combos, self.hg.val_ground)
+            self.hg.feat_combos, self.hg.val_ground, self.scoring_fn)
         # TODO ^ triple check that this is right? 
 
         lf_outputs = self.hg.apply_heuristics(

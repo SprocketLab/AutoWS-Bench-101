@@ -90,13 +90,16 @@ class Synthesizer(object):
 
         return heuristics_final, feature_combinations_final
 
-    def beta_optimizer(self,marginals, ground):
+    def beta_optimizer(self, marginals, ground, scoring_fn=None):
         """ 
         Returns the best beta parameter for abstain threshold given marginals
         Uses F1 score that maximizes the F1 score
 
         marginals: confidences for data from a single heuristic
         """	
+
+        if not scoring_fn:
+            scoring_fn = f1_score
 
         #Set the range of beta params
         #0.25 instead of 0.0 as a min makes controls coverage better
@@ -109,12 +112,17 @@ class Synthesizer(object):
             labels_cutoff[marginals <= (self.b-beta)] = -1.		
             labels_cutoff[marginals >= (self.b+beta)] = 1.		
             f1.append(f1_score(ground, labels_cutoff, average='weighted'))
+            # NOTE this seems to specifically use weighted F1... 
+            # Not sure what effect changing this will have.
+            # Turns out changing this to 'binary' results in an error... 
+            # This does not make sense, since we're testing on Basketball. 
          		
         f1 = np.nan_to_num(f1)
         return beta_params[np.argsort(np.array(f1))[-1]]
 
 
-    def find_optimal_beta(self, heuristics, X, feat_combos, ground):
+    def find_optimal_beta(self, heuristics, X, feat_combos, ground,
+             scoring_fn=None):
         """ 
         Returns optimal beta for given heuristics
 
@@ -128,7 +136,8 @@ class Synthesizer(object):
         for i,hf in enumerate(heuristics):
             marginals = hf.predict_proba(X[:,feat_combos[i]])[:,1]
             labels_cutoff = np.zeros(np.shape(marginals))
-            beta_opt.append((self.beta_optimizer(marginals, ground)))
+            beta_opt.append(
+                (self.beta_optimizer(marginals, ground, scoring_fn=scoring_fn)))
         return beta_opt
 
 

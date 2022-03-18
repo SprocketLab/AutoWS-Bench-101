@@ -52,12 +52,14 @@ class HeuristicGenerator(object):
             L[:,i] = marginals_to_labels(hf,primitive_matrix[:,feat_combos[i]],beta_opt[i])
         return L
 
-    def prune_heuristics(self,heuristics,feat_combos,keep=1):
+    def prune_heuristics(self,heuristics,feat_combos,keep=1,scoring_fn=None):
         """ 
         Selects the best heuristic based on Jaccard Distance and Reliability Metric
 
         keep: number of heuristics to keep from all generated heuristics
         """
+        if not scoring_fn:
+            scoring_fn = f1_score
 
         def calculate_jaccard_distance(num_labeled_total, num_labeled_L):
             scores = np.zeros(np.shape(num_labeled_L)[1])
@@ -71,7 +73,7 @@ class HeuristicGenerator(object):
         max_cardinality = len(heuristics)
         for i in range(max_cardinality):
             #Note that the LFs are being applied to the entire val set though they were developed on a subset...
-            beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, feat_combos[i], self.val_ground)
+            beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, feat_combos[i], self.val_ground, scoring_fn=scoring_fn)
             L_temp_val = self.apply_heuristics(heuristics[i], self.val_primitive_matrix, feat_combos[i], beta_opt_temp) 
             L_temp_train = self.apply_heuristics(heuristics[i], self.train_primitive_matrix, feat_combos[i], beta_opt_temp) 
             
@@ -102,7 +104,8 @@ class HeuristicGenerator(object):
         return sort_idx
      
 
-    def run_synthesizer(self, max_cardinality=1, idx=None, keep=1, model='lr'):
+    def run_synthesizer(self, max_cardinality=1, idx=None, keep=1, 
+            model='lr', scoring_fn=None):
         """ 
         Generates Synthesizer object and saves all generated heuristics
 
@@ -137,13 +140,14 @@ class HeuristicGenerator(object):
 
         #Select keep best heuristics from generated heuristics
         hf, feat_combos = self.syn.generate_heuristics(model, max_cardinality)
-        sort_idx = self.prune_heuristics(hf,feat_combos, keep)
+        sort_idx = self.prune_heuristics(hf,feat_combos, keep, 
+            scoring_fn=scoring_fn)
         for i in sort_idx:
             self.hf.append(index(hf,i)) 
             self.feat_combos.append(index(feat_combos,i))
 
         #create appended L matrices for validation and train set
-        beta_opt = self.syn.find_optimal_beta(self.hf, self.val_primitive_matrix, self.feat_combos, self.val_ground)
+        beta_opt = self.syn.find_optimal_beta(self.hf, self.val_primitive_matrix, self.feat_combos, self.val_ground, scoring_fn=scoring_fn)
         self.L_val = self.apply_heuristics(self.hf, self.val_primitive_matrix, self.feat_combos, beta_opt)       
         self.L_train = self.apply_heuristics(self.hf, self.train_primitive_matrix, self.feat_combos, beta_opt)  
     
