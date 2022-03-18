@@ -35,12 +35,6 @@ def main():
 
     # TODO apply dimensionality reduction to train_data, valid_data, test_data
 
-    # Use Gaussian Process or Random Forests as the LFs
-    # (can also use decision trees or anything else you want)
-    # NOTE to self, one idea for mixing LF types is to implement an 
-    # sklearn-style classifier which randomly selects one of some number of
-    # classifiers at __init__. This will maintain Snuba's expected number of 
-    # heuristics at the beginning (not sure if this actually matters)
     #lf_class = partial(GaussianProcessClassifier, 
     #    kernel=1.0*RBF(1.0), random_state=0)
     #lf_class = partial(RandomForestClassifier, 
@@ -51,6 +45,9 @@ def main():
     # Use Snuba convention of assuming only validation set labels...
     snuba.fit(valid_data, train_data, b=0.5, cardinality=1)
     lf_outputs = snuba.predict(train_data)
+    print(snuba.hg.heuristic_stats())
+    # NOTE that snuba uses a particular f1_score implementation. 
+    # We should parameterize the scoring function since it differs per-dataset
 
     # TODO train label model 
     # TODO train end model
