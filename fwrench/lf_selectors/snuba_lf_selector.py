@@ -1,0 +1,91 @@
+import numpy as np
+from tqdm import tqdm
+from .base_lf_selector import BaseSelector
+from .snuba.heuristic_generator import HeuristicGenerator
+
+def flip(x):
+    ''' Utility function for flipping snuba outputs
+    '''
+    if x == 0: # Abstain
+        return -1
+    elif x == -1:
+        return 0
+    else:
+        return x
+
+class SnubaSelector(BaseSelector):
+    def __init__(self, lf_generator):
+        super().__init__(lf_generator)
+
+    def fit(self, labeled_data, unlabeled_data, b=0.5):
+        ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
+        '''
+
+        x_train = np.array([d['feature'] for d in unlabeled_data.examples])
+        y_train = np.array(unlabeled_data.labels)
+        x_val = np.array([d['feature'] for d in labeled_data.examples])
+        y_val = np.array(labeled_data.labels)
+        self.train_primitive_matrix = x_train
+        self.train_ground = None #y_train # NOTE just used for eval in Snuba...
+        self.val_primitive_matrix = x_val
+        self.val_ground = y_val
+        self.b = b
+
+        validation_accuracy = []
+        training_accuracy = []
+        validation_coverage = []
+        training_coverage = []
+        training_marginals = []
+        idx = None
+
+        self.hg = HeuristicGenerator(
+            self.train_primitive_matrix, self.val_primitive_matrix, 
+            self.val_ground, self.train_ground, b=self.b)
+        for i in tqdm(range(3, 26)):
+            #Repeat synthesize-prune-verify at each iterations
+            if i == 3:
+                self.hg.run_synthesizer(
+                    max_cardinality=1, idx=idx, keep=3, 
+                    model=self.lf_generator)
+            else:
+                self.hg.run_synthesizer(
+                    max_cardinality=1, idx=idx, keep=1, 
+                    model=self.lf_generator)
+
+            self.hg.run_verifier()
+            
+            # Save evaluation metrics
+            va, ta, vc, tc = self.hg.evaluate()
+            validation_accuracy.append(va)
+            training_accuracy.append(ta)
+            training_marginals.append(self.hg.vf.train_marginals)
+            validation_coverage.append(vc)
+            training_coverage.append(tc)
+            
+            # Find low confidence datapoints in the labeled set
+            self.hg.find_feedback()
+            idx = self.hg.feedback_idx
+            
+            # Stop the iterative process when no low confidence labels
+            if idx == []:
+                break
+        return validation_accuracy, training_accuracy, validation_coverage, \
+            training_coverage, training_marginals
+
+    def predict(self, unlabeled_data):
+        X = np.array([d['feature'] for d in unlabeled_data.examples])
+
+        beta_opt = self.hg.syn.find_optimal_beta(
+            self.hg.hf, self.hg.val_primitive_matrix, 
+            self.hg.feat_combos, self.hg.val_ground)
+        # TODO ^ triple check that this is right? 
+
+        lf_outputs = self.hg.apply_heuristics(
+            self.hg.hf, X, 
+            self.hg.feat_combos, beta_opt)
+        # TODO ^ triple check that this is right?
+        # should be == training_marginals when using train_data
+
+        # Need to flip the outputs of snuba...
+        vflip = np.vectorize(flip)
+        return vflip(lf_outputs)
