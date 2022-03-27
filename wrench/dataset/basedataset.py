@@ -5,6 +5,7 @@ import pickle
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, List, Optional, Union, Callable
+from fwrench.pre_training import pca_pretrain
 
 import numpy as np
 import pandas as pd
@@ -172,6 +173,14 @@ class BaseDataset(ABC):
         ----------
         """
         pass
+    
+    def pre_train(self, component = 20):
+        X = np.array([d['feature'] for d in self.examples])
+        X_new = pca_pretrain(X, component)
+        for i,d in enumerate(self.examples):
+            d['feature'] = X_new[i]
+        return self
+
 
     def create_subset(self, idx: List[int]):
         dataset = self.__class__()
