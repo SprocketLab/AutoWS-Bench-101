@@ -7,6 +7,7 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -43,9 +44,10 @@ def main(original_lfs=False):
         #    kernel=1.0*RBF(1.0), random_state=0)
         #lf_class = partial(RandomForestClassifier, 
         #    max_depth=2, random_state=0)
-        lf_class = partial(DecisionTreeClassifier, 
+        lf_class1 = partial(DecisionTreeClassifier, 
             max_depth=1) # Equivalent to Snuba with regular decision trees
-        snuba = SnubaSelector(lf_class)
+        lf_class2 = partial(LogisticRegression)
+        snuba = SnubaSelector([lf_class1, lf_class2])
         # Use Snuba convention of assuming only validation set labels...
         snuba.fit(valid_data, train_data, 
             b=0.5, cardinality=1, iters=23)

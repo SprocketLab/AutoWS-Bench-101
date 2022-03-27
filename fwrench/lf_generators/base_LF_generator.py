@@ -14,17 +14,8 @@ class BaseGenerator(ABC):
 
     @abstractmethod
     def predict(self, x):
-        pred_label_list = np.empty((x.shape[0], 0), int)
-        for lf in self.hf:
-            pred_label_list = np.append(pred_label_list, np.array([lf.predict(x)]).transpose(), axis=1)
-        return pred_label_list
+        pass
 
-    @abstractmethod
-    def score(self, x, y):
-        score_list = []
-        for lf in self.hf:
-            score_list.append(lf.score(x,y))
-        return score_list
 
 
 class UnipolarLF(ABC):

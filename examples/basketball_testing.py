@@ -10,8 +10,14 @@ from wrench.endmodel import EndClassifierModel
 from wrench.labelmodel import FlyingSquid, MajorityVoting
 from wrench.search_space import SEARCH_SPACE
 from numpy import loadtxt
-from wrench.labelfunction import SnubaSelector, BasicDecisionTreeLF, ScoreSelector, MakeAbstractLFs
+from fwrench.lf_selectors import SnubaSelector
+from fwrench.lf_generators import SnubaGenerator, BasicDecisionTreeLFGenerator
 from sklearn.svm import SVC
+from functools import partial
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+import autosklearn.classification
 import json
 
 #### Just some code to print debug information to stdout
@@ -30,14 +36,36 @@ model_name = 'bert-base-cased'
 train_data, valid_data, test_data = load_dataset(dataset_home, data, extract_feature=True, extract_fn=extract_fn,
                                                  cache_name=extract_fn, model_name=model_name)
 
+train_data = train_data.pre_train(20)
+valid_data = valid_data.pre_train(20)
+
 x_val = np.array([d['feature'] for d in valid_data.examples])
 y_val = np.array(valid_data.labels)
+x_train = np.array([d['feature'] for d in train_data.examples])
+print(x_train.shape, x_val.shape)
 
-lf_generator = MakeAbstractLFs(x_val, y_val)
-lfs = lf_generator.make_snubaDecisionTree_lfs(b = 0.5, max_cardinality = 1, random_state = seed)
-print(type(lfs), len(lfs))
+automl = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=120,
+    per_run_time_limit=30, memory_limit = 2000)
+automl.fit(x_val, y_val)
+print(automl.leaderboard())
+'''
+lf_generator = BasicDecisionTreeLFGenerator(1000)
+lf_generator.fit(x_val, y_val, max_depth=3)
+print(len(lf_generator.hf))
+label_list = lf_generator.predict(x_train)
+print(label_list.shape)
 
-lf_selector = SnubaSelector(lfs, 50, True)
-selected_lfs = lf_selector.prune_heuristics(x_val, y_val)
-print(type(selected_lfs), len(selected_lfs))
+lf_selector = SnubaSelector(lf_generator)
+selected_lfs = lf_selector.fit(valid_data, train_data, b=0.5, cardinality=1, iters=23, scoring_fn=None, max_depth=3)
+print(len(selected_lfs))
+'''
+
+lf_class1 = partial(DecisionTreeClassifier, 
+            max_depth=1) # Equivalent to Snuba with regular decision trees
+lf_class2 = partial(LogisticRegression)
+#lf_class3 = partial(KNeighborsClassifier, algorithm='kd_tree')
+snuba = SnubaSelector([lf_class2,lf_class1])
+        # Use Snuba convention of assuming only validation set labels...
+snuba.fit(valid_data, train_data,
+            b=0.5, cardinality=1, iters=23)
 

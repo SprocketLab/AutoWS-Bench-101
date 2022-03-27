@@ -52,10 +52,9 @@ class HeuristicGenerator(object):
             L[:,i] = marginals_to_labels(hf,primitive_matrix[:,feat_combos[i]],beta_opt[i])
         return L
 
-    def prune_heuristics(self,heuristics,feat_combos,keep=1,scoring_fn=None):
+    def prune_heuristics(self,L_val, L_train, keep=1,scoring_fn=None):
         """ 
         Selects the best heuristic based on Jaccard Distance and Reliability Metric
-
         keep: number of heuristics to keep from all generated heuristics
         """
         if not scoring_fn:
@@ -67,26 +66,26 @@ class HeuristicGenerator(object):
                 scores[i] = np.sum(np.minimum(num_labeled_L[:,i],num_labeled_total))/np.sum(np.maximum(num_labeled_L[:,i],num_labeled_total))
             return 1-scores
         
-        L_val = np.array([])
-        L_train = np.array([])
-        beta_opt = np.array([])
-        max_cardinality = len(heuristics)
-        for i in range(max_cardinality):
-            #Note that the LFs are being applied to the entire val set though they were developed on a subset...
-            beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, feat_combos[i], self.val_ground, scoring_fn=scoring_fn)
-            L_temp_val = self.apply_heuristics(heuristics[i], self.val_primitive_matrix, feat_combos[i], beta_opt_temp) 
-            L_temp_train = self.apply_heuristics(heuristics[i], self.train_primitive_matrix, feat_combos[i], beta_opt_temp) 
+        # L_val = np.array([])
+        # L_train = np.array([])
+        # beta_opt = np.array([])
+        # max_cardinality = len(heuristics)
+        # for i in range(max_cardinality):
+        #     #Note that the LFs are being applied to the entire val set though they were developed on a subset...
+        #     beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, feat_combos[i], self.val_ground, scoring_fn=scoring_fn)
+        #     L_temp_val = self.apply_heuristics(heuristics[i], self.val_primitive_matrix, feat_combos[i], beta_opt_temp) 
+        #     L_temp_train = self.apply_heuristics(heuristics[i], self.train_primitive_matrix, feat_combos[i], beta_opt_temp) 
             
-            beta_opt = np.append(beta_opt, beta_opt_temp)
-            if i == 0:
-                L_val = np.append(L_val, L_temp_val) #converts to 1D array automatically
-                L_val = np.reshape(L_val,np.shape(L_temp_val))
-                L_train = np.append(L_train, L_temp_train) #converts to 1D array automatically
-                L_train = np.reshape(L_train,np.shape(L_temp_train))
-            else:
-                L_val = np.concatenate((L_val, L_temp_val), axis=1)
-                L_train = np.concatenate((L_train, L_temp_train), axis=1)
-        
+        #     beta_opt = np.append(beta_opt, beta_opt_temp)
+        #     if i == 0:
+        #         L_val = np.append(L_val, L_temp_val) #converts to 1D array automatically
+        #         L_val = np.reshape(L_val,np.shape(L_temp_val))
+        #         L_train = np.append(L_train, L_temp_train) #converts to 1D array automatically
+        #         L_train = np.reshape(L_train,np.shape(L_temp_train))
+        #     else:
+        #         L_val = np.concatenate((L_val, L_temp_val), axis=1)
+        #         L_train = np.concatenate((L_train, L_temp_train), axis=1)
+
         #Use F1 trade-off for reliability
         acc_cov_scores = [f1_score(self.val_ground, L_val[:,i], average='micro') for i in range(np.shape(L_val)[1])] 
         acc_cov_scores = np.nan_to_num(acc_cov_scores)
@@ -102,6 +101,7 @@ class HeuristicGenerator(object):
         combined_scores = 0.5*acc_cov_scores + 0.5*jaccard_scores
         sort_idx = np.argsort(combined_scores)[::-1][0:keep]
         return sort_idx
+     
      
 
     def run_synthesizer(self, max_cardinality=1, idx=None, keep=1, 
@@ -142,15 +142,17 @@ class HeuristicGenerator(object):
         hf, feat_combos = self.syn.generate_heuristics(model, max_cardinality)
         sort_idx = self.prune_heuristics(hf,feat_combos, keep, 
             scoring_fn=scoring_fn)
+        print(sort_idx)
         for i in sort_idx:
             self.hf.append(index(hf,i)) 
             self.feat_combos.append(index(feat_combos,i))
+        print(self.feat_combos)
 
         #create appended L matrices for validation and train set
         beta_opt = self.syn.find_optimal_beta(self.hf, self.val_primitive_matrix, self.feat_combos, self.val_ground, scoring_fn=scoring_fn)
         self.L_val = self.apply_heuristics(self.hf, self.val_primitive_matrix, self.feat_combos, beta_opt)       
         self.L_train = self.apply_heuristics(self.hf, self.train_primitive_matrix, self.feat_combos, beta_opt)  
-    
+
     def run_verifier(self):
         """ 
         Generates Verifier object and saves marginals
