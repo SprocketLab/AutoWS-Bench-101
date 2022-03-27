@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from .base_lf_selector import BaseSelector
 from .snuba.heuristic_generator import HeuristicGenerator
+from ..pre_training.pca import pca_pretrain
 
 def flip(x):
     ''' Utility function for flipping snuba outputs
@@ -17,7 +18,7 @@ class SnubaSelector(BaseSelector):
     def __init__(self, lf_generator):
         super().__init__(lf_generator)
 
-    def fit(self, labeled_data, unlabeled_data, 
+    def fit(self, labeled_data, unlabeled_data,
             b=0.5, cardinality=1, iters=23, scoring_fn=None):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
@@ -77,6 +78,7 @@ class SnubaSelector(BaseSelector):
 
     def predict(self, unlabeled_data):
         X = np.array([d['feature'] for d in unlabeled_data.examples])
+        print(self.hg.feat_combos)
 
         beta_opt = self.hg.syn.find_optimal_beta(
             self.hg.hf, self.hg.val_primitive_matrix, 

@@ -80,12 +80,14 @@ class Synthesizer(object):
         heuristics_final = []
         for cardinality in range(1, max_cardinality+1):
             feature_combinations = self.generate_feature_combinations(cardinality)
-
             heuristics = []
-            for i,comb in enumerate(feature_combinations):
-                heuristics.append(self.fit_function(comb, model))
+            feature_comb = []
+            for classifier in model:
+                for i,comb in enumerate(feature_combinations):
+                    heuristics.append(self.fit_function(comb, classifier))
+                    feature_comb.append(comb)
 
-            feature_combinations_final.append(feature_combinations)
+            feature_combinations_final.append(feature_comb)
             heuristics_final.append(heuristics)
 
         return heuristics_final, feature_combinations_final
