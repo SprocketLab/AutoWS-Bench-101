@@ -8,6 +8,7 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -15,6 +16,7 @@ from wrench.evaluation import f1_score_
 from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel
 from fwrench.lf_selectors import SnubaSelector
+from fwrench.embeddings import SklearnEmbedding
 
 def main(original_lfs=False):
     #### Just some code to print debug information to stdout
@@ -28,26 +30,24 @@ def main(original_lfs=False):
 
     dataset_home = '../../datasets'
     data = 'basketball'
-    extract_fn = 'bert'
-    model_name = 'bert-base-cased'
     train_data, valid_data, test_data = load_dataset(
         dataset_home, data, 
-        extract_feature=True, 
-        extract_fn=extract_fn,
-        cache_name=extract_fn, 
-        model_name=model_name)
+        extract_feature=True,)
 
     if not original_lfs:
-        # TODO apply dimensionality reduction to train_data, valid_data, test_data
+        # Dimensionality reduction...
+        pca = PCA(n_components=20)
+        embedder = SklearnEmbedding(pca)
+        embedder.fit(train_data, valid_data, test_data)
+        train_data = embedder.transform(train_data)
+        valid_data = embedder.transform(valid_data)
+        test_data = embedder.transform(test_data)
 
-        #lf_class = partial(GaussianProcessClassifier, 
-        #    kernel=1.0*RBF(1.0), random_state=0)
-        #lf_class = partial(RandomForestClassifier, 
-        #    max_depth=2, random_state=0)
-        lf_class1 = partial(DecisionTreeClassifier, 
-            max_depth=1) # Equivalent to Snuba with regular decision trees
-        lf_class2 = partial(LogisticRegression)
-        snuba = SnubaSelector([lf_class1, lf_class2])
+        # Fit Snuba with multiple LF function classes
+        lf_classes = [
+            partial(DecisionTreeClassifier, max_depth=1),
+            partial(LogisticRegression)]
+        snuba = SnubaSelector(lf_classes)
         # Use Snuba convention of assuming only validation set labels...
         snuba.fit(valid_data, train_data, 
             b=0.5, cardinality=1, iters=23)
