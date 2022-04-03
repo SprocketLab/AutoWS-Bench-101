@@ -102,10 +102,12 @@ class LENET(BackBone):
             nn.ReLU(),
         )
 
-        self.last_layer = nn.Linear(84, 10)
+        self.last_layer = nn.Linear(84, n_class)
     def forward(self, batch, return_features=False):
         #note: x to be the actual image, figure out the right way to fit the pipline
         x = batch['features'].to(self.get_device())
+        if len(x.shape) == 3:
+            x = torch.unsqueeze(x, 1)
         x = self.feature_extractor(x)
         x = x.view(x.shape[0], -1)
         features = self.classifier(x)

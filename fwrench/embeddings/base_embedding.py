@@ -4,10 +4,12 @@ import numpy as np
 
 class BaseEmbedding(ABC):
     def __init__(self):
-        pass
+        self.shape = None
 
     def _unpack_data(self, data):
         X = np.array([d['feature'] for d in data.examples])
+        self.shape = X[0].shape
+        X = X.reshape(len(data.examples), -1)
         return X
 
     def _repack_data(self, data, X):

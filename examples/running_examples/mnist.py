@@ -5,18 +5,23 @@ import fire
 from functools import partial
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
+from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
+from sklearn.metrics import jaccard_score, accuracy_score
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 
-from wrench.dataset import load_dataset, load_image_dataset
+from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
 from wrench.evaluation import f1_score_
 from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel
-from fwrench.lf_selectors import SnubaSelector
+from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
+from fwrench.embeddings import SklearnEmbedding
 
-def main():
+def main(original_lfs=False):
     #### Just some code to print debug information to stdout
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -27,30 +32,33 @@ def main():
     seed = 123 # TODO do something with this.
 
     dataset_home = '../../datasets'
-    data = 'mnist'
+    data = 'MNIST'
     train_data, valid_data, test_data = load_dataset(
-        dataset_home,
-        data, 
-        extract_feature=True)
+        dataset_home, data, 
+        extract_feature=True,
+        dataset_type='NumericDataset')
 
+    # Dimensionality reduction...
+    pca = PCA(n_components=100)
+    embedder = SklearnEmbedding(pca)
+    embedder.fit(train_data, valid_data, test_data)
+    train_data_embed = embedder.transform(train_data)
+    valid_data_embed = embedder.transform(valid_data)
+    test_data_embed = embedder.transform(test_data)
 
-    quit()
-
-
-
-
-    # TODO apply dimensionality reduction to train_data, valid_data, test_data
-
-    #lf_class = partial(GaussianProcessClassifier, 
-    #    kernel=1.0*RBF(1.0), random_state=0)
-    #lf_class = partial(RandomForestClassifier, 
-    #    max_depth=2, random_state=0)
-    lf_class1 = partial(DecisionTreeClassifier, 
-        max_depth=1) # Equivalent to Snuba with regular decision trees
-    lf_class2 = partial(LogisticRegression)
-    snuba = SnubaSelector([lf_class1, lf_class2])
+    # Fit Snuba with multiple LF function classes and a custom scoring function
+    lf_classes = [
+        #partial(AutoSklearn2Classifier, 
+        #    time_left_for_this_task=30,
+        #    per_run_time_limit=30,
+        #    memory_limit=50000, 
+        #    n_jobs=100),]
+        partial(DecisionTreeClassifier, max_depth=1),
+        LogisticRegression]
+    scoring_fn = accuracy_score
+    snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
-    snuba.fit(valid_data, train_data, 
+    snuba.fit(valid_data_embed, train_data_embed, 
         b=0.5, cardinality=1, iters=23)
     print(snuba.hg.heuristic_stats())
     # NOTE that snuba uses different F1 score implementations in 
@@ -59,11 +67,11 @@ def main():
     # and average='micro' for pruning... 
     # Maybe we should try different choices in different places as well?
 
-    train_weak_labels = snuba.predict(train_data)
+    train_weak_labels = snuba.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
-    valid_weak_labels = snuba.predict(valid_data)
+    valid_weak_labels = snuba.predict(valid_data_embed)
     valid_data.weak_labels = valid_weak_labels.tolist()
-    test_weak_labels = snuba.predict(test_data)
+    test_weak_labels = snuba.predict(test_data_embed)
     test_data.weak_labels = test_weak_labels.tolist()
 
     # Get score from majority vote
@@ -73,8 +81,8 @@ def main():
         dataset_valid=valid_data
     )
     logger.info(f'---Majority Vote eval---')
-    accuracy = label_model.test(test_data, 'accuracy')
-    logger.info(f'label model (MV) test accuracy:    {accuracy}')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (MV) test acc:    {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
     label_model = Snorkel()
@@ -83,19 +91,22 @@ def main():
         dataset_valid=valid_data
     )
     logger.info(f'---Snorkel eval---')
-    accuracy = label_model.test(test_data, 'accuracy')
-    logger.info(f'label model (Snorkel) test accuracy:    {accuracy}')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (Snorkel) test acc:    {acc}')
 
     # Train end model
     #### Filter out uncovered training data
     train_data = train_data.get_covered_subset()
     aggregated_hard_labels = label_model.predict(train_data)
     aggregated_soft_labels = label_model.predict_proba(train_data)
+
+    print(aggregated_soft_labels.shape)
+
     model = EndClassifierModel(
         batch_size=128,
         test_batch_size=512,
         n_steps=100, # Increase this to 100_000
-        backbone='MLP',
+        backbone='LENET', # TODO CHANGE
         optimizer='Adam',
         optimizer_lr=1e-2,
         optimizer_weight_decay=0.0,
@@ -105,13 +116,13 @@ def main():
         y_train=aggregated_soft_labels,
         dataset_valid=valid_data,
         evaluation_step=50,
-        metric='accuracy',
+        metric='acc',
         patience=100,
         device=device
     )
-    logger.info(f'---MLP eval---')
-    accuracy = model.test(test_data, 'accuracy')
-    logger.info(f'end model (MLP) test accuracy:    {accuracy}')
+    logger.info(f'---LeNet eval---')
+    acc = model.test(test_data, 'acc')
+    logger.info(f'end model (LeNet) test acc:    {acc}')
 
 if __name__ == '__main__':
     fire.Fire(main)
