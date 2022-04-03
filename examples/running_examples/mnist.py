@@ -59,7 +59,7 @@ def main(original_lfs=False):
     snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
     snuba.fit(valid_data_embed, train_data_embed, 
-        b=0.5, cardinality=1, iters=23)
+        b=0.1, cardinality=1, iters=23)
     print(snuba.hg.heuristic_stats())
     # NOTE that snuba uses different F1 score implementations in 
     # different places... 
