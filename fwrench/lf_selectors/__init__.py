@@ -1,1 +1,2 @@
 from .snuba_lf_selector import SnubaSelector
+from .autosklearn_lf_selector import AutoSklearnSelector

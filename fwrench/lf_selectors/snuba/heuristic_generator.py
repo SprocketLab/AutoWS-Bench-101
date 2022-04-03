@@ -97,6 +97,7 @@ class HeuristicGenerator(object):
         else:
             jaccard_scores = np.ones(np.shape(acc_cov_scores))
 
+        # TODO is this what we want to replace with independence?
         #Weighting the two scores to find best heuristic
         combined_scores = 0.5*acc_cov_scores + 0.5*jaccard_scores
         sort_idx = np.argsort(combined_scores)[::-1][0:keep]
@@ -142,11 +143,11 @@ class HeuristicGenerator(object):
         hf, feat_combos = self.syn.generate_heuristics(model, max_cardinality)
         sort_idx = self.prune_heuristics(hf,feat_combos, keep, 
             scoring_fn=scoring_fn)
-        print(sort_idx)
+        #print(sort_idx)
         for i in sort_idx:
             self.hf.append(index(hf,i)) 
             self.feat_combos.append(index(feat_combos,i))
-        print(self.feat_combos)
+        #print(self.feat_combos)
 
         #create appended L matrices for validation and train set
         beta_opt = self.syn.find_optimal_beta(self.hf, self.val_primitive_matrix, self.feat_combos, self.val_ground, scoring_fn=scoring_fn)

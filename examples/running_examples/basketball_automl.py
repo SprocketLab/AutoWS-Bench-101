@@ -12,6 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from autosklearn.metrics import f1_macro as automl_f1_macro
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -46,33 +47,20 @@ def main(original_lfs=False):
         valid_data = embedder.transform(valid_data)
         test_data = embedder.transform(test_data)
 
-        # Fit Snuba with multiple LF function classes and a custom scoring function
-        lf_classes = [
-            #partial(AutoSklearn2Classifier, 
-            #    time_left_for_this_task=30,
-            #    per_run_time_limit=30,
-            #    memory_limit=50000, 
-            #    n_jobs=100),]
-            partial(DecisionTreeClassifier, max_depth=1),
-            LogisticRegression,
-            GaussianNB]
-        scoring_fn = accuracy_score
-        snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
-        # Use Snuba convention of assuming only validation set labels...
-        snuba.fit(valid_data, train_data, 
-            b=0.5, cardinality=1, iters=23)
-        print(snuba.hg.heuristic_stats())
-        # NOTE that snuba uses different F1 score implementations in 
-        # different places... 
-        # In it uses average='weighted' for computing abstain thresholds
-        # and average='micro' for pruning... 
-        # Maybe we should try different choices in different places as well?
+        automl = AutoSklearnSelector(
+            lf_generator=[], 
+            scoring_fn=automl_f1_macro,
+            time_left_for_this_task=30,
+            per_run_time_limit=30,
+            memory_limit=50000, 
+            n_jobs=10)
+        automl.fit(valid_data, train_data)
 
-        train_weak_labels = snuba.predict(train_data)
+        train_weak_labels = automl.predict(train_data)
         train_data.weak_labels = train_weak_labels.tolist()
-        valid_weak_labels = snuba.predict(valid_data)
+        valid_weak_labels = automl.predict(valid_data)
         valid_data.weak_labels = valid_weak_labels.tolist()
-        test_weak_labels = snuba.predict(test_data)
+        test_weak_labels = automl.predict(test_data)
         test_data.weak_labels = test_weak_labels.tolist()
 
     # Get score from majority vote

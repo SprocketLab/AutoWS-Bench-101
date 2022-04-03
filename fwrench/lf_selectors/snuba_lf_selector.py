@@ -15,11 +15,11 @@ def flip(x):
         return x
 
 class SnubaSelector(BaseSelector):
-    def __init__(self, lf_generator):
-        super().__init__(lf_generator)
+    def __init__(self, lf_generator, scoring_fn=None):
+        super().__init__(lf_generator, scoring_fn)
 
     def fit(self, labeled_data, unlabeled_data,
-            b=0.5, cardinality=1, iters=23, scoring_fn=None):
+            b=0.5, cardinality=1, iters=23):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
 
@@ -33,7 +33,6 @@ class SnubaSelector(BaseSelector):
         self.val_ground = y_val
         self.b = b
         self.cardinality = cardinality
-        self.scoring_fn = scoring_fn
 
         validation_accuracy = []
         training_accuracy = []
@@ -78,7 +77,7 @@ class SnubaSelector(BaseSelector):
 
     def predict(self, unlabeled_data):
         X = np.array([d['feature'] for d in unlabeled_data.examples])
-        print(self.hg.feat_combos)
+        #print(self.hg.feat_combos)
 
         beta_opt = self.hg.syn.find_optimal_beta(
             self.hg.hf, self.hg.val_primitive_matrix, 
