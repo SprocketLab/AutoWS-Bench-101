@@ -22,7 +22,7 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
 logger = logging.getLogger(__name__)
 device = torch.device('cuda')
 seed = 123
-
+'''
 # train/valid/test :  54000, 6000, 10000
 x_val = loadtxt('../datasets/mnist/feature_valid.csv', delimiter=',')
 y_val = loadtxt('../datasets/mnist/label_valid.csv', delimiter=',')
@@ -39,7 +39,7 @@ print(type(lfs), len(lfs))
 lf_selector = SnubaSelector(lfs, 50, False)
 selected_lfs = lf_selector.prune_heuristics(x_val, y_val)
 
-'''
+
 features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
 labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
 pred_label_list = np.empty((labels.shape[0], 0), int)
@@ -85,16 +85,19 @@ mnist_train = open("../datasets/mnist/train.json", "w")
 json.dump(train_data, mnist_train)
 mnist_train.close()
     
-
+'''
 
 #### Load dataset 
 dataset_path = '../datasets'
-data = 'mnist'
+data = 'MNIST'
 
 train_data, valid_data, test_data = load_dataset(
     dataset_path,
     data, 
     extract_feature=True)
+
+print(train_data.examples[0])
+print(train_data.weak_labels[0])
 
 #### Generate soft training label via a label model
 #### The weak labels provided by supervision sources are alreadly encoded in dataset object
@@ -170,4 +173,4 @@ logger.info(f'end model (LENET) test acc: {acc}')
 
 if __name__ == '__main__':
     print('finish')
-'''
+
