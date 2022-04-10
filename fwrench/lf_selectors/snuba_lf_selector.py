@@ -24,7 +24,6 @@ class SnubaSelector(BaseSelector):
         '''
 
         x_train = np.array([d['feature'] for d in unlabeled_data.examples])
-        y_train = np.array(unlabeled_data.labels)
         x_val = np.array([d['feature'] for d in labeled_data.examples])
         y_val = np.array(labeled_data.labels)
         self.train_primitive_matrix = x_train
