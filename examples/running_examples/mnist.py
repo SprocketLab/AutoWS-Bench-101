@@ -21,6 +21,8 @@ from wrench.endmodel import EndClassifierModel
 from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import SklearnEmbedding
 
+from fwrench.embeddings.clip_embedding import ClipEmbedding
+
 def main(original_lfs=False):
     #### Just some code to print debug information to stdout
     logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -39,8 +41,9 @@ def main(original_lfs=False):
         dataset_type='NumericDataset')
 
     # Dimensionality reduction...
-    pca = PCA(n_components=100)
-    embedder = SklearnEmbedding(pca)
+    # pca = PCA(n_components=100)
+    # embedder = SklearnEmbedding(pca)
+    embedder = ClipEmbedding()
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)
