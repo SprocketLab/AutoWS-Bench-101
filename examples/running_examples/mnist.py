@@ -41,6 +41,7 @@ def main(original_lfs=False):
     # Dimensionality reduction...
     pca = PCA(n_components=100)
     embedder = SklearnEmbedding(pca)
+    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)
@@ -55,7 +56,7 @@ def main(original_lfs=False):
         #    n_jobs=100),]
         partial(DecisionTreeClassifier, max_depth=1),
         LogisticRegression]
-    scoring_fn = accuracy_score
+    scoring_fn = None #accuracy_score
     snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
     snuba.fit(valid_data_embed, train_data_embed, 
@@ -85,14 +86,14 @@ def main(original_lfs=False):
     logger.info(f'label model (MV) test acc:    {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
-    label_model = Snorkel()
-    label_model.fit(
-        dataset_train=train_data,
-        dataset_valid=valid_data
-    )
-    logger.info(f'---Snorkel eval---')
-    acc = label_model.test(test_data, 'acc')
-    logger.info(f'label model (Snorkel) test acc:    {acc}')
+    #label_model = Snorkel()
+    #label_model.fit(
+    #    dataset_train=train_data,
+    #    dataset_valid=valid_data
+    #)
+    #logger.info(f'---Snorkel eval---')
+    #acc = label_model.test(test_data, 'acc')
+    #logger.info(f'label model (Snorkel) test acc:    {acc}')
 
     # Train end model
     #### Filter out uncovered training data
@@ -105,7 +106,7 @@ def main(original_lfs=False):
     model = EndClassifierModel(
         batch_size=128,
         test_batch_size=512,
-        n_steps=100, # Increase this to 100_000
+        n_steps=1_000, # Increase this to 100_000
         backbone='LENET', # TODO CHANGE
         optimizer='Adam',
         optimizer_lr=1e-2,

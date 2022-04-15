@@ -12,6 +12,7 @@ class SklearnEmbedding(BaseEmbedding):
         for d in data:
             X_nps.append(self._unpack_data(d))
         X_np = np.concatenate(X_nps)
+        print(X_np.shape)
         self.embedder.fit(X_np)
 
     def transform(self, data):
