@@ -680,12 +680,8 @@ def evaluate_complex_binary(X, Ytrue, verbose=False):
     recall = np.zeros(X.shape[1])
     recall[negative_funcs] = recallneg[negative_funcs]
     recall[positive_funcs] = recallpos[positive_funcs]
-    print('numvotes is' + str(numvotes))
-    print("sum is " + str(tp + tn))
     accuracy = (tp + tn) / numvotes
-    print("accuracy is " + str(accuracy))
     accuracy = np.asarray(accuracy).flatten()
-    print("final output is " + str(accuracy), accuracy.shape)
 
     return coverage, precision, recall, frac_correct, frac_incorrect, frac_goodness, accuracy
 

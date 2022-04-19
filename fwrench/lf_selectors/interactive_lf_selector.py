@@ -18,6 +18,15 @@ from .interactive.snuba_synthesizer import Synthesizer
 from .interactive.utils import generate_ngram_LFs, get_final_set, train_end_classifier
 from .interactive.iws import InteractiveWeakSupervision
 
+def flip(x):
+    ''' Utility function for flipping snuba outputs
+    '''
+    if x == 0: # Abstain
+        return -1
+    elif x == -1:
+        return 0
+    else:
+        return x
 
 class IWS_Selector(BaseSelector):
     def __init__(self, lf_generator, scoring_fn=None):
@@ -56,6 +65,8 @@ class IWS_Selector(BaseSelector):
         self.b = b
         self.p = np.shape(self.val_primitive_matrix)[1]
         self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground, b)
+        self.hf = []
+        self.feat_combos = []
         heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality)
 
         L_val = np.array([])
@@ -77,14 +88,12 @@ class IWS_Selector(BaseSelector):
             else:
                 L_val = np.concatenate((L_val, L_temp_val), axis=1)
                 L_train = np.concatenate((L_train, L_temp_train), axis=1)
-        return L_val
+        return L_val, heuristics, feat_combos 
 
 
     def fit(self, labeled_data, unlabeled_data, num_iter, dname, b=0.5, cardinality=1,lf_descriptions = None):
-        L_val = self.snuba_lf_generator(labeled_data, unlabeled_data, b, cardinality)
-        print(np.unique(L_val))
+        L_val, heuristics, feat_combos = self.snuba_lf_generator(labeled_data, unlabeled_data, b, cardinality)
         LFs = sparse.csr_matrix(L_val)
-        print(LFs)
         svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
         LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
         y_val = np.array(labeled_data.labels)
@@ -93,22 +102,49 @@ class IWS_Selector(BaseSelector):
         y_val[where_0] = -1
         savedir='%s_test'%dname
         x_val = np.array([d['feature'] for d in labeled_data.examples])
-        numthreads = min(10, os.cpu_count())
+        numthreads = 1
         start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
         initial_labels = {i:1 for i in start_idxs}
-        print(L_val.shape, LFfeatures.shape, y_val.shape)
-        print(y_val)
-        print(start_idxs)
         IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6,
                                                 Ytrue=y_val, auto=True, corpus=x_val, savedir=savedir, 
                                                 progressbar=True, ensemblejobs=numthreads,numshow=2)
         IWSsession.run_experiments(num_iter)
-        IWSsession.model.mpool.close()
-        IWSsession.model.mpool.join()
         LFsets = get_final_set('LSE ac',IWSsession,npredict=200,r=None)
-        return LFsets[0][num_iter-1]
+        sort_idx =  LFsets[1][num_iter-1]
+        #print(sort_idx)
+        def index(a, inp):
+            i = 0
+            remainder = 0
+            while inp >= 0:
+                remainder = inp
+                inp -= len(a[i])
+                i+=1
+            try:
+                return a[i-1][remainder] #TODO: CHECK THIS REMAINDER THING WTF IS HAPPENING
+            except:
+                import pdb; pdb.set_trace()
+        
+        for i in sort_idx:
+            self.hf.append(index(heuristics,i)) 
+            self.feat_combos.append(index(feat_combos,i))
 
-    def predict(self):
-        pass
+    def predict(self, unlabeled_data):
+        X = np.array([d['feature'] for d in unlabeled_data.examples])
+        #print(self.feat_combos)
+
+        beta_opt = self.syn.find_optimal_beta(
+            self.hf, self.val_primitive_matrix, 
+            self.feat_combos, self.val_ground, self.scoring_fn)
+        # TODO ^ triple check that this is right? 
+
+        lf_outputs = self.apply_heuristics(
+            self.hf, X, 
+            self.feat_combos, beta_opt)
+        # TODO ^ triple check that this is right?
+        # should be == training_marginals when using train_data
+
+        # Need to flip the outputs of snuba...
+        vflip = np.vectorize(flip)
+        return vflip(lf_outputs)
 
 
