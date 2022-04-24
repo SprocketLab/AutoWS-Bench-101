@@ -37,9 +37,9 @@ class FWRENCHDataset(TorchDataset):
         self,
         name: str,
         split: str,
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__()
 
