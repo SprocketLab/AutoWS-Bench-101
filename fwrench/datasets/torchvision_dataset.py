@@ -8,7 +8,7 @@ from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
 
-from .dataset import FWRENCHDataset
+from dataset import FWRENCHDataset
 
 
 class TorchVisionDataset(FWRENCHDataset):
@@ -86,6 +86,17 @@ class TorchVisionDataset(FWRENCHDataset):
 
         with open(meta_json_path, "w") as meta_json_file:
             dump(meta_json, meta_json_file)
+
+        label_json_path = self.path / FWRENCHDataset.LABEL_JSON_FILENAME
+
+        if not label_json_path.exists():
+            unique_labels = np.unique(
+                [self[i][1] for i in range(len(self.data))]
+            ).tolist()
+            label_json = dict(zip(map(str, unique_labels), unique_labels))
+
+            with open(label_json_path, "w") as label_json_file:
+                dump(label_json, label_json_file)
 
     def write_split(self):
         self.path.mkdir(parents=True, exist_ok=True)

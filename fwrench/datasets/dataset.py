@@ -13,6 +13,7 @@ class FWRENCHDataset(TorchDataset):
     DATASET_PATH = Path(__file__).resolve(strict=True).parents[2] / "datasets"
 
     META_JSON_FILENAME = "meta.json"
+    LABEL_JSON_FILENAME = "label.json"
 
     SEED = 42
 
