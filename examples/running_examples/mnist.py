@@ -20,6 +20,7 @@ from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel
 from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import SklearnEmbedding
+from fwrench.datasets import MNISTDataset
 
 def main(original_lfs=False):
     #### Just some code to print debug information to stdout
@@ -31,14 +32,20 @@ def main(original_lfs=False):
     device = torch.device('cuda')
     seed = 123 # TODO do something with this.
 
+    train_data = MNISTDataset('train', name='MNIST')
+    valid_data = MNISTDataset('valid', name='MNIST')
+    test_data = MNISTDataset('test', name='MNIST')
+
     dataset_home = '../../datasets'
-    data = 'MNIST'
+    data = 'MNIST_3000'
     train_data, valid_data, test_data = load_dataset(
         dataset_home, data, 
         extract_feature=True,
         dataset_type='NumericDataset')
 
     # Dimensionality reduction...
+    # Try Fred's dim. reduction -- pretrained ResNet 
+    # (not applicable everywhere)
     pca = PCA(n_components=100)
     embedder = SklearnEmbedding(pca)
     #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
@@ -104,17 +111,17 @@ def main(original_lfs=False):
     print(aggregated_soft_labels.shape)
 
     model = EndClassifierModel(
-        batch_size=128,
+        batch_size=32,
         test_batch_size=512,
-        n_steps=1_000, # Increase this to 100_000
+        n_steps=10_000, # Increase this to 100_000
         backbone='LENET', # TODO CHANGE
-        optimizer='Adam',
-        optimizer_lr=1e-2,
+        optimizer='SGD',
+        optimizer_lr=1e-3,
         optimizer_weight_decay=0.0,
     )
     model.fit(
         dataset_train=train_data,
-        y_train=aggregated_soft_labels,
+        y_train=aggregated_hard_labels,
         dataset_valid=valid_data,
         evaluation_step=50,
         metric='acc',
