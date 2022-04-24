@@ -8,7 +8,7 @@ from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
 
-from dataset import FWRENCHDataset
+from . import FWRENCHDataset
 
 
 class TorchVisionDataset(FWRENCHDataset):
@@ -21,9 +21,9 @@ class TorchVisionDataset(FWRENCHDataset):
         self,
         name: str,
         split: str,
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         if download_path is None:
             download_path = TorchVisionDataset.DEFAULT_TORCHVISION_DOWNLOAD_PATH
@@ -139,9 +139,9 @@ class MNISTDataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "MNIST",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -164,9 +164,9 @@ class FashionMNISTDataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "FashionMNIST",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -190,9 +190,9 @@ class EMNISTDataset(TorchVisionDataset):
         emnist_split: str,
         split: str,
         name: str = "EMNIST",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         self.emnist_split = emnist_split
         super().__init__(name, split, path, download, download_path)
@@ -222,9 +222,9 @@ class KMNISTDataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "KMNIST",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -247,9 +247,9 @@ class QMNISTDataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "QMNIST",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -272,9 +272,9 @@ class SVHNDataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "SVHN",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -297,9 +297,9 @@ class CIFAR10Dataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "CIFAR10",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 
@@ -322,9 +322,9 @@ class CIFAR100Dataset(TorchVisionDataset):
         self,
         split: str,
         name: str = "CIFAR100",
-        path: Optional[Path | str] = None,
+        path: Optional[str] = None,
         download: bool = True,
-        download_path: Optional[Path | str] = None,
+        download_path: Optional[str] = None,
     ):
         super().__init__(name, split, path, download, download_path)
 

@@ -56,15 +56,17 @@ def main(original_lfs=False, dataset_home='./datasets'):
     test_data = convert_to_binary(test_data)
 
     # Dimensionality reduction...
-    # Try Fred's dim. reduction -- pretrained ResNet 
+    # Try Fred's dim. reduction? -- pretrained ResNet 
     # (not applicable everywhere)
-    emb = PCA(n_components=10)
-    #emb = sklearn.manifold.LocallyLinearEmbedding(n_components=10)
-    embedder = SklearnEmbedding(emb)
-    embedder.fit(valid_data)
-    train_data_embed = embedder.transform(train_data)
-    valid_data_embed = embedder.transform(valid_data)
-    test_data_embed = embedder.transform(test_data)
+    #emb = PCA(n_components=10)
+    #embedder = SklearnEmbedding(emb)
+    #embedder.fit(valid_data)
+    #train_data_embed = embedder.transform(train_data)
+    #valid_data_embed = embedder.transform(valid_data)
+    #test_data_embed = embedder.transform(test_data)
+    train_data_embed = train_data
+    valid_data_embed = valid_data
+    test_data_embed = test_data
 
     # Fit Snuba with multiple LF function classes and a custom scoring function
     lf_classes = [
