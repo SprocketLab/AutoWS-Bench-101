@@ -2,6 +2,7 @@ import logging
 import torch
 import numpy as np
 import fire
+import sklearn
 from functools import partial
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
@@ -22,7 +23,7 @@ from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import SklearnEmbedding
 from fwrench.datasets import MNISTDataset
 
-def main(original_lfs=False):
+def main(original_lfs=False, dataset_home='./datasets'):
     #### Just some code to print debug information to stdout
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -36,20 +37,31 @@ def main(original_lfs=False):
     valid_data = MNISTDataset('valid', name='MNIST')
     test_data = MNISTDataset('test', name='MNIST')
 
-    dataset_home = '../../datasets'
     data = 'MNIST_3000'
     train_data, valid_data, test_data = load_dataset(
         dataset_home, data, 
         extract_feature=True,
         dataset_type='NumericDataset')
 
+    # TODO hacky... Convert to binary problem
+    print(train_data)
+    def convert_to_binary(dset):
+        dset.n_class = 2
+        dset.id2label = {0: 0, 1: 1}
+        for i in range(len(dset.labels)):
+            dset.labels[i] = int(dset.labels[i] % 2 == 0)
+        return dset
+    train_data = convert_to_binary(train_data)
+    valid_data = convert_to_binary(valid_data)
+    test_data = convert_to_binary(test_data)
+
     # Dimensionality reduction...
     # Try Fred's dim. reduction -- pretrained ResNet 
     # (not applicable everywhere)
-    pca = PCA(n_components=100)
-    embedder = SklearnEmbedding(pca)
-    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
-    embedder.fit(train_data, valid_data, test_data)
+    emb = PCA(n_components=10)
+    #emb = sklearn.manifold.LocallyLinearEmbedding(n_components=10)
+    embedder = SklearnEmbedding(emb)
+    embedder.fit(valid_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)
     test_data_embed = embedder.transform(test_data)
@@ -67,7 +79,7 @@ def main(original_lfs=False):
     snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
     snuba.fit(valid_data_embed, train_data_embed, 
-        b=0.1, cardinality=1, iters=23)
+        b=0.5, cardinality=1, iters=23)
     print(snuba.hg.heuristic_stats())
     # NOTE that snuba uses different F1 score implementations in 
     # different places... 
@@ -93,14 +105,14 @@ def main(original_lfs=False):
     logger.info(f'label model (MV) test acc:    {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
-    #label_model = Snorkel()
-    #label_model.fit(
-    #    dataset_train=train_data,
-    #    dataset_valid=valid_data
-    #)
-    #logger.info(f'---Snorkel eval---')
-    #acc = label_model.test(test_data, 'acc')
-    #logger.info(f'label model (Snorkel) test acc:    {acc}')
+    label_model = Snorkel()
+    label_model.fit(
+        dataset_train=train_data,
+        dataset_valid=valid_data
+    )
+    logger.info(f'---Snorkel eval---')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (Snorkel) test acc:    {acc}')
 
     # Train end model
     #### Filter out uncovered training data
@@ -113,15 +125,15 @@ def main(original_lfs=False):
     model = EndClassifierModel(
         batch_size=32,
         test_batch_size=512,
-        n_steps=10_000, # Increase this to 100_000
+        n_steps=100_000, # Increase this to 100_000
         backbone='LENET', # TODO CHANGE
-        optimizer='SGD',
-        optimizer_lr=1e-3,
+        optimizer='Adam',
+        optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
     )
     model.fit(
         dataset_train=train_data,
-        y_train=aggregated_hard_labels,
+        y_train=aggregated_soft_labels,
         dataset_valid=valid_data,
         evaluation_step=50,
         metric='acc',
