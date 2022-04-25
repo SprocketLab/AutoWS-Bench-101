@@ -5,6 +5,32 @@ from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.multiclass import OneVsRestClassifier
+from abc import ABC
+
+class UnipolarLF(ABC):
+    def __init__(self, clf, class_ind):
+        self.clf = clf
+        self.class_ind = class_ind
+
+    def fit(self, x, y):
+        self.clf.fit(x, y)
+        return self.clf
+
+    def predict_binary(self, x):
+        preds = self.clf.predict(x)
+        return preds
+    
+    def predict(self, x):
+        ''' Unipolar prediction. Either predict 1 for a given class or abstain.
+        '''
+        preds = self.clf.predict(x)
+        abstain_inds = np.where(preds == 0)[0]
+        preds[abstain_inds] = -1
+        pred_inds = np.where(preds == 1)[0]
+        preds[pred_inds] = self.class_ind
+        return preds
+
 
 class Synthesizer(object):
     """
@@ -68,7 +94,16 @@ class Synthesizer(object):
             clf.fit(X, self.val_ground)
             return clf
 
-    def generate_heuristics(self, model, max_cardinality=1):
+    def fit_unipolar_function(self, comb, model, class_ind):
+        X = self.val_primitive_matrix[:,comb]
+        if np.shape(X)[0] == 1:
+            X = X.reshape(-1,1)
+
+        clf = OneVsRestClassifier(model())
+        clf.fit(X, self.val_ground)
+        return UnipolarLF(clf.estimators_[class_ind], class_ind)
+
+    def generate_heuristics(self, model, max_cardinality=1, class_ind = None, isbinary = True):
         """ 
         Generates heuristics over given feature cardinality
 
@@ -84,7 +119,10 @@ class Synthesizer(object):
             feature_comb = []
             for classifier in model:
                 for i,comb in enumerate(feature_combinations):
-                    heuristics.append(self.fit_function(comb, classifier))
+                    if isbinary:
+                        heuristics.append(self.fit_function(comb, classifier))
+                    else:
+                        heuristics.append(self.fit_unipolar_function(comb, classifier, class_ind))
                     feature_comb.append(comb)
 
             feature_combinations_final.append(feature_comb)

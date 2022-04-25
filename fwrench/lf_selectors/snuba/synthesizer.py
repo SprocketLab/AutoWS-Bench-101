@@ -143,4 +143,3 @@ class Synthesizer(object):
         return beta_opt
 
 
-
