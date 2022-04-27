@@ -13,14 +13,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from fwrench.embeddings.vae_embedding import VAE2DEmbedding
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
 from wrench.evaluation import f1_score_
 from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
-from wrench.endmodel import EndClassifierModel
+from wrench.endmodel import EndClassifierModel, MLPModel
 from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
-from fwrench.embeddings import SklearnEmbedding
+from fwrench.embeddings import *
 from fwrench.datasets import MNISTDataset
 
 def main(original_lfs=False, dataset_home='./datasets'):
@@ -44,29 +45,41 @@ def main(original_lfs=False, dataset_home='./datasets'):
         dataset_type='NumericDataset')
 
     # TODO hacky... Convert to binary problem
-    print(train_data)
     def convert_to_binary(dset):
         dset.n_class = 2
         dset.id2label = {0: 0, 1: 1}
         for i in range(len(dset.labels)):
             dset.labels[i] = int(dset.labels[i] % 2 == 0)
         return dset
+    binary_mode = True
     train_data = convert_to_binary(train_data)
     valid_data = convert_to_binary(valid_data)
     test_data = convert_to_binary(test_data)
+    
+    # TODO also hacky... normalize data
+    def normalize01(dset):
+        # NOTE preprocessing... MNIST should be in [0, 1]
+        for i in range(len(dset.examples)):
+            dset.examples[i]['feature'] = np.array(
+                dset.examples[i]['feature']).astype(float)
+            dset.examples[i]['feature'] /= float(
+                np.max(dset.examples[i]['feature']))
+        return dset
+    train_data = normalize01(train_data)
+    valid_data = normalize01(valid_data)
+    test_data = normalize01(test_data)
 
     # Dimensionality reduction...
     # Try Fred's dim. reduction? -- pretrained ResNet 
     # (not applicable everywhere)
-    #emb = PCA(n_components=10)
+    #emb = PCA(n_components=100)
     #embedder = SklearnEmbedding(emb)
-    #embedder.fit(valid_data)
-    #train_data_embed = embedder.transform(train_data)
-    #valid_data_embed = embedder.transform(valid_data)
-    #test_data_embed = embedder.transform(test_data)
-    train_data_embed = train_data
-    valid_data_embed = valid_data
-    test_data_embed = test_data
+    embedder = VAE2DEmbedding()
+    #embedder = FlattenEmbedding()
+    embedder.fit(train_data, valid_data, test_data)
+    train_data_embed = embedder.transform(train_data)
+    valid_data_embed = embedder.transform(valid_data)
+    test_data_embed = embedder.transform(test_data)
 
     # Fit Snuba with multiple LF function classes and a custom scoring function
     lf_classes = [
@@ -76,7 +89,8 @@ def main(original_lfs=False, dataset_home='./datasets'):
         #    memory_limit=50000, 
         #    n_jobs=100),]
         partial(DecisionTreeClassifier, max_depth=1),
-        LogisticRegression]
+        #LogisticRegression
+        ]
     scoring_fn = None #accuracy_score
     snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
@@ -103,18 +117,26 @@ def main(original_lfs=False, dataset_home='./datasets'):
         dataset_valid=valid_data
     )
     logger.info(f'---Majority Vote eval---')
+    acc = label_model.test(train_data, 'acc')
+    logger.info(f'label model (MV) train acc:    {acc}')
+    acc = label_model.test(valid_data, 'acc')
+    logger.info(f'label model (MV) valid acc:    {acc}')
     acc = label_model.test(test_data, 'acc')
-    logger.info(f'label model (MV) test acc:    {acc}')
+    logger.info(f'label model (MV) test acc:     {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
-    label_model = Snorkel()
-    label_model.fit(
-        dataset_train=train_data,
-        dataset_valid=valid_data
-    )
-    logger.info(f'---Snorkel eval---')
-    acc = label_model.test(test_data, 'acc')
-    logger.info(f'label model (Snorkel) test acc:    {acc}')
+    #label_model = Snorkel()
+    #label_model.fit(
+    #    dataset_train=train_data,
+    #    dataset_valid=valid_data
+    #)
+    #logger.info(f'---Snorkel eval---')
+    #acc = label_model.test(train_data, 'acc')
+    #logger.info(f'label model (Snorkel) train acc:    {acc}')
+    #acc = label_model.test(valid_data, 'acc')
+    #logger.info(f'label model (Snorkel) valid acc:    {acc}')
+    #acc = label_model.test(test_data, 'acc')
+    #logger.info(f'label model (Snorkel) test acc:     {acc}')
 
     # Train end model
     #### Filter out uncovered training data
@@ -122,16 +144,20 @@ def main(original_lfs=False, dataset_home='./datasets'):
     aggregated_hard_labels = label_model.predict(train_data)
     aggregated_soft_labels = label_model.predict_proba(train_data)
 
-    print(aggregated_soft_labels.shape)
+    coverage = aggregated_soft_labels.shape[0] / len(train_data_embed.labels)
+    print(f'coverage = {coverage:.4f}')
 
+    # TODO train end model on combination of real valid labels and the estimated train labels. 
+    # Does it do better than just training on the valid labels?
     model = EndClassifierModel(
-        batch_size=32,
+        batch_size=128,
         test_batch_size=512,
-        n_steps=100_000, # Increase this to 100_000
+        n_steps=1_000, # Increase this to 100_000
         backbone='LENET', # TODO CHANGE
-        optimizer='Adam',
-        optimizer_lr=1e-1,
+        optimizer='SGD',
+        optimizer_lr=1e-2,
         optimizer_weight_decay=0.0,
+        binary_mode=binary_mode,
     )
     model.fit(
         dataset_train=train_data,
@@ -139,7 +165,7 @@ def main(original_lfs=False, dataset_home='./datasets'):
         dataset_valid=valid_data,
         evaluation_step=50,
         metric='acc',
-        patience=100,
+        patience=1000,
         device=device
     )
     logger.info(f'---LeNet eval---')
