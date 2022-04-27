@@ -2,175 +2,184 @@ import logging
 import torch
 import numpy as np
 import fire
+from functools import partial
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
+from sklearn.metrics import jaccard_score, accuracy_score
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+
 from wrench.dataset import load_dataset
-from numpy import savetxt
 from wrench.logging import LoggingHandler
-from wrench.search import grid_search
+from wrench.evaluation import f1_score_
+from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel
-from wrench.labelmodel import FlyingSquid, MajorityVoting
-from wrench.search_space import SEARCH_SPACE
-from numpy import loadtxt
-from wrench.labelfunction import SnubaSelector, BasicDecisionTreeLF, ScoreSelector, MakeAbstractLFs
-from sklearn.svm import SVC
-import json
+from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector, IWS_Selector
+from fwrench.embeddings import SklearnEmbedding
 
-#### Just some code to print debug information to stdout
-logging.basicConfig(format='%(asctime)s - %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S',
-                    level=logging.INFO,
-                    handlers=[LoggingHandler()])
-logger = logging.getLogger(__name__)
-device = torch.device('cuda')
-seed = 123
-'''
-# train/valid/test :  54000, 6000, 10000
-x_val = loadtxt('../datasets/mnist/feature_valid.csv', delimiter=',')
-y_val = loadtxt('../datasets/mnist/label_valid.csv', delimiter=',')
-print(x_val.shape)
+def main(original_lfs=False):
+    #### Just some code to print debug information to stdout
+    logging.basicConfig(format='%(asctime)s - %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO,
+                        handlers=[LoggingHandler()])
+    logger = logging.getLogger(__name__)
+    device = torch.device('cuda')
+    seed = 123 # TODO do something with this.
 
-# generate label functions
-lf_generator = MakeAbstractLFs(x_val, y_val)
-lfs = lf_generator.make_unipolarSVM_lfs(200, kernel='linear', random_state = seed)
-print(type(lfs), len(lfs))
-# lfs_2 = lf_generator.make_basicDecisionTree_lfs(2000, random_state = seed)
-# print(type(lfs_2), len(lfs_2))
+    dataset_home = '../datasets'
+    data = 'MNIST'
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, 
+        extract_feature=True,
+        dataset_type='NumericDataset')
 
-# select label functions
-lf_selector = SnubaSelector(lfs, 50, False)
-selected_lfs = lf_selector.prune_heuristics(x_val, y_val)
-
-
-features = loadtxt('../datasets/mnist/features.csv', delimiter=',')
-labels = loadtxt('../datasets/mnist/labels.csv', delimiter=',')
-pred_label_list = np.empty((labels.shape[0], 0), int)
-for lf in selected_lfs:
-    pred_label_list = np.append(pred_label_list, np.array([lf.predict(features)]).transpose(), axis=1)
-
-#update label functions into json file
-mnist_valid = open("../datasets/mnist/valid.json", "r")
-valid_data = json.load(mnist_valid)
-mnist_valid.close()
-i = 54000
-for key in valid_data:
-    valid_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
-    i = i + 1
-print(i)
-mnist_valid = open("../datasets/mnist/valid.json", "w")
-json.dump(valid_data, mnist_valid)
-mnist_valid.close()
+    # TODO hacky... Convert to binary problem
+    print(train_data)
+    print(np.array(train_data.labels))
+    def convert_to_binary(dset):
+        dset.n_class = 2
+        dset.id2label = {0: 0, 1: 1}
+        for i in range(len(dset.labels)):
+            dset.labels[i] = int(dset.labels[i] % 2 == 0)
+        return dset
+    train_data = convert_to_binary(train_data)
+    valid_data = convert_to_binary(valid_data)
+    test_data = convert_to_binary(test_data)
+    print("new data")
+    print(np.array(train_data.labels))
 
 
-mnist_test = open("../datasets/mnist/test.json", "r")
-test_data = json.load(mnist_test)
-mnist_test.close()
-i = 60000
-for key in test_data:
-    test_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
-    i = i + 1
-print(i)
-mnist_test = open("../datasets/mnist/test.json", "w")
-json.dump(test_data, mnist_test)
-mnist_test.close()
+    # Dimensionality reduction...
+    pca = PCA(n_components=40)
+    embedder = SklearnEmbedding(pca)
+    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
+    embedder.fit(train_data, valid_data, test_data)
+    train_data_embed = embedder.transform(train_data)
+    valid_data_embed = embedder.transform(valid_data)
+    test_data_embed = embedder.transform(test_data)
+
+    # dname = 'mnist'
+    # # Fit Snuba with multiple LF function classes and a custom scoring function
+    # lf_classes = [
+    #     #partial(AutoSklearn2Classifier, 
+    #     #    time_left_for_this_task=30,
+    #     #    per_run_time_limit=30,
+    #     #    memory_limit=50000, 
+    #     #    n_jobs=100),]
+    #     partial(DecisionTreeClassifier, max_depth=1),
+    #     LogisticRegression]
+    # scoring_fn = None #accuracy_score
+    # interactiveWS = IWS_Selector(lf_classes, scoring_fn=scoring_fn)
+    #         # Use Snuba convention of assuming only validation set labels...
+    # interactiveWS.fit(valid_data, train_data, 30,
+    #             dname, b=0.5, cardinality=2,lf_descriptions = None, npredict=100)
+    # train_weak_labels = interactiveWS.predict(train_data)
+    # train_data.weak_labels = train_weak_labels.tolist()
+    # valid_weak_labels = interactiveWS.predict(valid_data)
+    # valid_data.weak_labels = valid_weak_labels.tolist()
+    # test_weak_labels = interactiveWS.predict(test_data)
+    # test_data.weak_labels = test_weak_labels.tolist()
+
+    # print(train_weak_labels)
 
 
-mnist_train = open("../datasets/mnist/train.json", "r")
-train_data = json.load(mnist_train)
-mnist_train.close()
-i = 0
-for key in train_data:
-    train_data[key]['weak_labels'] = list(map(int, pred_label_list[i].tolist()))
-    i = i + 1
-print(i)
-mnist_train = open("../datasets/mnist/train.json", "w")
-json.dump(train_data, mnist_train)
-mnist_train.close()
-    
-'''
+    lf_classes = [
+        #partial(AutoSklearn2Classifier, 
+        #    time_left_for_this_task=30,
+        #    per_run_time_limit=30,
+        #    memory_limit=50000, 
+        #    n_jobs=100),]
+        partial(DecisionTreeClassifier, max_depth=1),
+        LogisticRegression]
+    scoring_fn = None #accuracy_score
+    snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
+    # Use Snuba convention of assuming only validation set labels...
+    snuba.fit(valid_data_embed, train_data_embed, 
+        b=0.5, cardinality=1, iters=23)
+    print(snuba.hg.heuristic_stats())
+    # NOTE that snuba uses different F1 score implementations in 
+    # different places... 
+    # In it uses average='weighted' for computing abstain thresholds
+    # and average='micro' for pruning... 
+    # Maybe we should try different choices in different places as well?
 
-#### Load dataset 
-dataset_path = '../datasets'
-data = 'MNIST'
+    train_weak_labels = snuba.predict(train_data_embed)
+    train_data.weak_labels = train_weak_labels.tolist()
+    valid_weak_labels = snuba.predict(valid_data_embed)
+    valid_data.weak_labels = valid_weak_labels.tolist()
+    test_weak_labels = snuba.predict(test_data_embed)
+    test_data.weak_labels = test_weak_labels.tolist()
 
-train_data, valid_data, test_data = load_dataset(
-    dataset_path,
-    data, 
-    extract_feature=True)
-
-print(train_data.examples[0])
-print(train_data.weak_labels[0])
-
-#### Generate soft training label via a label model
-#### The weak labels provided by supervision sources are alreadly encoded in dataset object
-label_model = MajorityVoting()
-label_model.fit(
-    dataset_train=train_data,
-    dataset_valid=valid_data
-)
-acc = label_model.test(test_data, 'acc')
-logger.info(f'majority vote test acc: {acc}')
-
-#### Filter out uncovered training data
-train_data = train_data.get_covered_subset()
-aggregated_hard_labels = label_model.predict(train_data)
-aggregated_soft_labels = label_model.predict_proba(train_data)
-print(aggregated_soft_labels.shape)
-print(aggregated_soft_labels[0])
-
-model = EndClassifierModel(
-        batch_size = 32,
-        test_batch_size=256,
-        n_steps=10000,
-        backbone='LENET',
-        optimizer='Adam',
+    # Get score from majority vote
+    label_model = MajorityVoting()
+    label_model.fit(
+        dataset_train=train_data,
+        dataset_valid=valid_data
     )
-model.fit(
+    logger.info(f'---Majority Vote eval---')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (MV) test acc:    {acc}')
+
+    # # Get score from FlyingSquid
+    # label_model = FlyingSquid()
+    # label_model.fit(
+    #     dataset_train=train_data,
+    #     dataset_valid=valid_data
+    # )
+    # logger.info(f'---FlyingSquid eval---')
+    # f1_micro = label_model.test(test_data, 'f1_micro')
+    # logger.info(f'label model (FS) test f1_micro:    {f1_micro}')
+    # f1_macro = label_model.test(test_data, 'f1_macro')
+    # logger.info(f'label model (FS) test f1_macro:    {f1_macro}')
+    # f1_binary = label_model.test(test_data, 'f1_binary')
+    # logger.info(f'label model (FS) test f1_binary:   {f1_binary}')
+    # f1_weighted = label_model.test(test_data, 'f1_weighted')
+    # logger.info(f'label model (FS) test f1_weighted: {f1_weighted}')
+
+    # # Get score from Snorkel (afaik, this is the default Snuba LM)
+    # label_model = Snorkel()
+    # label_model.fit(
+    #     dataset_train=train_data,
+    #     dataset_valid=valid_data
+    # )
+    # logger.info(f'---Snorkel eval---')
+    # acc = label_model.test(test_data, 'acc')
+    # logger.info(f'label model (Snorkel) test acc:    {acc}')
+
+    # Train end model
+    #### Filter out uncovered training data
+    train_data = train_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(train_data)
+    aggregated_soft_labels = label_model.predict_proba(train_data)
+
+    print(aggregated_soft_labels.shape)
+
+    model = EndClassifierModel(
+        batch_size=32,
+        test_batch_size=512,
+        n_steps=1000, # Increase this to 100_000
+        backbone='LENET', # TODO CHANGE
+        optimizer='Adam',
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+    )
+    model.fit(
         dataset_train=train_data,
         y_train=aggregated_soft_labels,
-        #dataset_valid=valid_data,
+        dataset_valid=valid_data,
+        evaluation_step=50,
         metric='acc',
-        evaluation_step=50, # ?
-        patience=200, # ?
+        patience=100,
         device=device
     )
-acc = model.test(test_data, 'acc')
-logger.info(f'end model (LENET) test acc: {acc}')
-
-
-l = range(600)
-valid_data = valid_data.create_subset(l)
-valid_label = np.array(valid_data.labels)
-print(valid_label.shape)
-y_valid = np.empty((0, 10))
-for i in range(valid_label.shape[0]):
-    l = [0] * 10
-    l[valid_label[i]] = 1
-    y_valid = np.append(y_valid, np.array([l]), axis=0)
-
-model.fit(
-        dataset_train=valid_data,
-        y_train=y_valid,
-        metric='acc',
-        evaluation_step=50, # ?
-        patience=200, # ?
-        device=device
-    )
-acc = model.test(test_data, 'acc')
-logger.info(f'end model (LENET) test acc: {acc}')
-
-
-merge_data = train_data.get_merged_set(valid_data)
-merge_y_train = np.concatenate((aggregated_soft_labels, y_valid), axis=0)
-model.fit(
-        dataset_train=merge_data,
-        y_train=merge_y_train,
-        metric='acc',
-        evaluation_step=50, # ?
-        patience=200, # ?
-        device=device
-    )
-acc = model.test(test_data, 'acc')
-logger.info(f'end model (LENET) test acc: {acc}')
+    logger.info(f'---LeNet eval---')
+    acc = model.test(test_data, 'acc')
+    logger.info(f'end model (LeNet) test acc:    {acc}')
 
 if __name__ == '__main__':
-    print('finish')
-
+    fire.Fire(main)
