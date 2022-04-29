@@ -6,10 +6,11 @@ class BaseEmbedding(ABC):
     def __init__(self):
         self.shape = None
 
-    def _unpack_data(self, data):
+    def _unpack_data(self, data, flatten=True):
         X = np.array([d['feature'] for d in data.examples])
         self.shape = X[0].shape
-        X = X.reshape(len(data.examples), -1)
+        if flatten:
+            X = X.reshape(len(data.examples), -1)
         return X
 
     def _repack_data(self, data, X):

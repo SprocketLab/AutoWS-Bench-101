@@ -90,16 +90,16 @@ class LENET(BackBone):
     def __init__(self, n_class, input_size, dropout=0.0, binary_mode=False, **kwargs):
         super(LENET, self).__init__(n_class=n_class, binary_mode=binary_mode)
         self.feature_extractor = nn.Sequential(            
-            nn.Conv2d(1, 6, 5), nn.ReLU(),
-            nn.MaxPool2d(2), nn.Conv2d(6, 16, 5),
-            nn.ReLU(), nn.MaxPool2d(2)
+            nn.Conv2d(1, 6, 5), nn.Tanh(),
+            nn.AvgPool2d(2), nn.Conv2d(6, 16, 5),
+            nn.Tanh(), nn.AvgPool2d(2)
         )
 
         self.classifier = nn.Sequential(
             nn.Linear(256, 120),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Linear(120, 84),
-            nn.ReLU(),
+            nn.Tanh(),
         )
 
         self.last_layer = nn.Linear(84, n_class)
