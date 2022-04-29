@@ -53,41 +53,32 @@ def main(original_lfs=False):
     print("new data")
     print(np.array(train_data.labels))
 
+    x_train = np.array([d['feature'] for d in train_data.examples])
+    x_train = x_train.reshape(x_train.shape[0], 28 * 28)
+    for i, d in enumerate(train_data.examples):
+        d['feature'] = x_train[i].tolist()
 
+    x_valid = np.array([d['feature'] for d in valid_data.examples])
+    x_valid = x_valid.reshape(x_valid.shape[0], 28 * 28)
+    for i, d in enumerate(valid_data.examples):
+        d['feature'] = x_valid[i].tolist()
+
+    x_test = np.array([d['feature'] for d in test_data.examples])
+    x_test = x_test.reshape(x_test.shape[0], 28 * 28)
+    for i, d in enumerate(test_data.examples):
+        d['feature'] = x_test[i].tolist()
+    
     # Dimensionality reduction...
-    pca = PCA(n_components=40)
-    embedder = SklearnEmbedding(pca)
-    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
-    embedder.fit(train_data, valid_data, test_data)
-    train_data_embed = embedder.transform(train_data)
-    valid_data_embed = embedder.transform(valid_data)
-    test_data_embed = embedder.transform(test_data)
+    # pca = PCA(n_components=40)
+    # embedder = SklearnEmbedding(pca)
+    # #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
+    # embedder.fit(train_data, valid_data, test_data)
+    # train_data_embed = embedder.transform(train_data)
+    # valid_data_embed = embedder.transform(valid_data)
+    # test_data_embed = embedder.transform(test_data)
 
-    # dname = 'mnist'
-    # # Fit Snuba with multiple LF function classes and a custom scoring function
-    # lf_classes = [
-    #     #partial(AutoSklearn2Classifier, 
-    #     #    time_left_for_this_task=30,
-    #     #    per_run_time_limit=30,
-    #     #    memory_limit=50000, 
-    #     #    n_jobs=100),]
-    #     partial(DecisionTreeClassifier, max_depth=1),
-    #     LogisticRegression]
-    # scoring_fn = None #accuracy_score
-    # interactiveWS = IWS_Selector(lf_classes, scoring_fn=scoring_fn)
-    #         # Use Snuba convention of assuming only validation set labels...
-    # interactiveWS.fit(valid_data, train_data, 30,
-    #             dname, b=0.5, cardinality=2,lf_descriptions = None, npredict=100)
-    # train_weak_labels = interactiveWS.predict(train_data)
-    # train_data.weak_labels = train_weak_labels.tolist()
-    # valid_weak_labels = interactiveWS.predict(valid_data)
-    # valid_data.weak_labels = valid_weak_labels.tolist()
-    # test_weak_labels = interactiveWS.predict(test_data)
-    # test_data.weak_labels = test_weak_labels.tolist()
-
-    # print(train_weak_labels)
-
-
+    dname = 'mnist'
+    # Fit Snuba with multiple LF function classes and a custom scoring function
     lf_classes = [
         #partial(AutoSklearn2Classifier, 
         #    time_left_for_this_task=30,
@@ -97,23 +88,19 @@ def main(original_lfs=False):
         partial(DecisionTreeClassifier, max_depth=1),
         LogisticRegression]
     scoring_fn = None #accuracy_score
-    snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
-    # Use Snuba convention of assuming only validation set labels...
-    snuba.fit(valid_data_embed, train_data_embed, 
-        b=0.5, cardinality=1, iters=23)
-    print(snuba.hg.heuristic_stats())
-    # NOTE that snuba uses different F1 score implementations in 
-    # different places... 
-    # In it uses average='weighted' for computing abstain thresholds
-    # and average='micro' for pruning... 
-    # Maybe we should try different choices in different places as well?
-
-    train_weak_labels = snuba.predict(train_data_embed)
+    interactiveWS = IWS_Selector(lf_classes, scoring_fn=scoring_fn)
+            # Use Snuba convention of assuming only validation set labels...
+    interactiveWS.fit(valid_data, train_data, 30,
+                dname, b=0.5, cardinality=1,lf_descriptions = None, npredict=30)
+    train_weak_labels = interactiveWS.predict(train_data)
     train_data.weak_labels = train_weak_labels.tolist()
-    valid_weak_labels = snuba.predict(valid_data_embed)
+    valid_weak_labels = interactiveWS.predict(valid_data)
     valid_data.weak_labels = valid_weak_labels.tolist()
-    test_weak_labels = snuba.predict(test_data_embed)
+    test_weak_labels = interactiveWS.predict(test_data)
     test_data.weak_labels = test_weak_labels.tolist()
+
+    print(train_weak_labels.shape)
+
 
     # Get score from majority vote
     label_model = MajorityVoting()
@@ -141,15 +128,15 @@ def main(original_lfs=False):
     # f1_weighted = label_model.test(test_data, 'f1_weighted')
     # logger.info(f'label model (FS) test f1_weighted: {f1_weighted}')
 
-    # # Get score from Snorkel (afaik, this is the default Snuba LM)
-    # label_model = Snorkel()
-    # label_model.fit(
-    #     dataset_train=train_data,
-    #     dataset_valid=valid_data
-    # )
-    # logger.info(f'---Snorkel eval---')
-    # acc = label_model.test(test_data, 'acc')
-    # logger.info(f'label model (Snorkel) test acc:    {acc}')
+    # Get score from Snorkel (afaik, this is the default Snuba LM)
+    label_model = Snorkel()
+    label_model.fit(
+        dataset_train=train_data,
+        dataset_valid=valid_data
+    )
+    logger.info(f'---Snorkel eval---')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (Snorkel) test acc:    {acc}')
 
     # Train end model
     #### Filter out uncovered training data
