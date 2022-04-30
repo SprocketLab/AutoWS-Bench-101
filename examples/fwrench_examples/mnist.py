@@ -72,10 +72,11 @@ def main(original_lfs=False, dataset_home='./datasets'):
     # Dimensionality reduction...
     # Try Fred's dim. reduction? -- pretrained ResNet 
     # (not applicable everywhere)
-    #emb = PCA(n_components=100)
-    #embedder = SklearnEmbedding(emb)
-    embedder = VAE2DEmbedding()
-    #embedder = FlattenEmbedding()
+    emb = PCA(n_components=100)
+    embedder = SklearnEmbedding(emb) # Use PCA or any other sklearn embedding
+    #embedder = FlattenEmbedding() # i.e., just use raw features
+    #embedder = VAE2DEmbedding() # TODO not finished yet
+
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)
@@ -125,18 +126,21 @@ def main(original_lfs=False, dataset_home='./datasets'):
     logger.info(f'label model (MV) test acc:     {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
-    #label_model = Snorkel()
-    #label_model.fit(
-    #    dataset_train=train_data,
-    #    dataset_valid=valid_data
-    #)
-    #logger.info(f'---Snorkel eval---')
-    #acc = label_model.test(train_data, 'acc')
-    #logger.info(f'label model (Snorkel) train acc:    {acc}')
-    #acc = label_model.test(valid_data, 'acc')
-    #logger.info(f'label model (Snorkel) valid acc:    {acc}')
-    #acc = label_model.test(test_data, 'acc')
-    #logger.info(f'label model (Snorkel) test acc:     {acc}')
+    label_model = Snorkel()
+    label_model.fit(
+        dataset_train=train_data,
+        dataset_valid=valid_data
+    )
+    logger.info(f'---Snorkel eval---')
+    acc = label_model.test(train_data, 'acc')
+    logger.info(f'label model (Snorkel) train acc:    {acc}')
+    acc = label_model.test(valid_data, 'acc')
+    logger.info(f'label model (Snorkel) valid acc:    {acc}')
+    acc = label_model.test(test_data, 'acc')
+    logger.info(f'label model (Snorkel) test acc:     {acc}')
+    # NOTE these values are misleading;
+    # WRENCH reports accuracy using soft labels and often 
+    # just collapses to majority class
 
     # Train end model
     #### Filter out uncovered training data
@@ -152,8 +156,8 @@ def main(original_lfs=False, dataset_home='./datasets'):
     model = EndClassifierModel(
         batch_size=128,
         test_batch_size=512,
-        n_steps=1_000, # Increase this to 100_000
-        backbone='LENET', # TODO CHANGE
+        n_steps=1_000, # Increase this to 100_000 if needed
+        backbone='LENET', 
         optimizer='SGD',
         optimizer_lr=1e-2,
         optimizer_weight_decay=0.0,
