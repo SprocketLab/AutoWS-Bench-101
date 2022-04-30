@@ -22,6 +22,16 @@ class FWRENCHDataset(ABC, TorchDataset):
     def _split_json_filename(split):
         return f"{split}.json"
 
+    @staticmethod
+    def generate_split_indices(N, train_p, seed=SEED):
+        train_size = int(N * train_p)
+        indices = np.arange(N)
+        train_indices = np.random.default_rng(seed).choice(
+            indices, size=train_size, replace=False
+        )
+        valid_indices = np.setdiff1d(indices, train_indices)
+        return train_indices, valid_indices
+
     @dataclass
     class _FeatureLabel:
         feature: NDArray
