@@ -1,5 +1,4 @@
 import logging
-from tokenize import Expfloat
 import torch
 import numpy as np
 import fire
@@ -9,7 +8,6 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
@@ -20,7 +18,7 @@ from wrench.logging import LoggingHandler
 from wrench.evaluation import f1_score_
 from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel
-from fwrench.lf_selectors import Exp_Selector, AutoSklearnSelector, IWS_Selector
+from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector, IWS_Selector
 from fwrench.embeddings import SklearnEmbedding
 
 def main(original_lfs=False):
@@ -41,44 +39,56 @@ def main(original_lfs=False):
         dataset_type='NumericDataset')
 
     # TODO hacky... Convert to binary problem
-    # print(train_data)
-    # print(np.array(train_data.labels))
-    # def convert_to_binary(dset):
-    #     dset.n_class = 2
-    #     dset.id2label = {0: 0, 1: 1}
-    #     for i in range(len(dset.labels)):
-    #         dset.labels[i] = int(dset.labels[i] % 2 == 0)
-    #     return dset
-    # train_data = convert_to_binary(train_data)
-    # valid_data = convert_to_binary(valid_data)
-    # test_data = convert_to_binary(test_data)
-    # print("new data")
-    # print(np.array(train_data.labels))
+    print(np.array(train_data.labels))
+    def convert_to_binary(dset):
+        dset.n_class = 2
+        dset.id2label = {0: 0, 1: 1}
+        for i in range(len(dset.labels)):
+            dset.labels[i] = int(dset.labels[i] % 2 == 0)
+        return dset
+    train_data = convert_to_binary(train_data)
+    valid_data = convert_to_binary(valid_data)
+    test_data = convert_to_binary(test_data)
+    print("new data")
+    print(np.array(train_data.labels))
 
-    x_train = np.array([d['feature'] for d in train_data.examples])
-    x_train = x_train.reshape(x_train.shape[0], 28 * 28)
-    for i, d in enumerate(train_data.examples):
-        d['feature'] = x_train[i].tolist()
+    def normalize01(dset):
+        # NOTE preprocessing... MNIST should be in [0, 1]
+        for i in range(len(dset.examples)):
+            dset.examples[i]['feature'] = np.array(
+                dset.examples[i]['feature']).astype(float)
+            dset.examples[i]['feature'] /= float(
+                np.max(dset.examples[i]['feature']))
+        return dset
+    train_data = normalize01(train_data)
+    valid_data = normalize01(valid_data)
+    test_data = normalize01(test_data)
 
-    x_valid = np.array([d['feature'] for d in valid_data.examples])
-    x_valid = x_valid.reshape(x_valid.shape[0], 28 * 28)
-    for i, d in enumerate(valid_data.examples):
-        d['feature'] = x_valid[i].tolist()
+    # x_train = np.array([d['feature'] for d in train_data.examples])
+    # x_train = x_train.reshape(x_train.shape[0], 28 * 28)
+    # for i, d in enumerate(train_data.examples):
+    #     d['feature'] = x_train[i].tolist()
 
-    x_test = np.array([d['feature'] for d in test_data.examples])
-    x_test = x_test.reshape(x_test.shape[0], 28 * 28)
-    for i, d in enumerate(test_data.examples):
-        d['feature'] = x_test[i].tolist()
+    # x_valid = np.array([d['feature'] for d in valid_data.examples])
+    # x_valid = x_valid.reshape(x_valid.shape[0], 28 * 28)
+    # for i, d in enumerate(valid_data.examples):
+    #     d['feature'] = x_valid[i].tolist()
+
+    # x_test = np.array([d['feature'] for d in test_data.examples])
+    # x_test = x_test.reshape(x_test.shape[0], 28 * 28)
+    # for i, d in enumerate(test_data.examples):
+    #     d['feature'] = x_test[i].tolist()
     
     # Dimensionality reduction...
-    # pca = PCA(n_components=40)
-    # embedder = SklearnEmbedding(pca)
-    # #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
-    # embedder.fit(train_data, valid_data, test_data)
-    # train_data_embed = embedder.transform(train_data)
-    # valid_data_embed = embedder.transform(valid_data)
-    # test_data_embed = embedder.transform(test_data)
+    pca = PCA(n_components=40)
+    embedder = SklearnEmbedding(pca)
+    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
+    embedder.fit(train_data, valid_data, test_data)
+    train_data_embed = embedder.transform(train_data)
+    valid_data_embed = embedder.transform(valid_data)
+    test_data_embed = embedder.transform(test_data)
 
+    dname = 'mnist'
     # Fit Snuba with multiple LF function classes and a custom scoring function
     lf_classes = [
         #partial(AutoSklearn2Classifier, 
@@ -86,17 +96,18 @@ def main(original_lfs=False):
         #    per_run_time_limit=30,
         #    memory_limit=50000, 
         #    n_jobs=100),]
-        partial(SVC, kernel="linear", C = 1.0),
+        partial(DecisionTreeClassifier, max_depth=1),
         LogisticRegression]
     scoring_fn = None #accuracy_score
-    ExpLF = Exp_Selector(lf_classes, scoring_fn=scoring_fn)
+    interactiveWS = IWS_Selector(lf_classes, scoring_fn=scoring_fn)
             # Use Snuba convention of assuming only validation set labels...
-    ExpLF.fit(valid_data, 50)
-    train_weak_labels = ExpLF.predict(train_data)
+    interactiveWS.fit(valid_data_embed, 30, dname, b=0.5, 
+                cardinality=2,lf_descriptions = None, npredict=30)
+    train_weak_labels = interactiveWS.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
-    valid_weak_labels = ExpLF.predict(valid_data)
+    valid_weak_labels = interactiveWS.predict(valid_data_embed)
     valid_data.weak_labels = valid_weak_labels.tolist()
-    test_weak_labels = ExpLF.predict(test_data)
+    test_weak_labels = interactiveWS.predict(test_data_embed)
     test_data.weak_labels = test_weak_labels.tolist()
 
     print(train_weak_labels.shape)
