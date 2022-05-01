@@ -22,7 +22,7 @@ class Exp_Selector(BaseSelector):
                 for i, e in enumerate(clf.estimators_):
                     heuristics.append(UnipolarLF(e, i))
                     exp_combos.append(random_selection)
-                print(len(heuristics))
+                #print(len(heuristics))
             break
         score_list = []
         for i, hf in enumerate(heuristics):
