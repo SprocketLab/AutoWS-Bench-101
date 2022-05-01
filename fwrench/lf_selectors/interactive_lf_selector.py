@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import pandas as pd
 from scipy import sparse
-from .base_lf_selector import BaseSelector
+from .base_lf_selector import BaseSelector, UnipolarLF
 import random
 from .interactive.utils import AVAILABLEDATASETS
 from sklearn.feature_extraction.text import CountVectorizer
@@ -18,6 +18,7 @@ from .interactive.snuba_synthesizer import Synthesizer
 
 from .interactive.utils import generate_ngram_LFs, get_final_set, train_end_classifier
 from .interactive.iws import InteractiveWeakSupervision
+
 
 def flip(x):
     ''' Utility function for flipping snuba outputs
@@ -54,47 +55,26 @@ class IWS_Selector(BaseSelector):
             L[:,i] = marginals_to_labels(hf,primitive_matrix[:,feat_combos[i]],beta_opt[i])
         return L
 
-    def unipolar_lf_generator(self, labeled_data, class_ind, cardinality=1):
-        x_val = np.array([d['feature'] for d in labeled_data.examples])
-        y_val = np.array(labeled_data.labels)
-        self.cardinality = cardinality
-        self.train_ground = None #y_train # NOTE just used for eval in Snuba...
-        self.val_primitive_matrix = x_val
-        self.val_ground = y_val
-        self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground)
-        self.hf = []
-        self.feat_combos = []
-        heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality, class_ind, False)
-
+    def unipolar_lf_generator(self, heuristics, feat_combos, class_ind):
         L_val = np.array([])
         max_cardinality = len(heuristics)
+        hf_final = []
         for i in range(max_cardinality):
+            new_hf = []
             L_temp_val = np.zeros((np.shape(self.val_primitive_matrix)[0],len(heuristics[i])))
             for j, hf in enumerate(heuristics[i]):
+                hf = UnipolarLF(hf.estimators_[class_ind], class_ind)
+                new_hf.append(hf)
                 L_temp_val[:,j] = hf.predict_binary(self.val_primitive_matrix[:,feat_combos[i][j]])
             if i == 0:
                 L_val = np.append(L_val, L_temp_val) #converts to 1D array automatically
                 L_val = np.reshape(L_val,np.shape(L_temp_val))
             else:
                 L_val = np.concatenate((L_val, L_temp_val), axis=1)
-        return L_val, heuristics, feat_combos 
+            hf_final.append(new_hf)
+        return L_val, hf_final, feat_combos 
 
-    def snuba_lf_generator(self, labeled_data, unlabeled_data, b = 0.5, cardinality=1):
-        x_train = np.array([d['feature'] for d in unlabeled_data.examples])
-        x_val = np.array([d['feature'] for d in labeled_data.examples])
-        y_val = np.array(labeled_data.labels)
-        self.cardinality = cardinality
-        self.train_primitive_matrix = x_train
-        self.train_ground = None #y_train # NOTE just used for eval in Snuba...
-        self.val_primitive_matrix = x_val
-        self.val_ground = y_val
-        self.b = b
-        self.p = np.shape(self.val_primitive_matrix)[1]
-        self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground, b)
-        self.hf = []
-        self.feat_combos = []
-        heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality)
-
+    def snuba_lf_generator(self, heuristics, feat_combos):
         L_val = np.array([])
         beta_opt = np.array([])
         max_cardinality = len(heuristics)
@@ -112,7 +92,7 @@ class IWS_Selector(BaseSelector):
         return L_val, heuristics, feat_combos 
 
 
-    def fit(self, labeled_data, unlabeled_data, num_iter, dname, b=0.5, cardinality=1,
+    def fit(self, labeled_data, num_iter, dname, b=0.5, cardinality=1,
                         lf_descriptions = None, npredict = 100):
         def index(a, inp):
             i = 0
@@ -126,12 +106,24 @@ class IWS_Selector(BaseSelector):
             except:
                 import pdb; pdb.set_trace()
 
+        x_val = np.array([d['feature'] for d in labeled_data.examples])
+        y_val = np.array(labeled_data.labels)
+        self.cardinality = cardinality
+        self.val_primitive_matrix = x_val
+        self.val_ground = y_val
+        self.b = b
+        self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground, b)
+        self.hf = []
+        self.feat_combos = []
+
         savedir='%s_test'%dname
         numthreads = 1
         y_val = np.array(labeled_data.labels)
         if (len(np.unique(y_val)) == 2):
             self.isbinary = True
-            L_val, heuristics, feat_combos = self.snuba_lf_generator(labeled_data, unlabeled_data, b, cardinality)
+            heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality)
+            L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
+            print(L_val.shape)
             LFs = sparse.csr_matrix(L_val)
             svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
             LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
@@ -154,12 +146,13 @@ class IWS_Selector(BaseSelector):
         else:
             self.isbinary = False
             y_val_backup = copy.deepcopy(y_val)
+            hfs, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality, False)
             for i in np.unique(y_val):
                 where_pos = np.where(y_val == i)[0]
                 y_val_backup[where_pos] = 1
                 where_neg = np.where(y_val != i)[0]
                 y_val_backup[where_neg] = -1
-                L_val, heuristics, feat_combos = self.unipolar_lf_generator(labeled_data, i, cardinality)
+                L_val, heuristics, feat_combos = self.unipolar_lf_generator(hfs, feat_combos, i)
                 print(L_val.shape)
                 LFs = sparse.csr_matrix(L_val)
                 svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
@@ -173,9 +166,9 @@ class IWS_Selector(BaseSelector):
                 IWSsession.run_experiments(num_iter)
                 LFsets = get_final_set('LSE ac',IWSsession, npredict,r=None)
                 sort_idx =  LFsets[1][num_iter-1]
-                for i in sort_idx:
-                    self.hf.append(index(heuristics,i)) 
-                    self.feat_combos.append(index(feat_combos,i))
+                for idx in sort_idx:
+                    self.hf.append(index(heuristics,idx)) 
+                    self.feat_combos.append(index(feat_combos,idx))
 
 
 
@@ -201,6 +194,7 @@ class IWS_Selector(BaseSelector):
             L = np.zeros((np.shape(X)[0],len(self.hf)))
             for j, hf in enumerate(self.hf):
                 L[:,j] = hf.predict(X[:,self.feat_combos[j]])
+            L = L.astype(int)
             return L
 
 
