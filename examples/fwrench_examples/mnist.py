@@ -14,6 +14,7 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from fwrench.embeddings.vae_embedding import VAE2DEmbedding
+from fwrench.embeddings.resnet_embedding import ResNetEmbedding
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -23,6 +24,8 @@ from wrench.endmodel import EndClassifierModel, MLPModel
 from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import *
 from fwrench.datasets import MNISTDataset
+
+from utils import get_accuracy_coverage
 
 def main(original_lfs=False, dataset_home='./datasets'):
     #### Just some code to print debug information to stdout
@@ -51,10 +54,10 @@ def main(original_lfs=False, dataset_home='./datasets'):
         for i in range(len(dset.labels)):
             dset.labels[i] = int(dset.labels[i] % 2 == 0)
         return dset
-    binary_mode = True
-    train_data = convert_to_binary(train_data)
-    valid_data = convert_to_binary(valid_data)
-    test_data = convert_to_binary(test_data)
+    binary_mode = False
+    #train_data = convert_to_binary(train_data)
+    #valid_data = convert_to_binary(valid_data)
+    #test_data = convert_to_binary(test_data)
     
     # TODO also hacky... normalize data
     def normalize01(dset):
@@ -72,10 +75,11 @@ def main(original_lfs=False, dataset_home='./datasets'):
     # Dimensionality reduction...
     # Try Fred's dim. reduction? -- pretrained ResNet 
     # (not applicable everywhere)
-    emb = PCA(n_components=100)
-    embedder = SklearnEmbedding(emb) # Use PCA or any other sklearn embedding
+    #emb = PCA(n_components=100)
+    #embedder = SklearnEmbedding(emb) # Use PCA or any other sklearn embedding
     #embedder = FlattenEmbedding() # i.e., just use raw features
-    #embedder = VAE2DEmbedding() # TODO not finished yet
+    #embedder = VAE2DEmbedding()
+    embedder = ResNetEmbedding()
 
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
@@ -96,7 +100,8 @@ def main(original_lfs=False, dataset_home='./datasets'):
     snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
     # Use Snuba convention of assuming only validation set labels...
     snuba.fit(valid_data_embed, train_data_embed, 
-        b=0.5, cardinality=1, iters=23)
+        b=0.1 if not binary_mode else 0.5, # TODO
+        cardinality=1, iters=23)
     print(snuba.hg.heuristic_stats())
     # NOTE that snuba uses different F1 score implementations in 
     # different places... 
@@ -112,18 +117,18 @@ def main(original_lfs=False, dataset_home='./datasets'):
     test_data.weak_labels = test_weak_labels.tolist()
 
     # Get score from majority vote
-    label_model = MajorityVoting()
-    label_model.fit(
-        dataset_train=train_data,
-        dataset_valid=valid_data
-    )
-    logger.info(f'---Majority Vote eval---')
-    acc = label_model.test(train_data, 'acc')
-    logger.info(f'label model (MV) train acc:    {acc}')
-    acc = label_model.test(valid_data, 'acc')
-    logger.info(f'label model (MV) valid acc:    {acc}')
-    acc = label_model.test(test_data, 'acc')
-    logger.info(f'label model (MV) test acc:     {acc}')
+    #label_model = MajorityVoting()
+    #label_model.fit(
+    #    dataset_train=train_data,
+    #    dataset_valid=valid_data
+    #)
+    #logger.info(f'---Majority Vote eval---')
+    #acc = label_model.test(train_data, 'acc')
+    #logger.info(f'label model (MV) train acc:    {acc}')
+    #acc = label_model.test(valid_data, 'acc')
+    #logger.info(f'label model (MV) valid acc:    {acc}')
+    #acc = label_model.test(test_data, 'acc')
+    #logger.info(f'label model (MV) test acc:     {acc}')
 
     # Get score from Snorkel (afaik, this is the default Snuba LM)
     label_model = Snorkel()
@@ -144,9 +149,16 @@ def main(original_lfs=False, dataset_home='./datasets'):
 
     # Train end model
     #### Filter out uncovered training data
-    train_data = train_data.get_covered_subset()
-    aggregated_hard_labels = label_model.predict(train_data)
-    aggregated_soft_labels = label_model.predict_proba(train_data)
+    train_data_covered = train_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(train_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(train_data_covered)
+
+
+    # Get actual label model accuracy using hard labels
+    get_accuracy_coverage(train_data, label_model, split='train')
+    get_accuracy_coverage(valid_data, label_model, split='valid')
+    get_accuracy_coverage(test_data, label_model, split='test')
+
 
     coverage = aggregated_soft_labels.shape[0] / len(train_data_embed.labels)
     print(f'coverage = {coverage:.4f}')
@@ -154,18 +166,19 @@ def main(original_lfs=False, dataset_home='./datasets'):
     # TODO train end model on combination of real valid labels and the estimated train labels. 
     # Does it do better than just training on the valid labels?
     model = EndClassifierModel(
-        batch_size=128,
+        batch_size=512,
         test_batch_size=512,
         n_steps=1_000, # Increase this to 100_000 if needed
-        backbone='LENET', 
+        backbone='LENET',
         optimizer='SGD',
-        optimizer_lr=1e-2,
+        optimizer_lr=1e-3,
         optimizer_weight_decay=0.0,
         binary_mode=binary_mode,
     )
     model.fit(
-        dataset_train=train_data,
+        dataset_train=train_data_covered,
         y_train=aggregated_soft_labels,
+        #y_train=aggregated_hard_labels,
         dataset_valid=valid_data,
         evaluation_step=50,
         metric='acc',

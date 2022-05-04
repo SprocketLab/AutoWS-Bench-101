@@ -7,7 +7,7 @@ from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
 
-from dataset import FWRENCHDataset
+from .dataset import FWRENCHDataset
 
 
 class TorchVisionDataset(FWRENCHDataset):
