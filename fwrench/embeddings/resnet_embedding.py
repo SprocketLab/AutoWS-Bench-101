@@ -26,6 +26,8 @@ class ResNetEmbedding(BaseEmbedding):
             X.cuda()
             X_emb = self.model.forward(X)
             X_emb = X_emb.cpu().numpy()
+            X_emb = X_emb.reshape(X_emb.shape[0], -1)
+            print(X_emb.shape)
         return self._repack_data(data, X_emb)
 
     def fit_transform(self, data, ngpus=1, max_epochs=5, hidden_size=128):
