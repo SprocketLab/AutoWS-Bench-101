@@ -12,9 +12,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
-from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from fwrench.embeddings.vae_embedding import VAE2DEmbedding
-from fwrench.embeddings.resnet_embedding import ResNetEmbedding
+from fwrench.embeddings.resnet_embedding import ResNet18Embedding
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -25,9 +24,19 @@ from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import *
 from fwrench.datasets import MNISTDataset
 
-from utils import get_accuracy_coverage
+import utils
 
-def main(original_lfs=False, dataset_home='./datasets'):
+def main(data_dir='MNIST_3000', 
+        dataset_home='./datasets',
+        even_odd=False,
+        embedding='resnet18', # raw | pca | resnet18 | vae
+        scoring_fn=None, # TODO
+        lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
+        lf_selector='snuba', # snuba | interactive | goggles
+        em_hard_labels=True, # Use hard labels in the end model
+        seed=123, # TODO
+        ):
+
     #### Just some code to print debug information to stdout
     logging.basicConfig(format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -35,51 +44,40 @@ def main(original_lfs=False, dataset_home='./datasets'):
                         handlers=[LoggingHandler()])
     logger = logging.getLogger(__name__)
     device = torch.device('cuda')
-    seed = 123 # TODO do something with this.
 
     train_data = MNISTDataset('train', name='MNIST')
     valid_data = MNISTDataset('valid', name='MNIST')
     test_data = MNISTDataset('test', name='MNIST')
 
-    data = 'MNIST_3000'
+    data = data_dir
     train_data, valid_data, test_data = load_dataset(
         dataset_home, data, 
         extract_feature=True,
         dataset_type='NumericDataset')
 
-    # TODO hacky... Convert to binary problem
-    def convert_to_binary(dset):
-        dset.n_class = 2
-        dset.id2label = {0: 0, 1: 1}
-        for i in range(len(dset.labels)):
-            dset.labels[i] = int(dset.labels[i] % 2 == 0)
-        return dset
-    binary_mode = False
-    #train_data = convert_to_binary(train_data)
-    #valid_data = convert_to_binary(valid_data)
-    #test_data = convert_to_binary(test_data)
+    binary_mode = even_odd
+    if even_odd:
+        train_data = utils.convert_to_even_odd(train_data)
+        valid_data = utils.convert_to_even_odd(valid_data)
+        test_data = utils.convert_to_even_odd(test_data)
     
-    # TODO also hacky... normalize data
-    def normalize01(dset):
-        # NOTE preprocessing... MNIST should be in [0, 1]
-        for i in range(len(dset.examples)):
-            dset.examples[i]['feature'] = np.array(
-                dset.examples[i]['feature']).astype(float)
-            dset.examples[i]['feature'] /= float(
-                np.max(dset.examples[i]['feature']))
-        return dset
-    train_data = normalize01(train_data)
-    valid_data = normalize01(valid_data)
-    test_data = normalize01(test_data)
+    # TODO also hacky... normalize MNIST data because it comes unnormalized
+    train_data = utils.normalize01(train_data)
+    valid_data = utils.normalize01(valid_data)
+    test_data = utils.normalize01(test_data)
 
     # Dimensionality reduction...
-    # Try Fred's dim. reduction? -- pretrained ResNet 
-    # (not applicable everywhere)
-    #emb = PCA(n_components=100)
-    #embedder = SklearnEmbedding(emb) # Use PCA or any other sklearn embedding
-    #embedder = FlattenEmbedding() # i.e., just use raw features
-    #embedder = VAE2DEmbedding()
-    embedder = ResNetEmbedding()
+    if embedding == 'raw': 
+        embedder = FlattenEmbedding() 
+    elif embedding == 'pca':
+        emb = PCA(n_components=100)
+        embedder = SklearnEmbedding(emb)
+    elif embedding == 'resnet18':
+        embedder = ResNet18Embedding()
+    elif embedding == 'vae':
+        embedder = VAE2DEmbedding()
+    else:
+        raise NotImplementedError
 
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
@@ -87,27 +85,40 @@ def main(original_lfs=False, dataset_home='./datasets'):
     test_data_embed = embedder.transform(test_data)
 
     # Fit Snuba with multiple LF function classes and a custom scoring function
-    lf_classes = [
-        #partial(AutoSklearn2Classifier, 
-        #    time_left_for_this_task=30,
-        #    per_run_time_limit=30,
-        #    memory_limit=50000, 
-        #    n_jobs=100),]
-        partial(DecisionTreeClassifier, max_depth=1),
-        #LogisticRegression
-        ]
+    if lf_class_options == 'default':
+        lf_classes = [
+            partial(DecisionTreeClassifier, max_depth=1),
+            ]
+    else:
+        if not isinstance(lf_class_options, tuple):
+            lf_class_options = [lf_class_options]
+        lf_classes = []
+        logger.info(lf_class_options)
+        for lf_cls in lf_class_options:
+            if lf_cls == 'DecisionTreeClassifier':
+                lf_classes.append(partial(DecisionTreeClassifier, max_depth=1))
+            elif lf_cls == 'LogisticRegression':
+                lf_classes.append(LogisticRegression)
+            else: 
+                # If the lf class you need isn't implemented, add it here
+                raise NotImplementedError
+    logger.info(f'Using LF classes: {lf_classes}')
+
     scoring_fn = None #accuracy_score
-    snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
-    # Use Snuba convention of assuming only validation set labels...
-    snuba.fit(valid_data_embed, train_data_embed, 
-        b=0.1 if not binary_mode else 0.5, # TODO
-        cardinality=1, iters=23)
-    print(snuba.hg.heuristic_stats())
-    # NOTE that snuba uses different F1 score implementations in 
-    # different places... 
-    # In it uses average='weighted' for computing abstain thresholds
-    # and average='micro' for pruning... 
-    # Maybe we should try different choices in different places as well?
+    if lf_selector == 'snuba':
+        snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
+        # Use Snuba convention of assuming only validation set labels...
+        snuba.fit(valid_data_embed, train_data_embed, 
+            b=0.1 if not binary_mode else 0.5, # TODO
+            cardinality=1, iters=23)
+        logger.info(snuba.hg.heuristic_stats())
+        # NOTE that snuba uses different F1 score implementations in 
+        # different places... 
+        # In it uses average='weighted' for computing abstain thresholds
+        # and average='micro' for pruning... 
+        # Maybe we should try different choices in different places as well?
+    else: 
+        raise NotImplementedError
 
     train_weak_labels = snuba.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
@@ -116,6 +127,7 @@ def main(original_lfs=False, dataset_home='./datasets'):
     test_weak_labels = snuba.predict(test_data_embed)
     test_data.weak_labels = test_weak_labels.tolist()
 
+    # NOTE MV code sometimes crashes for unknown reasons
     # Get score from majority vote
     #label_model = MajorityVoting()
     #label_model.fit(
@@ -136,16 +148,6 @@ def main(original_lfs=False, dataset_home='./datasets'):
         dataset_train=train_data,
         dataset_valid=valid_data
     )
-    logger.info(f'---Snorkel eval---')
-    acc = label_model.test(train_data, 'acc')
-    logger.info(f'label model (Snorkel) train acc:    {acc}')
-    acc = label_model.test(valid_data, 'acc')
-    logger.info(f'label model (Snorkel) valid acc:    {acc}')
-    acc = label_model.test(test_data, 'acc')
-    logger.info(f'label model (Snorkel) test acc:     {acc}')
-    # NOTE these values are misleading;
-    # WRENCH reports accuracy using soft labels and often 
-    # just collapses to majority class
 
     # Train end model
     #### Filter out uncovered training data
@@ -155,30 +157,28 @@ def main(original_lfs=False, dataset_home='./datasets'):
 
 
     # Get actual label model accuracy using hard labels
-    get_accuracy_coverage(train_data, label_model, split='train')
-    get_accuracy_coverage(valid_data, label_model, split='valid')
-    get_accuracy_coverage(test_data, label_model, split='test')
-
+    utils.get_accuracy_coverage(train_data, label_model, logger, split='train')
+    utils.get_accuracy_coverage(valid_data, label_model, logger, split='valid')
+    utils.get_accuracy_coverage(test_data, label_model, logger, split='test')
 
     coverage = aggregated_soft_labels.shape[0] / len(train_data_embed.labels)
-    print(f'coverage = {coverage:.4f}')
+    logger.info(f'coverage = {coverage:.4f}')
 
-    # TODO train end model on combination of real valid labels and the estimated train labels. 
-    # Does it do better than just training on the valid labels?
+    # Does it do better than just training on the validation labels?
     model = EndClassifierModel(
-        batch_size=512,
+        batch_size=256,
         test_batch_size=512,
         n_steps=1_000, # Increase this to 100_000 if needed
         backbone='LENET',
         optimizer='SGD',
-        optimizer_lr=1e-3,
+        optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
         binary_mode=binary_mode,
     )
     model.fit(
         dataset_train=train_data_covered,
-        y_train=aggregated_soft_labels,
-        #y_train=aggregated_hard_labels,
+        y_train=aggregated_hard_labels if em_hard_labels \
+            else aggregated_soft_labels,
         dataset_valid=valid_data,
         evaluation_step=50,
         metric='acc',

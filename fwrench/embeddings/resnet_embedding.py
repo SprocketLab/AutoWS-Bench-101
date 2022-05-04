@@ -4,10 +4,8 @@ import torch
 import torchvision.models as models
 
 from .base_embedding import BaseEmbedding
-from.vae_utils import ConvVAE, VAE
 
-
-class ResNetEmbedding(BaseEmbedding):
+class ResNet18Embedding(BaseEmbedding):
     def __init__(self):
         resnet = models.resnet18(pretrained=True)
         self.model = torch.nn.Sequential(*list(resnet.children())[:-1])
@@ -27,7 +25,6 @@ class ResNetEmbedding(BaseEmbedding):
             X_emb = self.model.forward(X)
             X_emb = X_emb.cpu().numpy()
             X_emb = X_emb.reshape(X_emb.shape[0], -1)
-            print(X_emb.shape)
         return self._repack_data(data, X_emb)
 
     def fit_transform(self, data, ngpus=1, max_epochs=5, hidden_size=128):
