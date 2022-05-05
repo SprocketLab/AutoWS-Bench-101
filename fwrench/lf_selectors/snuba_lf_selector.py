@@ -22,6 +22,7 @@ class SnubaSelector(BaseSelector):
             b=0.5, cardinality=1, iters=23):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
+        # TODO raise error if num classes is != 2
 
         x_train = np.array([d['feature'] for d in unlabeled_data.examples])
         x_val = np.array([d['feature'] for d in labeled_data.examples])
@@ -29,7 +30,7 @@ class SnubaSelector(BaseSelector):
         self.train_primitive_matrix = x_train
         self.train_ground = None #y_train # NOTE just used for eval in Snuba...
         self.val_primitive_matrix = x_val
-        self.val_ground = y_val
+        self.val_ground = ((y_val * 2) - 1) # Flip negative class to -1
         self.b = b
         self.cardinality = cardinality
 

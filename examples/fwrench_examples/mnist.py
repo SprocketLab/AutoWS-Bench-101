@@ -34,6 +34,7 @@ def main(data_dir='MNIST_3000',
         lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='snuba', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
+        n_labeled_points=100,
         seed=123, # TODO
         ):
 
@@ -55,11 +56,17 @@ def main(data_dir='MNIST_3000',
         extract_feature=True,
         dataset_type='NumericDataset')
 
+    # Create subset of labeled dataset
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
     binary_mode = even_odd
     if even_odd:
         train_data = utils.convert_to_even_odd(train_data)
         valid_data = utils.convert_to_even_odd(valid_data)
         test_data = utils.convert_to_even_odd(test_data)
+        #train_data = utils.convert_0_1(train_data)
+        #valid_data = utils.convert_0_1(valid_data)
+        #test_data = utils.convert_0_1(test_data)
     
     # TODO also hacky... normalize MNIST data because it comes unnormalized
     train_data = utils.normalize01(train_data)
@@ -87,7 +94,8 @@ def main(data_dir='MNIST_3000',
     # Fit Snuba with multiple LF function classes and a custom scoring function
     if lf_class_options == 'default':
         lf_classes = [
-            partial(DecisionTreeClassifier, max_depth=1),
+            #partial(DecisionTreeClassifier, max_depth=1),
+            LogisticRegression
             ]
     else:
         if not isinstance(lf_class_options, tuple):
@@ -110,6 +118,7 @@ def main(data_dir='MNIST_3000',
         # Use Snuba convention of assuming only validation set labels...
         snuba.fit(valid_data_embed, train_data_embed, 
             b=0.1 if not binary_mode else 0.5, # TODO
+            #b=0.9,
             cardinality=1, iters=23)
         logger.info(snuba.hg.heuristic_stats())
         # NOTE that snuba uses different F1 score implementations in 
@@ -151,7 +160,7 @@ def main(data_dir='MNIST_3000',
 
     # Train end model
     #### Filter out uncovered training data
-    train_data_covered = train_data.get_covered_subset()
+    train_data_covered = train_data#.get_covered_subset()
     aggregated_hard_labels = label_model.predict(train_data_covered)
     aggregated_soft_labels = label_model.predict_proba(train_data_covered)
 
