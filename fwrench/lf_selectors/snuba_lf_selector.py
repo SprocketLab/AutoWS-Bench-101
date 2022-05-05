@@ -22,7 +22,9 @@ class SnubaSelector(BaseSelector):
             b=0.5, cardinality=1, iters=23):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
-        # TODO raise error if num classes is != 2
+
+        if labeled_data.n_class != 2:
+            raise NotImplementedError
 
         x_train = np.array([d['feature'] for d in unlabeled_data.examples])
         x_val = np.array([d['feature'] for d in labeled_data.examples])

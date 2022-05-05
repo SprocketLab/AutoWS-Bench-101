@@ -134,3 +134,7 @@ dmypy.json
 # OURS
 datasets/*
 .vscode/launch.json
+*ubyte*
+*hparams.yaml
+*.ckpt
+*events.out.tfevents*

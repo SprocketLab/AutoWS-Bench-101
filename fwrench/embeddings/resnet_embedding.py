@@ -16,7 +16,10 @@ class ResNet18Embedding(BaseEmbedding):
 
     def transform(self, data):
         X_np = self._unpack_data(data, flatten=False)
-        X_np = X_np.repeat(3, axis=1) # Repeat since MNIST is greyscale
+        if X_np.shape[1] == 1: # Repeat since MNIST is greyscale
+            X_np = X_np.repeat(3, axis=1)
+        elif X_np.shape[1] > 3: # Probably need to permute
+            X_np = np.transpose(X_np, (0, 3, 1, 2))
         with torch.no_grad():
             # TODO batching ... 
             X = torch.from_numpy(X_np)

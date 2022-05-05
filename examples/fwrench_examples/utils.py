@@ -25,12 +25,18 @@ def convert_0_1(dset):
     subset.id2label = {0: 0, 1: 1}
     return subset
 
+def convert_one_v_rest(dset, pos_class):
+    dset.n_class = 2
+    dset.id2label = {0: 0, 1: 1}
+    for i in range(len(dset.labels)):
+        dset.labels[i] = int(dset.labels[i] == pos_class)
+    return dset
+
 def convert_to_even_odd(dset):
     dset.n_class = 2
     dset.id2label = {0: 0, 1: 1}
-    for i in range(len(dset.labels)): # TODO one vs rest
-        #dset.labels[i] = int(dset.labels[i] % 2 == 0)
-        dset.labels[i] = int(dset.labels[i] == 1)
+    for i in range(len(dset.labels)):
+        dset.labels[i] = int(dset.labels[i] % 2 == 0)
     return dset
 
 def normalize01(dset):
