@@ -68,7 +68,7 @@ class Synthesizer(object):
             clf.fit(X, self.val_ground)
             return clf
 
-    def generate_heuristics(self, model, max_cardinality=1):
+    def generate_heuristics(self, model, max_cardinality=1, combo_samples=-1):
         """ 
         Generates heuristics over given feature cardinality
 
@@ -77,20 +77,43 @@ class Synthesizer(object):
         """
         #have to make a dictionary?? or feature combinations here? or list of arrays?
         feature_combinations_final = []
+        for cardinality in range(1, max_cardinality+1):
+            feature_combinations = self.generate_feature_combinations(
+                cardinality)
+            feature_comb = []       
+            for i, comb in enumerate(feature_combinations):
+                feature_comb.append(comb)
+            feature_combinations_final.append(feature_comb)
+
+        feature_combinations_final_flat = [
+            combo for combos in feature_combinations_final for combo in combos]
+        if combo_samples != -1:
+            # Randomly sample
+            r = np.random.permutation(
+                np.arange(len(feature_combinations_final_flat)))[:combo_samples]
+            r = np.array(r)
+            feature_combinations_final_flat = np.array(
+                feature_combinations_final_flat, dtype=object)
+            feature_combinations_final_flat = feature_combinations_final_flat[r]
+        
+        reduced_feature_combinations = []
         heuristics_final = []
         for cardinality in range(1, max_cardinality+1):
-            feature_combinations = self.generate_feature_combinations(cardinality)
-            heuristics = []
-            feature_comb = []
             for classifier in model:
-                for i,comb in enumerate(feature_combinations):
-                    heuristics.append(self.fit_function(comb, classifier))
-                    feature_comb.append(comb)
+                # for un-flattening the list
+                reduced_feature_combinations.append(
+                    list(filter(lambda x: len(x) == cardinality, 
+                        feature_combinations_final_flat)))
+                feature_combinations = reduced_feature_combinations[-1]
 
-            feature_combinations_final.append(feature_comb)
-            heuristics_final.append(heuristics)
-
-        return heuristics_final, feature_combinations_final
+                # Generate heuristics 
+                heuristics = []
+                for i, comb in enumerate(feature_combinations):
+                    heuristics.append(
+                        self.fit_function(comb, classifier))            
+                heuristics_final.append(heuristics)
+        
+        return heuristics_final, reduced_feature_combinations
 
     def beta_optimizer(self, marginals, ground, scoring_fn=None):
         """ 

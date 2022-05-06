@@ -36,6 +36,7 @@ def main(data_dir='MNIST_3000',
         em_hard_labels=True, # Use hard labels in the end model
         n_labeled_points=100, # Number of points used to train lf_selector
         snuba_cardinality=2, # Only used if lf_selector='snuba'
+        snuba_combo_samples=-1, # -1 uses all feat. combos
         seed=123, # TODO
         ):
 
@@ -121,7 +122,8 @@ def main(data_dir='MNIST_3000',
             lf_generator=lf_classes,
             scoring_fn=scoring_fn,
             b=0.5, # TODO change
-            cardinality=snuba_cardinality)
+            cardinality=snuba_cardinality, 
+            combo_samples=snuba_combo_samples)
         selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10) 
         selector.fit(valid_data_embed, train_data_embed)
         for i in range(len(selector.lf_selectors)):

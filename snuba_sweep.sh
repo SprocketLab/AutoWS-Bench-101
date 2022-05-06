@@ -38,14 +38,14 @@ do
     snuba_cardinality=2
     n_labeled_points=100
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
-    mkdir -p ${savedir}
-    python examples/fwrench_examples/mnist.py \
-        --embedding=${embedding} \
-        --lf_class_options=${lf_class_options} \
-        --em_hard_labels=${em_hard_labels} \
-        --snuba_cardinality=${snuba_cardinality} \
-        --n_labeled_points=${n_labeled_points} \
-        |& tee -a ${savedir}/res_seed${seed}.log
+    # mkdir -p ${savedir}
+    # python examples/fwrench_examples/mnist.py \
+    #     --embedding=${embedding} \
+    #     --lf_class_options=${lf_class_options} \
+    #     --em_hard_labels=${em_hard_labels} \
+    #     --snuba_cardinality=${snuba_cardinality} \
+    #     --n_labeled_points=${n_labeled_points} \
+    #     |& tee -a ${savedir}/res_seed${seed}.log
 
     # Top-2
     embedding=vae
@@ -53,14 +53,14 @@ do
     snuba_cardinality=2
     n_labeled_points=500
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
-    mkdir -p ${savedir}
-    python examples/fwrench_examples/mnist.py \
-        --embedding=${embedding} \
-        --lf_class_options=${lf_class_options} \
-        --em_hard_labels=${em_hard_labels} \
-        --snuba_cardinality=${snuba_cardinality} \
-        --n_labeled_points=${n_labeled_points} \
-        |& tee -a ${savedir}/res_seed${seed}.log
+    # mkdir -p ${savedir}
+    # python examples/fwrench_examples/mnist.py \
+    #     --embedding=${embedding} \
+    #     --lf_class_options=${lf_class_options} \
+    #     --em_hard_labels=${em_hard_labels} \
+    #     --snuba_cardinality=${snuba_cardinality} \
+    #     --n_labeled_points=${n_labeled_points} \
+    #     |& tee -a ${savedir}/res_seed${seed}.log
 
 
     # Top-3
@@ -69,14 +69,14 @@ do
     snuba_cardinality=2
     n_labeled_points=100
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
-    mkdir -p ${savedir}
-    python examples/fwrench_examples/mnist.py \
-        --embedding=${embedding} \
-        --lf_class_options=${lf_class_options} \
-        --em_hard_labels=${em_hard_labels} \
-        --snuba_cardinality=${snuba_cardinality} \
-        --n_labeled_points=${n_labeled_points} \
-        |& tee -a ${savedir}/res_seed${seed}.log
+    # mkdir -p ${savedir}
+    # python examples/fwrench_examples/mnist.py \
+    #     --embedding=${embedding} \
+    #     --lf_class_options=${lf_class_options} \
+    #     --em_hard_labels=${em_hard_labels} \
+    #     --snuba_cardinality=${snuba_cardinality} \
+    #     --n_labeled_points=${n_labeled_points} \
+    #     |& tee -a ${savedir}/res_seed${seed}.log
 
     # Top-4
     embedding=pca
@@ -84,14 +84,14 @@ do
     snuba_cardinality=2
     n_labeled_points=100
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
-    mkdir -p ${savedir}
-    python examples/fwrench_examples/mnist.py \
-        --embedding=${embedding} \
-        --lf_class_options=${lf_class_options} \
-        --em_hard_labels=${em_hard_labels} \
-        --snuba_cardinality=${snuba_cardinality} \
-        --n_labeled_points=${n_labeled_points} \
-        |& tee -a ${savedir}/res_seed${seed}.log
+    # mkdir -p ${savedir}
+    # python examples/fwrench_examples/mnist.py \
+    #     --embedding=${embedding} \
+    #     --lf_class_options=${lf_class_options} \
+    #     --em_hard_labels=${em_hard_labels} \
+    #     --snuba_cardinality=${snuba_cardinality} \
+    #     --n_labeled_points=${n_labeled_points} \
+    #     |& tee -a ${savedir}/res_seed${seed}.log
 
     # Top-5
     embedding=pca
@@ -99,14 +99,14 @@ do
     snuba_cardinality=2
     n_labeled_points=500
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
-    mkdir -p ${savedir}
-    python examples/fwrench_examples/mnist.py \
-        --embedding=${embedding} \
-        --lf_class_options=${lf_class_options} \
-        --em_hard_labels=${em_hard_labels} \
-        --snuba_cardinality=${snuba_cardinality} \
-        --n_labeled_points=${n_labeled_points} \
-        |& tee -a ${savedir}/res_seed${seed}.log
+    # mkdir -p ${savedir}
+    # python examples/fwrench_examples/mnist.py \
+    #     --embedding=${embedding} \
+    #     --lf_class_options=${lf_class_options} \
+    #     --em_hard_labels=${em_hard_labels} \
+    #     --snuba_cardinality=${snuba_cardinality} \
+    #     --n_labeled_points=${n_labeled_points} \
+    #     |& tee -a ${savedir}/res_seed${seed}.log
 
 done
 

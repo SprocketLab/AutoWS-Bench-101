@@ -16,10 +16,11 @@ def flip(x):
 
 class SnubaSelector(BaseSelector):
     def __init__(self, lf_generator, scoring_fn=None, 
-            b=0.5, cardinality=1, iters=23):
+            b=0.5, cardinality=1, combo_samples=-1, iters=23):
         super().__init__(lf_generator, scoring_fn)
         self.b = b
         self.cardinality = cardinality
+        self.combo_samples = combo_samples
         self.iters = iters
 
     def fit(self, labeled_data, unlabeled_data):
@@ -51,11 +52,13 @@ class SnubaSelector(BaseSelector):
             #Repeat synthesize-prune-verify at each iterations
             if i == 3:
                 self.hg.run_synthesizer(
-                    max_cardinality=self.cardinality, idx=idx, keep=3, 
+                    max_cardinality=self.cardinality, 
+                    combo_samples=self.combo_samples, idx=idx, keep=3, 
                     model=self.lf_generator, scoring_fn=self.scoring_fn)
             else:
                 self.hg.run_synthesizer(
-                    max_cardinality=self.cardinality, idx=idx, keep=1, 
+                    max_cardinality=self.cardinality, 
+                    combo_samples=self.combo_samples, idx=idx, keep=1, 
                     model=self.lf_generator, scoring_fn=self.scoring_fn)
 
             self.hg.run_verifier()

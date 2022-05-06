@@ -105,7 +105,7 @@ class HeuristicGenerator(object):
      
      
 
-    def run_synthesizer(self, max_cardinality=1, idx=None, keep=1, 
+    def run_synthesizer(self, max_cardinality=1, combo_samples=-1, idx=None, keep=1, 
             model='lr', scoring_fn=None):
         """ 
         Generates Synthesizer object and saves all generated heuristics
@@ -140,7 +140,8 @@ class HeuristicGenerator(object):
                 import pdb; pdb.set_trace()
 
         #Select keep best heuristics from generated heuristics
-        hf, feat_combos = self.syn.generate_heuristics(model, max_cardinality)
+        hf, feat_combos = self.syn.generate_heuristics(
+            model, max_cardinality, combo_samples)
         sort_idx = self.prune_heuristics(hf,feat_combos, keep, 
             scoring_fn=scoring_fn)
         #print(sort_idx)
