@@ -5,6 +5,7 @@ from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from scipy.special import comb
 
 class Synthesizer(object):
     """
@@ -22,34 +23,84 @@ class Synthesizer(object):
         self.p = np.shape(self.val_primitive_matrix)[1]
         self.b=b
 
-    def generate_feature_combinations(self, cardinality=1):
+    def generate_feature_combinations(self, 
+            max_cardinality=1, combo_samples=-1):
         """ 
         Create a list of primitive index combinations for given cardinality
 
         max_cardinality: max number of features each heuristic operates over 
         """
         primitive_idx = range(self.p)
+        p = self.p
         feature_combinations = []
 
-        for comb in itertools.combinations(primitive_idx, cardinality):
-            feature_combinations.append(comb)
+        size_combspace = np.sum([
+            comb(p, c) for c in np.arange(1, max_cardinality+1)])
+
+        if (combo_samples == -1) or (combo_samples >= size_combspace):
+            for cardinality in range(1, max_cardinality+1):
+                feature_combinations_i = []
+                for combo in itertools.combinations(primitive_idx, cardinality):
+                    feature_combinations_i.append(combo)
+                feature_combinations.append(feature_combinations_i)
+        else:
+            # Run generative process to randomly select combo_samples 
+            # with replacement (?) using the CDF and law of total probability
+            # LOL so this won't work because Snuba assumes at least one combo
+            # per cardinality. Sigh.
+            #
+            # feature_combos_flat = []
+            # while len(feature_combos_flat) < combo_samples:
+            #     r = np.random.rand()
+            #     lower = 0
+            #     upper = comb(p, 1) / size_combspace
+            #     for cardinality in range(1, max_cardinality+1):
+            #         if (lower <= r) and (r < upper):
+            #             combo = np.random.permutation(
+            #                 primitive_idx)[:cardinality]
+            #             # TODO check if combo is in feature_combos_flat
+            #             # if we want to do this without replacement
+            #             combo = tuple(combo)
+            #             feature_combos_flat.append(combo)
+            #             break
+            #         lower = upper
+            #         upper_numerator = np.sum(
+            #             [comb(p, c) for c in np.arange(1, cardinality+1)])
+            #         upper = upper_numerator / size_combspace
+
+            feature_combos_flat = []
+            while len(feature_combos_flat) < combo_samples:
+                # Slightly bias toward higher cardinality by reversing
+                for cardinality in reversed(range(1, max_cardinality+1)):
+                    combo = np.random.permutation(primitive_idx)[:cardinality]
+                    combo = tuple(combo)
+                    # TODO without replacement?
+                    if combo not in feature_combos_flat:
+                        feature_combos_flat.append(combo)
+                        if len(feature_combos_flat) == combo_samples:
+                            break
+
+            for cardinality in range(1, max_cardinality+1):
+                feature_combinations.append(
+                    list(filter(lambda x: len(x) == cardinality, 
+                        feature_combos_flat)))
 
         return feature_combinations
 
-    def fit_function(self, comb, model):
+    def fit_function(self, combo, model):
         """ 
         Fits a single logistic regression or decision tree model
 
-        comb: feature combination to fit model over
+        combo: feature combination to fit model over
         model: fit logistic regression or a decision tree
         """
-        X = self.val_primitive_matrix[:,comb]
+        X = self.val_primitive_matrix[:,combo]
         if np.shape(X)[0] == 1:
             X = X.reshape(-1,1)
 
         # fit decision tree or logistic regression or knn
         if model == 'dt':
-            dt = DecisionTreeClassifier(max_depth=len(comb))
+            dt = DecisionTreeClassifier(max_depth=len(combo))
             dt.fit(X, self.val_ground)
             return dt
 
@@ -71,49 +122,28 @@ class Synthesizer(object):
     def generate_heuristics(self, model, max_cardinality=1, combo_samples=-1):
         """ 
         Generates heuristics over given feature cardinality
-
         model: fit logistic regression or a decision tree
         max_cardinality: max number of features each heuristic operates over
         """
         #have to make a dictionary?? or feature combinations here? or list of arrays?
         feature_combinations_final = []
-        for cardinality in range(1, max_cardinality+1):
-            feature_combinations = self.generate_feature_combinations(
-                cardinality)
-            feature_comb = []       
-            for i, comb in enumerate(feature_combinations):
-                feature_comb.append(comb)
-            feature_combinations_final.append(feature_comb)
-
-        feature_combinations_final_flat = [
-            combo for combos in feature_combinations_final for combo in combos]
-        if combo_samples != -1:
-            # Randomly sample
-            r = np.random.permutation(
-                np.arange(len(feature_combinations_final_flat)))[:combo_samples]
-            r = np.array(r)
-            feature_combinations_final_flat = np.array(
-                feature_combinations_final_flat, dtype=object)
-            feature_combinations_final_flat = feature_combinations_final_flat[r]
-        
-        reduced_feature_combinations = []
         heuristics_final = []
+        feature_combinations_allcard = self.generate_feature_combinations(
+                max_cardinality, combo_samples) # TODO
         for cardinality in range(1, max_cardinality+1):
+            feature_combinations = feature_combinations_allcard[cardinality-1]
+            heuristics = []
+            feature_comb = []
             for classifier in model:
-                # for un-flattening the list
-                reduced_feature_combinations.append(
-                    list(filter(lambda x: len(x) == cardinality, 
-                        feature_combinations_final_flat)))
-                feature_combinations = reduced_feature_combinations[-1]
+                for i,combo in enumerate(feature_combinations):
+                    heuristics.append(self.fit_function(combo, classifier))
+                    feature_comb.append(combo)
 
-                # Generate heuristics 
-                heuristics = []
-                for i, comb in enumerate(feature_combinations):
-                    heuristics.append(
-                        self.fit_function(comb, classifier))            
-                heuristics_final.append(heuristics)
-        
-        return heuristics_final, reduced_feature_combinations
+            feature_combinations_final.append(feature_comb)
+            heuristics_final.append(heuristics)
+
+        return heuristics_final, feature_combinations_final
+
 
     def beta_optimizer(self, marginals, ground, scoring_fn=None):
         """ 
