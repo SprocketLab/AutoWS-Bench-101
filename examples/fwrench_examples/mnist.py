@@ -29,13 +29,13 @@ import utils
 def main(data_dir='MNIST_3000', 
         dataset_home='./datasets',
         even_odd=False,
-        embedding='resnet18', # raw | pca | resnet18 | vae
+        embedding='vae', # raw | pca | resnet18 | vae
         scoring_fn=None, # TODO
-        lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
+        lf_class_options='DecisionTreeClassifier,LogisticRegression', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='snuba', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
         n_labeled_points=100, # Number of points used to train lf_selector
-        snuba_cardinality=1, # Only used if lf_selector='snuba'
+        snuba_cardinality=2, # Only used if lf_selector='snuba'
         seed=123, # TODO
         ):
 
