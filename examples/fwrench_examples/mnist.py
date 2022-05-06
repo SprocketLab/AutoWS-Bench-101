@@ -31,7 +31,7 @@ def main(data_dir='MNIST_3000',
         even_odd=False,
         embedding='vae', # raw | pca | resnet18 | vae
         scoring_fn=None, # TODO
-        lf_class_options='DecisionTreeClassifier,LogisticRegression', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
+        lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='snuba', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
         n_labeled_points=100, # Number of points used to train lf_selector
@@ -97,7 +97,7 @@ def main(data_dir='MNIST_3000',
     # Fit Snuba with multiple LF function classes and a custom scoring function
     if lf_class_options == 'default':
         lf_classes = [
-            #partial(DecisionTreeClassifier, max_depth=1),
+            partial(DecisionTreeClassifier, max_depth=1),
             LogisticRegression
             ]
     else:
@@ -120,13 +120,13 @@ def main(data_dir='MNIST_3000',
         MySnubaSelector = partial(SnubaSelector, 
             lf_generator=lf_classes,
             scoring_fn=scoring_fn,
-            b=0.5,
-            cardinality=snuba_cardinality) # TODO change
+            b=0.5, # TODO change
+            cardinality=snuba_cardinality)
         selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10) 
-        # TODO change number of classes to 10
         selector.fit(valid_data_embed, train_data_embed)
         for i in range(len(selector.lf_selectors)):
-            logger.info(f'Selector {i} stats\n{selector.lf_selectors[i].hg.heuristic_stats()}')
+            logger.info(
+                f'Selector {i} stats\n{selector.lf_selectors[i].hg.heuristic_stats()}')
     else:
         raise NotImplementedError
 
