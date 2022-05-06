@@ -34,7 +34,8 @@ def main(data_dir='MNIST_3000',
         lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='snuba', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
-        n_labeled_points=100,
+        n_labeled_points=100, # Number of points used to train lf_selector
+        snuba_cardinality=1, # Only used if lf_selector='snuba'
         seed=123, # TODO
         ):
 
@@ -61,12 +62,14 @@ def main(data_dir='MNIST_3000',
 
     binary_mode = even_odd
     if even_odd:
-        train_data = utils.convert_to_even_odd(train_data)
-        valid_data = utils.convert_to_even_odd(valid_data)
-        test_data = utils.convert_to_even_odd(test_data)
-        #train_data = utils.convert_0_1(train_data)
-        #valid_data = utils.convert_0_1(valid_data)
-        #test_data = utils.convert_0_1(test_data)
+        train_data = utils.convert_one_v_rest(train_data, pos_class=1)
+        valid_data = utils.convert_one_v_rest(valid_data, pos_class=1)
+        test_data = utils.convert_one_v_rest(test_data, pos_class=1)
+
+    # TODO hack to make dataset smaller, 3 class problem
+    #train_data = utils.convert_0_1_2(train_data)
+    #valid_data = utils.convert_0_1_2(valid_data)
+    #test_data = utils.convert_0_1_2(test_data)
     
     # TODO also hacky... normalize MNIST data because it comes unnormalized
     train_data = utils.normalize01(train_data)
@@ -114,44 +117,26 @@ def main(data_dir='MNIST_3000',
 
     scoring_fn = None #accuracy_score
     if lf_selector == 'snuba':
-        snuba = SnubaSelector(lf_classes, scoring_fn=scoring_fn)
-        # Use Snuba convention of assuming only validation set labels...
-        snuba.fit(valid_data_embed, train_data_embed, 
-            b=0.1 if not binary_mode else 0.5, # TODO
-            #b=0.9,
-            cardinality=1, iters=23)
-        logger.info(snuba.hg.heuristic_stats())
-        # NOTE that snuba uses different F1 score implementations in 
-        # different places... 
-        # In it uses average='weighted' for computing abstain thresholds
-        # and average='micro' for pruning... 
-        # Maybe we should try different choices in different places as well?
-    else: 
+        MySnubaSelector = partial(SnubaSelector, 
+            lf_generator=lf_classes,
+            scoring_fn=scoring_fn,
+            b=0.5,
+            cardinality=snuba_cardinality) # TODO change
+        selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10) 
+        # TODO change number of classes to 10
+        selector.fit(valid_data_embed, train_data_embed)
+        for i in range(len(selector.lf_selectors)):
+            logger.info(f'Selector {i} stats\n{selector.lf_selectors[i].hg.heuristic_stats()}')
+    else:
         raise NotImplementedError
 
-    train_weak_labels = snuba.predict(train_data_embed)
+    train_weak_labels = selector.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
-    valid_weak_labels = snuba.predict(valid_data_embed)
+    valid_weak_labels = selector.predict(valid_data_embed)
     valid_data.weak_labels = valid_weak_labels.tolist()
-    test_weak_labels = snuba.predict(test_data_embed)
+    test_weak_labels = selector.predict(test_data_embed)
     test_data.weak_labels = test_weak_labels.tolist()
 
-    # NOTE MV code sometimes crashes for unknown reasons
-    # Get score from majority vote
-    #label_model = MajorityVoting()
-    #label_model.fit(
-    #    dataset_train=train_data,
-    #    dataset_valid=valid_data
-    #)
-    #logger.info(f'---Majority Vote eval---')
-    #acc = label_model.test(train_data, 'acc')
-    #logger.info(f'label model (MV) train acc:    {acc}')
-    #acc = label_model.test(valid_data, 'acc')
-    #logger.info(f'label model (MV) valid acc:    {acc}')
-    #acc = label_model.test(test_data, 'acc')
-    #logger.info(f'label model (MV) test acc:     {acc}')
-
-    # Get score from Snorkel (afaik, this is the default Snuba LM)
     label_model = Snorkel()
     label_model.fit(
         dataset_train=train_data,
@@ -160,24 +145,21 @@ def main(data_dir='MNIST_3000',
 
     # Train end model
     #### Filter out uncovered training data
-    train_data_covered = train_data#.get_covered_subset()
+    train_data_covered = train_data.get_covered_subset()
     aggregated_hard_labels = label_model.predict(train_data_covered)
     aggregated_soft_labels = label_model.predict_proba(train_data_covered)
-
 
     # Get actual label model accuracy using hard labels
     utils.get_accuracy_coverage(train_data, label_model, logger, split='train')
     utils.get_accuracy_coverage(valid_data, label_model, logger, split='valid')
     utils.get_accuracy_coverage(test_data, label_model, logger, split='test')
 
-    coverage = aggregated_soft_labels.shape[0] / len(train_data_embed.labels)
-    logger.info(f'coverage = {coverage:.4f}')
 
     # Does it do better than just training on the validation labels?
     model = EndClassifierModel(
         batch_size=256,
         test_batch_size=512,
-        n_steps=1_000, # Increase this to 100_000 if needed
+        n_steps=1_000,
         backbone='LENET',
         optimizer='SGD',
         optimizer_lr=1e-1,

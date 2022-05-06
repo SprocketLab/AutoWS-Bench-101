@@ -13,7 +13,7 @@ class VAE2DEmbedding(BaseEmbedding):
     def __init__(self):
         self.model = None
 
-    def fit(self, *data, ngpus=1, max_epochs=1, hidden_size=128): # TODO
+    def fit(self, *data, ngpus=1, max_epochs=20, hidden_size=128): # TODO
         X_nps = []
         for d in data:
             X_nps.append(self._unpack_data(d, flatten=False))

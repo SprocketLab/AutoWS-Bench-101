@@ -15,11 +15,14 @@ def flip(x):
         return x
 
 class SnubaSelector(BaseSelector):
-    def __init__(self, lf_generator, scoring_fn=None):
-        super().__init__(lf_generator, scoring_fn)
-
-    def fit(self, labeled_data, unlabeled_data,
+    def __init__(self, lf_generator, scoring_fn=None, 
             b=0.5, cardinality=1, iters=23):
+        super().__init__(lf_generator, scoring_fn)
+        self.b = b
+        self.cardinality = cardinality
+        self.iters = iters
+
+    def fit(self, labeled_data, unlabeled_data):
         ''' NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         '''
 
@@ -33,8 +36,6 @@ class SnubaSelector(BaseSelector):
         self.train_ground = None #y_train # NOTE just used for eval in Snuba...
         self.val_primitive_matrix = x_val
         self.val_ground = ((y_val * 2) - 1) # Flip negative class to -1
-        self.b = b
-        self.cardinality = cardinality
 
         validation_accuracy = []
         training_accuracy = []
@@ -46,7 +47,7 @@ class SnubaSelector(BaseSelector):
         self.hg = HeuristicGenerator(
             self.train_primitive_matrix, self.val_primitive_matrix, 
             self.val_ground, self.train_ground, b=self.b)
-        for i in tqdm(range(3, iters + 3)):
+        for i in tqdm(range(3, self.iters + 3)):
             #Repeat synthesize-prune-verify at each iterations
             if i == 3:
                 self.hg.run_synthesizer(
