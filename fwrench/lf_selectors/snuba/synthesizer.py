@@ -165,8 +165,11 @@ class Synthesizer(object):
         for beta in beta_params:		
             labels_cutoff = np.zeros(np.shape(marginals))		
             labels_cutoff[marginals <= (self.b-beta)] = -1.		
-            labels_cutoff[marginals >= (self.b+beta)] = 1.		
-            f1.append(f1_score(ground, labels_cutoff, average='weighted'))
+            labels_cutoff[marginals >= (self.b+beta)] = 1.
+            if not scoring_fn:
+                f1.append(f1_score(ground, labels_cutoff, average='weighted'))
+            else:
+                f1.append(scoring_fn(ground, labels_cutoff))
             # NOTE this seems to specifically use weighted F1... 
             # Not sure what effect changing this will have.
             # Turns out changing this to 'binary' results in an error... 

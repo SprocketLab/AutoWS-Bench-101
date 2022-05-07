@@ -116,12 +116,15 @@ def main(data_dir='MNIST_3000',
                 raise NotImplementedError
     logger.info(f'Using LF classes: {lf_classes}')
 
-    scoring_fn = None #accuracy_score
+    if scoring_fn == 'acc':
+        scoring_fn = accuracy_score
+    else:
+        scoring_fn = None
     if lf_selector == 'snuba':
         MySnubaSelector = partial(SnubaSelector, 
             lf_generator=lf_classes,
             scoring_fn=scoring_fn,
-            b=0.5, # TODO change
+            b=0.5, # TODO change this to 0.9 and run overnight 
             cardinality=snuba_cardinality, 
             combo_samples=snuba_combo_samples)
         selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10) 

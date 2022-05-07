@@ -87,7 +87,10 @@ class HeuristicGenerator(object):
                 L_train = np.concatenate((L_train, L_temp_train), axis=1)
 
         #Use F1 trade-off for reliability
-        acc_cov_scores = [f1_score(self.val_ground, L_val[:,i], average='micro') for i in range(np.shape(L_val)[1])] 
+        if not scoring_fn:
+            acc_cov_scores = [f1_score(self.val_ground, L_val[:,i],  average='micro') for i in range(np.shape(L_val)[1])] 
+        else:
+            acc_cov_scores = [scoring_fn(self.val_ground, L_val[:,i]) for i in range(np.shape(L_val)[1])] 
         acc_cov_scores = np.nan_to_num(acc_cov_scores)
         
         if self.vf != None:
