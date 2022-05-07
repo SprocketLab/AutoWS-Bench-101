@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import *
 
 
 def get_accuracy_coverage(data, label_model, logger, split='train'):
@@ -61,9 +61,48 @@ def normalize01(dset):
             np.max(dset.examples[i]['feature']))
     return dset
 
-def merge_datasets(data1, data2):
-    pass
+def mixture_metric(y, y_hat, defaultmetric, abstain_symbol=None,
+        default_weight=1.0, 
+        accuracy_weight=0.0,
+        balanced_accuracy_weight=0.0,
+        precision_weight=0.0,
+        recall_weight=0.0, 
+        matthews_weight=0.0,
+        cohen_kappa_weight=0.0,
+        jaccard_weight=0.0,
+        fbeta_weight=0.0):
 
+    if abstain_symbol is not None:
+        # filter out abstains
+        cover = y_hat.nonzero()[0]
+        y_covered = y[cover]
+        y_hat_covered = y_hat[cover]
+    else:
+        y_covered = y
+        y_hat_covered = y_hat
+
+    # TODO if new metrics are added, add them to this vector and normalize
+    alpha = [default_weight, accuracy_weight, balanced_accuracy_weight,
+        precision_weight, recall_weight, cohen_kappa_weight,
+        jaccard_weight, fbeta_weight, matthews_weight]
+    alpha = np.array(alpha)
+    alpha /= alpha.sum()
+
+    return alpha[0] * defaultmetric(y, y_hat) \
+        + alpha[1] * accuracy_score(y, y_hat) \
+        + alpha[2] * balanced_accuracy_score(y_covered, y_hat_covered) \
+        + alpha[3] * precision_score(y_covered, y_hat_covered, average='micro', 
+            zero_division=0) \
+        + alpha[4] * recall_score(y_covered, y_hat_covered, average='micro',
+            zero_division=0) \
+        + alpha[5] * ((
+            cohen_kappa_score(y_covered, y_hat_covered) + 1.0) / 2.0) \
+        + alpha[6] * jaccard_score(y_covered, y_hat_covered, average='micro', 
+            zero_division=0) \
+        + alpha[7] * fbeta_score(y_covered, y_hat_covered, 
+            beta=1, average='micro', zero_division=0) \
+        + alpha[8] * (
+            (matthews_corrcoef(y_covered, y_hat_covered) + 1.0) / 2.0) \
 
 class MulticlassAdaptor:
     def __init__(self, lf_selector, nclasses=10):

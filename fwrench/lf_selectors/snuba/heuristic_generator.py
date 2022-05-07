@@ -1,9 +1,12 @@
+from functools import partial
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
 
 from .synthesizer import Synthesizer
 from .verifier import Verifier
+
 
 class HeuristicGenerator(object):
     """
@@ -57,8 +60,9 @@ class HeuristicGenerator(object):
         Selects the best heuristic based on Jaccard Distance and Reliability Metric
         keep: number of heuristics to keep from all generated heuristics
         """
-        if not scoring_fn:
-            scoring_fn = f1_score
+        #if not scoring_fn:
+        #    scoring_fn = f1_score
+        #scoring_fn = partial(defaultmetric=partial(f1_score, average='micro'))
 
         def calculate_jaccard_distance(num_labeled_total, num_labeled_L):
             scores = np.zeros(np.shape(num_labeled_L)[1])
@@ -87,10 +91,9 @@ class HeuristicGenerator(object):
                 L_train = np.concatenate((L_train, L_temp_train), axis=1)
 
         #Use F1 trade-off for reliability
-        if not scoring_fn:
-            acc_cov_scores = [f1_score(self.val_ground, L_val[:,i],  average='micro') for i in range(np.shape(L_val)[1])] 
-        else:
-            acc_cov_scores = [scoring_fn(self.val_ground, L_val[:,i]) for i in range(np.shape(L_val)[1])] 
+        comboscore = partial(scoring_fn, defaultmetric=partial(f1_score, average='micro'), abstain_symbol=0)
+        acc_cov_scores = [comboscore(
+            self.val_ground, L_val[:,i]) for i in range(np.shape(L_val)[1])] 
         acc_cov_scores = np.nan_to_num(acc_cov_scores)
         
         if self.vf != None:

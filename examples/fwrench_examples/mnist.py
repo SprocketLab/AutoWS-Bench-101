@@ -26,17 +26,30 @@ from fwrench.datasets import MNISTDataset
 
 import utils
 
+import warnings
+warnings.filterwarnings('ignore') # NOTE the metrics throw a lot of warns...
+
 def main(data_dir='MNIST_3000', 
         dataset_home='./datasets',
         even_odd=False,
         embedding='vae', # raw | pca | resnet18 | vae
-        scoring_fn=None, # TODO
         lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='snuba', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
         n_labeled_points=100, # Number of points used to train lf_selector
         snuba_cardinality=2, # Only used if lf_selector='snuba'
         snuba_combo_samples=-1, # -1 uses all feat. combos
+
+        default_weight=1.0, # weight for the default metric for the lf_selector. The weights don't need to sum to one, they're normalized internally. 
+        accuracy_weight=0.0,
+        balanced_accuracy_weight=0.0,
+        precision_weight=0.0,
+        recall_weight=0.0,
+        matthews_weight=0.0, # Don't use this. it causes the PDB to launch for some reason... Probably an internal sklearn thing. 
+        cohen_kappa_weight=0.0,
+        jaccard_weight=0.0,
+        fbeta_weight=0.0, # Currently just F1
+
         seed=123, # TODO
         ):
 
@@ -116,10 +129,19 @@ def main(data_dir='MNIST_3000',
                 raise NotImplementedError
     logger.info(f'Using LF classes: {lf_classes}')
 
-    if scoring_fn == 'acc':
-        scoring_fn = accuracy_score
-    else:
-        scoring_fn = None
+    scoring_fn = partial(
+        utils.mixture_metric, 
+        default_weight=default_weight,
+        accuracy_weight=accuracy_weight,
+        balanced_accuracy_weight=balanced_accuracy_weight,
+        precision_weight=precision_weight,
+        recall_weight=recall_weight,
+        matthews_weight=matthews_weight,
+        cohen_kappa_weight=cohen_kappa_weight,
+        jaccard_weight=jaccard_weight,
+        fbeta_weight=fbeta_weight,
+        )
+
     if lf_selector == 'snuba':
         MySnubaSelector = partial(SnubaSelector, 
             lf_generator=lf_classes,

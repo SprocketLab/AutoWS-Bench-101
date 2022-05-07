@@ -1,11 +1,13 @@
-import numpy as np
 import itertools
+from functools import partial
 
-from sklearn.metrics import f1_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
+import numpy as np
 from scipy.special import comb
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 
 class Synthesizer(object):
     """
@@ -116,7 +118,18 @@ class Synthesizer(object):
 
         else: # Assume a generic model family... Expected to be a partial.
             clf = model()
-            clf.fit(X, self.val_ground)
+            if len(np.unique(self.val_ground)) == 1:
+                # Horrible hack to get snuba to not crash in weird edge case
+                # Ultimately OK though because this classifier should get 
+                # filtered out. Otherwise the HP config will fail, and for good 
+                # reason. 
+                #Xtmp = np.vstack([X, X[0]])
+                #y = self.val_ground
+                #ytmp = np.hstack([y, np.array(-y[0])])
+                #clf.fit(Xtmp, ytmp)
+                clf.fit(X, self.val_ground)
+            else:
+                clf.fit(X, self.val_ground)
             return clf
 
     def generate_heuristics(self, model, max_cardinality=1, combo_samples=-1):
@@ -153,8 +166,8 @@ class Synthesizer(object):
         marginals: confidences for data from a single heuristic
         """	
 
-        if not scoring_fn:
-            scoring_fn = f1_score
+        #if not scoring_fn:
+        #    scoring_fn = f1_score
 
         #Set the range of beta params
         #0.25 instead of 0.0 as a min makes controls coverage better
@@ -166,10 +179,8 @@ class Synthesizer(object):
             labels_cutoff = np.zeros(np.shape(marginals))		
             labels_cutoff[marginals <= (self.b-beta)] = -1.		
             labels_cutoff[marginals >= (self.b+beta)] = 1.
-            if not scoring_fn:
-                f1.append(f1_score(ground, labels_cutoff, average='weighted'))
-            else:
-                f1.append(scoring_fn(ground, labels_cutoff))
+            comboscore = partial(scoring_fn, defaultmetric=partial(f1_score, average='weighted'),  abstain_symbol=0)
+            f1.append(comboscore(ground, labels_cutoff))
             # NOTE this seems to specifically use weighted F1... 
             # Not sure what effect changing this will have.
             # Turns out changing this to 'binary' results in an error... 
