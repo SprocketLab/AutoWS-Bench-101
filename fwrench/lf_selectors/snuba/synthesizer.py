@@ -123,11 +123,10 @@ class Synthesizer(object):
                 # Ultimately OK though because this classifier should get 
                 # filtered out. Otherwise the HP config will fail, and for good 
                 # reason. 
-                #Xtmp = np.vstack([X, X[0]])
-                #y = self.val_ground
-                #ytmp = np.hstack([y, np.array(-y[0])])
-                #clf.fit(Xtmp, ytmp)
-                clf.fit(X, self.val_ground)
+                Xtmp = np.vstack([X, -X[0]])
+                y = self.val_ground
+                ytmp = np.hstack([y, np.array(-y[0])])
+                clf.fit(Xtmp, ytmp)
             else:
                 clf.fit(X, self.val_ground)
             return clf
