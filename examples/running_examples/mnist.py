@@ -22,6 +22,8 @@ from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
 from fwrench.embeddings import SklearnEmbedding
 
 from fwrench.embeddings.clip_embedding import ClipEmbedding
+from sklearn_som.som import SOM
+from sklearn.manifold import LocallyLinearEmbedding
 
 def main(original_lfs=False):
     #### Just some code to print debug information to stdout
@@ -43,7 +45,11 @@ def main(original_lfs=False):
     # Dimensionality reduction...
     # pca = PCA(n_components=100)
     # embedder = SklearnEmbedding(pca)
-    embedder = ClipEmbedding()
+    # embedder = ClipEmbedding()
+    som = SOM(m=10,n=1,dim=784)
+    embedder = SklearnEmbedding(som)
+    #lle = LocallyLinearEmbedding(n_components=5)
+    #embedder = SklearnEmbedding(lle)
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)

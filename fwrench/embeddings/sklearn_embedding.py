@@ -1,6 +1,8 @@
 from fwrench.embeddings.base_embedding import BaseEmbedding
 import numpy as np
-import umap
+#import umap
+from sklearn_som.som import SOM
+# need to add pip sklearn-som==1.1.0 to environment
 
 class SklearnEmbedding(BaseEmbedding):
     def __init__(self, embedder):
@@ -56,15 +58,16 @@ if __name__ == '__main__':
 
     # pca = PCA(n_components=10)
     # embedder = SklearnEmbedding(pca)
-    embedder = SklearnEmbedding(umap.UMAP(n_neighbors=5,
-                                min_dist=0.3,
-                                metric='correlation'))
+    # embedder = SklearnEmbedding(umap.UMAP(n_neighbors=5,
+    #                             min_dist=0.3,
+    #                             metric='correlation'))
+    embedder = SklearnEmbedding(SOM(m=10,n=1,dim=784))
 
     # Fit the union of all unlabeled examples
     #embedder.fit(train_data, valid_data, test_data)
 
-    train_data = embedder.fit_transform(train_data, 5)
-    valid_data = embedder.fit_transform(valid_data, 5)
-    test_data = embedder.fit_transform(test_data, 5)
+    #train_data = embedder.fit_transform(train_data, 5)
+    #valid_data = embedder.fit_transform(valid_data, 5)
+    test_data = embedder.fit_transform(test_data)
 
     print(len(test_data.examples[4]['feature']))
