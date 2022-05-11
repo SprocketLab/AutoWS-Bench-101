@@ -24,7 +24,7 @@ from fwrench.lf_selectors import SnubaSelector
 from fwrench.embeddings import *
 from fwrench.datasets import MNISTDataset
 
-import utils
+import fwrench.utils as utils
 
 import warnings
 warnings.filterwarnings('ignore') # NOTE the metrics throw a lot of warns...
