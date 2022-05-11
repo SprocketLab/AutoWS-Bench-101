@@ -20,6 +20,7 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
                     n_labeled_points = 100,
                     snuba_cardinality = 2,
                     snuba_iterations = 1,
+                    snuba_combo_samples = 500,
                     
                     default_weight=config[0],
                     accuracy_weight=config[1],
@@ -32,7 +33,8 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
                     fbeta_weight=config[8],
                     )
             except Exception:
-                pass
+                print(f'hit exception')
+                acc = 0.0
 
             # Record results
             res = f'[random_search] conf={config}, seed={seed}, acc={acc}'

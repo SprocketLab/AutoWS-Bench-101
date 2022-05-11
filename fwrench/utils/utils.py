@@ -88,21 +88,31 @@ def mixture_metric(y, y_hat, defaultmetric, abstain_symbol=None,
     alpha = np.array(alpha)
     alpha /= alpha.sum()
 
-    return alpha[0] * defaultmetric(y, y_hat) \
-        + alpha[1] * accuracy_score(y, y_hat) \
-        + alpha[2] * balanced_accuracy_score(y_covered, y_hat_covered) \
-        + alpha[3] * precision_score(y_covered, y_hat_covered, average='micro', 
-            zero_division=0) \
-        + alpha[4] * recall_score(y_covered, y_hat_covered, average='micro',
-            zero_division=0) \
-        + alpha[5] * ((
-            cohen_kappa_score(y_covered, y_hat_covered) + 1.0) / 2.0) \
-        + alpha[6] * jaccard_score(y_covered, y_hat_covered, average='micro', 
-            zero_division=0) \
-        + alpha[7] * fbeta_score(y_covered, y_hat_covered, 
-            beta=1, average='micro', zero_division=0) \
-        + alpha[8] * (
-            (matthews_corrcoef(y_covered, y_hat_covered) + 1.0) / 2.0) \
+    # Only compute the metric if it has nonzero weight (for speed)
+    # NOTE it turns out that metric combinations leads to a lot of overhead
+    m0 = defaultmetric(y, y_hat) if alpha[0] > 0.0 else 0.0
+    m1 = accuracy_score(y, y_hat)if alpha[1] > 0.0 else 0.0
+    m2 = balanced_accuracy_score(y_covered, y_hat_covered) if alpha[2] > 0.0 else 0.0
+    m3 = precision_score(y_covered, y_hat_covered, 
+            average='micro', zero_division=0) if alpha[3] > 0.0 else 0.0
+    m4 = recall_score(y_covered, y_hat_covered, 
+            average='micro', zero_division=0) if alpha[4] > 0.0 else 0.0
+    m5 = ((cohen_kappa_score(y_covered, y_hat_covered) + 1.0) / 2.0) if alpha[5] > 0.0 else 0.0
+    m6 = jaccard_score(y_covered, y_hat_covered, 
+            average='micro', zero_division=0) if alpha[6] > 0.0 else 0.0
+    m7 = fbeta_score(y_covered, y_hat_covered, 
+            beta=1, average='micro', zero_division=0) if alpha[7] > 0.0 else 0.0
+    m8 = ((matthews_corrcoef(y_covered, y_hat_covered) + 1.0) / 2.0) if alpha[8] > 0.0 else 0.0
+
+    return alpha[0] * m0 \
+        + alpha[1] * m1 \
+        + alpha[2] * m2 \
+        + alpha[3] * m3 \
+        + alpha[4] * m4 \
+        + alpha[5] * m5 \
+        + alpha[6] * m6 \
+        + alpha[7] * m7 \
+        + alpha[8] * m8
 
 class MulticlassAdaptor:
     def __init__(self, lf_selector, nclasses=10):
