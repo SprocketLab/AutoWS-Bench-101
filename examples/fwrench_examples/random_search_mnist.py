@@ -11,24 +11,27 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
         config = config_samples[i]
         for seed in range(n_seeds):
 
-            acc = mnist_main(
-                #embedding = 'vae',
-                embedding='pca', # For speed
-                lf_class_options = 'default',
-                em_hard_labels = True,
-                n_labeled_points = 100,
-                snuba_cardinality = 2,
-                
-                default_weight=config[0],
-                accuracy_weight=config[1],
-                balanced_accuracy_weight=config[2],
-                precision_weight=config[3],
-                recall_weight=config[4],
-                matthews_weight=config[5],
-                cohen_kappa_weight=config[6],
-                jaccard_weight=config[7],
-                fbeta_weight=config[8],
-                )
+            try:
+                acc = mnist_main(
+                    #embedding = 'vae',
+                    embedding='pca', # For speed
+                    lf_class_options = 'default',
+                    em_hard_labels = True,
+                    n_labeled_points = 100,
+                    snuba_cardinality = 2,
+                    
+                    default_weight=config[0],
+                    accuracy_weight=config[1],
+                    balanced_accuracy_weight=config[2],
+                    precision_weight=config[3],
+                    recall_weight=config[4],
+                    matthews_weight=config[5],
+                    cohen_kappa_weight=config[6],
+                    jaccard_weight=config[7],
+                    fbeta_weight=config[8],
+                    )
+            except Exception:
+                pass
 
             # Record results
             res = f'[random_search] conf={config}, seed={seed}, acc={acc}'
