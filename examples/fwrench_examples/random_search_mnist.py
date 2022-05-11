@@ -14,7 +14,7 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
             acc = mnist_main(
                 #embedding = 'vae',
                 embedding='pca', # For speed
-                lf_class_options = 'DecisionTreeClassifier,LogisticRegression',
+                lf_class_options = 'default',
                 em_hard_labels = True,
                 n_labeled_points = 100,
                 snuba_cardinality = 2,

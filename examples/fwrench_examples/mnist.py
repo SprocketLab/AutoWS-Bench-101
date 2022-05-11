@@ -20,7 +20,7 @@ from wrench.logging import LoggingHandler
 from wrench.evaluation import f1_score_
 from wrench.labelmodel import MajorityVoting, FlyingSquid, Snorkel
 from wrench.endmodel import EndClassifierModel, MLPModel
-from fwrench.lf_selectors import SnubaSelector, AutoSklearnSelector
+from fwrench.lf_selectors import SnubaSelector
 from fwrench.embeddings import *
 from fwrench.datasets import MNISTDataset
 
