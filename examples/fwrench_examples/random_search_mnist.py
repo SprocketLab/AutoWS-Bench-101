@@ -1,7 +1,7 @@
 import fire
 import numpy as np
 
-from mnist import main as mnist_main
+import fwrench.applications as applications
 
 
 def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
@@ -12,7 +12,7 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
         for seed in range(n_seeds):
 
             try:
-                acc = mnist_main(
+                acc = applications.mnist.main(
                     #embedding = 'vae',
                     embedding='pca', # For speed
                     lf_class_options = 'default',
