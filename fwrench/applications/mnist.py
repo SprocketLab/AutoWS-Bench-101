@@ -49,6 +49,7 @@ def main(data_dir='MNIST_3000',
         cohen_kappa_weight=0.0,
         jaccard_weight=0.0,
         fbeta_weight=0.0, # Currently just F1
+        snuba_iterations=23,
 
         seed=123, # TODO
         ):
@@ -148,7 +149,8 @@ def main(data_dir='MNIST_3000',
             scoring_fn=scoring_fn,
             b=0.5, # TODO change this to 0.9 and run overnight 
             cardinality=snuba_cardinality, 
-            combo_samples=snuba_combo_samples)
+            combo_samples=snuba_combo_samples,
+            iters=snuba_iterations)
         selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10) 
         selector.fit(valid_data_embed, train_data_embed)
         for i in range(len(selector.lf_selectors)):

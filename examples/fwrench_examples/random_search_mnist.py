@@ -19,6 +19,7 @@ def main(num_random_samples=10_000, n_seeds=3, resdir='results'):
                     em_hard_labels = True,
                     n_labeled_points = 100,
                     snuba_cardinality = 2,
+                    snuba_iterations = 1,
                     
                     default_weight=config[0],
                     accuracy_weight=config[1],
