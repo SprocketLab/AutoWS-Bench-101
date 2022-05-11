@@ -206,6 +206,7 @@ def main(data_dir='MNIST_3000',
     logger.info(f'---LeNet eval---')
     acc = model.test(test_data, 'acc')
     logger.info(f'end model (LeNet) test acc:    {acc}')
+    return acc
 
 if __name__ == '__main__':
     fire.Fire(main)

@@ -119,7 +119,6 @@ do
         # Top-3
         embedding=vae
         em_hard_labels=True
-        snuba_cardinality=2
         n_labeled_points=100
         savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
         mkdir -p ${savedir}
@@ -141,7 +140,6 @@ do
     # Top-3
     embedding=vae
     em_hard_labels=True
-    snuba_cardinality=2
     n_labeled_points=100
     savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
     mkdir -p ${savedir}
