@@ -1,11 +1,15 @@
 from pathlib import Path
 from typing import Optional, Union
-
+import gzip
+import pickle
 import numpy as np
 from torch import Generator
 from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
+from .gendata import gener_spherical_mnist
+import torch.utils.data as data_utils
+import torch
 
 from .dataset import FWRENCHDataset
 
@@ -70,6 +74,7 @@ class MNISTDataset(TorchVisionDataset):
 
     def download(self):
         trainvalid = datasets.MNIST(self.download_path, train=True, download=True)
+        print(trainvalid)
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
         )
@@ -202,6 +207,33 @@ class CIFAR100Dataset(TorchVisionDataset):
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
 
+class SphericalDataset(TorchVisionDataset):
+    def __init__(self, split: str, name: str = "SPHERICAL_MNIST", **kwargs):
+        gener_spherical_mnist()
+        with gzip.open("s2_mnist.gz", 'rb') as f:
+            self.genDataset = pickle.load(f)
+        super().__init__(name, split, **kwargs)
+
+    def download(self):
+        train_data = torch.from_numpy(
+            self.genDataset["train"]["images"][:, None, :, :].astype(np.float32))
+        train_labels = torch.from_numpy(
+            self.genDataset["train"]["labels"].astype(np.int64))
+        trainvalid = data_utils.TensorDataset(train_data, train_labels)
+        train_split, valid_split = TorchVisionDataset._split(
+            trainvalid, train_p=self.train_p
+        )
+        test_data = torch.from_numpy(
+            self.genDataset["test"]["images"][:, None, :, :].astype(np.float32))
+        test_labels = torch.from_numpy(
+            self.genDataset["test"]["labels"].astype(np.int64))
+
+        test_split = data_utils.TensorDataset(test_data, test_labels)
+        valid_size = len(valid_split)
+        self._set_path_suffix(valid_size)
+        self._set_data(train_split, valid_split, test_split)
+
+
 
 def main():
     MNISTDataset("train")
@@ -235,6 +267,10 @@ def main():
     CIFAR100Dataset("train")
     CIFAR100Dataset("valid")
     CIFAR100Dataset("test")
+
+    SphericalDataset("train")
+    SphericalDataset("valid")
+    SphericalDataset("test")
 
 
 if __name__ == "__main__":
