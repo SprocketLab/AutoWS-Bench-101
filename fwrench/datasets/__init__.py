@@ -9,4 +9,5 @@ from .torchvision_dataset import (
     SVHNDataset,
     CIFAR10Dataset,
     CIFAR100Dataset,
+    SphericalDataset,
 )
