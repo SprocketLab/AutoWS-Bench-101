@@ -4,13 +4,13 @@ resdir=results/fashion_mnist/snubasweep
 mkdir -p ${resdir}
 ####TODO DO NOT REMOVE THESE RESULTS #rm -rf ${resdir}/* 
 
-for embedding in raw pca resnet18 vae
+for embedding in pca resnet18 vae #raw
 do
     for em_hard_labels in True False
     do 
         for snuba_cardinality in 1 2
         do 
-            for n_labeled_points in 100 500 1000 5000
+            for n_labeled_points in 100 #500 1000 5000
             do 
                 savedir=${resdir}/embedding_${embedding}/lf_class_options_${lf_class_options}/em_hard_labels_${em_hard_labels}/snuba_cardinality_${snuba_cardinality}/n_labeled_points_${n_labeled_points}
                 mkdir -p ${savedir}
