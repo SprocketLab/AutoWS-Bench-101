@@ -1,0 +1,3 @@
+[discretized] conf=DEFAULT, seed=0, acc=0.4017
+[discretized] conf=DEFAULT, seed=1, acc=0.3614
+[discretized] conf=DEFAULT, seed=2, acc=0.3689

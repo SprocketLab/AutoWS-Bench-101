@@ -1,0 +1,4 @@
+  File "fwrench/applications/mnist.py", line 131
+    logger.info(f'Using LF classes: {lf_classes}')
+                                                ^
+SyntaxError: invalid syntax

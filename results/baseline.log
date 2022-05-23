@@ -1,0 +1,3 @@
+[baseline] conf=DEFAULT, seed=0, acc=0.4068
+[baseline] conf=DEFAULT, seed=1, acc=0.4393
+[baseline] conf=DEFAULT, seed=2, acc=0.4066
