@@ -23,12 +23,12 @@ from fwrench.datasets import MNISTDataset, KMNISTDataset
 from fwrench.embeddings import SklearnEmbedding
 import fwrench.utils as utils
 
-def main(data_dir='KMNIST_3000', 
+def main(data_dir='MNIST_3000', 
         dataset_home='../../datasets',
         even_odd=False,
         embedding='vae', # raw | pca | resnet18 | vae
         lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
-        lf_selector='snuba', # snuba | interactive | goggles
+        lf_selector='interactive', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
         n_labeled_points=100, # Number of points used to train lf_selector
         snuba_cardinality=2, # Only used if lf_selector='snuba'
@@ -55,9 +55,9 @@ def main(data_dir='KMNIST_3000',
     logger = logging.getLogger(__name__)
     device = torch.device('cuda')
 
-    train_data = KMNISTDataset('train', name='KMNIST')
-    valid_data = KMNISTDataset('valid', name='KMNIST')
-    test_data = KMNISTDataset('test', name='KMNIST')
+    train_data = MNISTDataset('train', name='MNIST')
+    valid_data = MNISTDataset('valid', name='MNIST')
+    test_data = MNISTDataset('test', name='MNIST')
 
     data = data_dir
     train_data, valid_data, test_data = load_dataset(
@@ -95,26 +95,60 @@ def main(data_dir='KMNIST_3000',
     test_data_embed = embedder.transform(test_data)
 
     dname = 'mnist'
-    # Fit Snuba with multiple LF function classes and a custom scoring function
-    lf_classes = [
-        #partial(AutoSklearn2Classifier, 
-        #    time_left_for_this_task=30,
-        #    per_run_time_limit=30,
-        #    memory_limit=50000, 
-        #    n_jobs=100),]
-        partial(DecisionTreeClassifier, max_depth=1),
-        LogisticRegression]
-    scoring_fn = None #accuracy_score
-    interactiveWS = IWS_Selector(lf_classes, scoring_fn=scoring_fn)
-            # Use Snuba convention of assuming only validation set labels...
-    interactiveWS.fit(valid_data_embed, 30, dname, b=0.5, 
-                cardinality=2,lf_descriptions = None, npredict=30)
+    if lf_class_options == 'default':
+        lf_classes = [
+            partial(DecisionTreeClassifier, max_depth=1),
+            LogisticRegression
+            ]
+    else:
+        if not isinstance(lf_class_options, tuple):
+            lf_class_options = [lf_class_options]
+        lf_classes = []
+        logger.info(lf_class_options)
+        for lf_cls in lf_class_options:
+            if lf_cls == 'DecisionTreeClassifier':
+                lf_classes.append(partial(DecisionTreeClassifier, max_depth=1))
+            elif lf_cls == 'LogisticRegression':
+                lf_classes.append(LogisticRegression)
+            else: 
+                # If the lf class you need isn't implemented, add it here
+                raise NotImplementedError
+    logger.info(f'Using LF classes: {lf_classes}')
 
-    train_weak_labels = interactiveWS.predict(train_data_embed)
+    scoring_fn = partial(
+        utils.mixture_metric, 
+        default_weight=default_weight,
+        accuracy_weight=accuracy_weight,
+        balanced_accuracy_weight=balanced_accuracy_weight,
+        precision_weight=precision_weight,
+        recall_weight=recall_weight,
+        matthews_weight=matthews_weight,
+        cohen_kappa_weight=cohen_kappa_weight,
+        jaccard_weight=jaccard_weight,
+        fbeta_weight=fbeta_weight,
+        )
+    if lf_selector == 'interactive':
+        MyIWSSelector = partial(IWS_Selector, 
+            lf_generator=lf_classes,
+            scoring_fn=scoring_fn,
+            num_iter = 30,
+            b=0.5, # TODO change this to 0.9 and run overnight 
+            cardinality=2, npredict = 100)
+        selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=10) 
+        selector.fit(valid_data_embed, train_data_embed)
+
+        for i in range(len(selector.lf_selectors)):
+            logger.info(
+                f'Selector {i} stats\n')
+    else:
+        raise NotImplementedError
+
+
+    train_weak_labels = selector.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
-    valid_weak_labels = interactiveWS.predict(valid_data_embed)
+    valid_weak_labels = selector.predict(valid_data_embed)
     valid_data.weak_labels = valid_weak_labels.tolist()
-    test_weak_labels = interactiveWS.predict(test_data_embed)
+    test_weak_labels = selector.predict(test_data_embed)
     test_data.weak_labels = test_weak_labels.tolist()
 
     print(train_weak_labels.shape)
