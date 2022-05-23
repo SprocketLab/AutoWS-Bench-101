@@ -31,8 +31,13 @@ def flip(x):
         return x
 
 class IWS_Selector(BaseSelector):
-    def __init__(self, lf_generator, scoring_fn=None):
+    def __init__(self, lf_generator, scoring_fn=None, num_iter = 30, 
+                b=0.5, cardinality=1, npredict = 100):
         super().__init__(lf_generator, scoring_fn)
+        self.num_iter = num_iter
+        self.b = b
+        self.cardinality = cardinality
+        self.npredict = npredict
 
     def apply_heuristics(self, heuristics, primitive_matrix, feat_combos, beta_opt):
         """ 
@@ -80,8 +85,10 @@ class IWS_Selector(BaseSelector):
         max_cardinality = len(heuristics)
         for i in range(max_cardinality):
             #Note that the LFs are being applied to the entire val set though they were developed on a subset...
-            beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, feat_combos[i], self.val_ground, scoring_fn=self.scoring_fn)
-            L_temp_val = self.apply_heuristics(heuristics[i], self.val_primitive_matrix, feat_combos[i], beta_opt_temp) 
+            beta_opt_temp = self.syn.find_optimal_beta(heuristics[i], self.val_primitive_matrix, 
+                                    feat_combos[i], self.val_ground, scoring_fn=self.scoring_fn)
+            L_temp_val = self.apply_heuristics(heuristics[i], self.val_primitive_matrix, 
+                                                feat_combos[i], beta_opt_temp) 
             
             beta_opt = np.append(beta_opt, beta_opt_temp)
             if i == 0:
@@ -92,8 +99,7 @@ class IWS_Selector(BaseSelector):
         return L_val, heuristics, feat_combos 
 
 
-    def fit(self, labeled_data, num_iter, dname, b=0.5, cardinality=1,
-                        lf_descriptions = None, npredict = 100):
+    def fit(self, labeled_data, unlabeled_data):
         def index(a, inp):
             i = 0
             remainder = 0
@@ -108,22 +114,19 @@ class IWS_Selector(BaseSelector):
 
         x_val = np.array([d['feature'] for d in labeled_data.examples])
         y_val = np.array(labeled_data.labels)
-        self.cardinality = cardinality
         self.val_primitive_matrix = x_val
         self.val_ground = y_val
-        self.b = b
-        self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground, b)
+        self.syn = Synthesizer(self.val_primitive_matrix, self.val_ground, self.b)
         self.hf = []
         self.feat_combos = []
+        lf_descriptions = None
 
-        savedir='%s_test'%dname
         numthreads = 1
         y_val = np.array(labeled_data.labels)
         if (len(np.unique(y_val)) == 2):
             self.isbinary = True
-            heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality)
+            heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
             L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
-            print(L_val.shape)
             LFs = sparse.csr_matrix(L_val)
             svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
             LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
@@ -134,38 +137,37 @@ class IWS_Selector(BaseSelector):
             where_0 = np.where(y_val == 0)[0]
             #need to flip the ground truth label
             y_val[where_0] = -1
-            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6,
-                                                    Ytrue=y_val, auto=True, corpus=x_val, savedir=savedir, 
+            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE',
+                                                     r=0.6, Ytrue=y_val, auto=True, corpus=x_val,
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
-            IWSsession.run_experiments(num_iter)
-            LFsets = get_final_set('LSE ac', IWSsession, npredict,r=None)
-            sort_idx =  LFsets[1][num_iter-1]
+            IWSsession.run_experiments(self.num_iter)
+            LFsets = get_final_set('LSE ac', IWSsession, self.npredict,r=None)
+            sort_idx =  LFsets[1][self.num_iter-1]
             for i in sort_idx:
                 self.hf.append(index(heuristics,i)) 
                 self.feat_combos.append(index(feat_combos,i))
         else:
             self.isbinary = False
             y_val_backup = copy.deepcopy(y_val)
-            hfs, feat_combos = self.syn.generate_heuristics(self.lf_generator, cardinality, False)
+            hfs, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality, False)
             for i in np.unique(y_val):
                 where_pos = np.where(y_val == i)[0]
                 y_val_backup[where_pos] = 1
                 where_neg = np.where(y_val != i)[0]
                 y_val_backup[where_neg] = -1
                 L_val, heuristics, feat_combos = self.unipolar_lf_generator(hfs, feat_combos, i)
-                print(L_val.shape)
                 LFs = sparse.csr_matrix(L_val)
                 svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
                 LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
                 x_val = np.array([d['feature'] for d in labeled_data.examples])
                 start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
                 initial_labels = {i:1 for i in start_idxs}
-                IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6,
-                                                    Ytrue=y_val_backup, auto=True, corpus=x_val, savedir=savedir, 
+                IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE',
+                                                    r=0.6, Ytrue=y_val_backup, auto=True, corpus=x_val,
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
-                IWSsession.run_experiments(num_iter)
-                LFsets = get_final_set('LSE ac',IWSsession, npredict,r=None)
-                sort_idx =  LFsets[1][num_iter-1]
+                IWSsession.run_experiments(self.num_iter)
+                LFsets = get_final_set('LSE ac',IWSsession, self.npredict,r=None)
+                sort_idx =  LFsets[1][self.num_iter-1]
                 for idx in sort_idx:
                     self.hf.append(index(heuristics,idx)) 
                     self.feat_combos.append(index(feat_combos,idx))
