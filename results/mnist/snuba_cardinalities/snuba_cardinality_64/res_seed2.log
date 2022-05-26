@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "fwrench/applications/mnist.py", line 25, in <module>
+    from fwrench.datasets import MNISTDataset
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/datasets/__init__.py", line 1, in <module>
+    from .dataset import FWRENCHDataset
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/datasets/dataset.py", line 8, in <module>
+    from numpy.typing import NDArray
+ImportError: cannot import name 'NDArray' from 'numpy.typing' (/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/numpy/typing/__init__.py)
+Traceback (most recent call last):
+  File "fwrench/applications/mnist.py", line 25, in <module>
+    from fwrench.datasets import MNISTDataset
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/datasets/__init__.py", line 1, in <module>
+    from .dataset import FWRENCHDataset
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/datasets/dataset.py", line 8, in <module>
+    from numpy.typing import NDArray
+ImportError: cannot import name 'NDArray' from 'numpy.typing' (/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/numpy/typing/__init__.py)

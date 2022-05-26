@@ -1,0 +1,48 @@
+/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:498: UserWarning: The given NumPy array is not writeable, and PyTorch does not support non-writeable tensors. This means you can write to the underlying (supposedly non-writeable) NumPy array using the tensor. You may want to copy the array to protect its data or make it writeable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at  /opt/conda/conda-bld/pytorch_1631630836880/work/torch/csrc/utils/tensor_numpy.cpp:180.)
+  return torch.from_numpy(parsed.astype(m[2], copy=False)).view(*s)
+2022-05-05 06:56:00 - loading data from datasets/MNIST_3000/train.json
+  0%|          | 0/57000 [00:00<?, ?it/s]  1%|▏         | 730/57000 [00:00<00:07, 7297.19it/s]  3%|▎         | 1467/57000 [00:00<00:07, 7334.21it/s]  4%|▍         | 2205/57000 [00:00<00:07, 7353.78it/s]  5%|▌         | 2942/57000 [00:00<00:07, 7358.12it/s]  6%|▋         | 3683/57000 [00:00<00:07, 7373.67it/s]  8%|▊         | 4421/57000 [00:00<00:07, 7371.89it/s]  9%|▉         | 5159/57000 [00:00<00:07, 7374.32it/s] 10%|█         | 5899/57000 [00:00<00:06, 7379.92it/s] 12%|█▏        | 6640/57000 [00:00<00:06, 7388.93it/s] 13%|█▎        | 7383/57000 [00:01<00:06, 7400.00it/s] 14%|█▍        | 8124/57000 [00:01<00:06, 7387.76it/s] 16%|█▌        | 8865/57000 [00:01<00:06, 7393.34it/s] 17%|█▋        | 9606/57000 [00:01<00:06, 7396.71it/s] 18%|█▊        | 10347/57000 [00:01<00:06, 7398.70it/s] 19%|█▉        | 11089/57000 [00:01<00:06, 7403.99it/s] 21%|██        | 11830/57000 [00:01<00:06, 7404.34it/s] 22%|██▏       | 12571/57000 [00:01<00:06, 7404.41it/s] 23%|██▎       | 13312/57000 [00:01<00:05, 7403.68it/s] 25%|██▍       | 14055/57000 [00:01<00:05, 7409.91it/s] 26%|██▌       | 14796/57000 [00:02<00:05, 7341.65it/s] 27%|██▋       | 15531/57000 [00:02<00:05, 7338.87it/s] 29%|██▊       | 16268/57000 [00:02<00:05, 7346.53it/s] 30%|██▉       | 17003/57000 [00:02<00:05, 7338.34it/s] 31%|███       | 17741/57000 [00:02<00:05, 7348.25it/s] 32%|███▏      | 18483/57000 [00:02<00:05, 7369.64it/s] 34%|███▎      | 19221/57000 [00:02<00:05, 7372.70it/s] 35%|███▌      | 19961/57000 [00:02<00:05, 7378.40it/s] 36%|███▋      | 20704/57000 [00:02<00:04, 7393.23it/s] 38%|███▊      | 21444/57000 [00:02<00:04, 7391.47it/s] 39%|███▉      | 22184/57000 [00:03<00:04, 7388.49it/s] 40%|████      | 22923/57000 [00:03<00:04, 7383.37it/s] 42%|████▏     | 23662/57000 [00:03<00:04, 7377.59it/s] 43%|████▎     | 24403/57000 [00:03<00:04, 7384.67it/s] 44%|████▍     | 25142/57000 [00:03<00:04, 7376.99it/s] 45%|████▌     | 25880/57000 [00:03<00:04, 7377.07it/s] 47%|████▋     | 26621/57000 [00:03<00:04, 7386.48it/s] 48%|████▊     | 27366/57000 [00:03<00:04, 7402.85it/s] 49%|████▉     | 28107/57000 [00:03<00:03, 7402.60it/s] 51%|█████     | 28848/57000 [00:03<00:03, 7385.30it/s] 52%|█████▏    | 29588/57000 [00:04<00:03, 7388.27it/s] 53%|█████▎    | 30334/57000 [00:04<00:03, 7407.99it/s] 55%|█████▍    | 31077/57000 [00:04<00:03, 7411.71it/s] 56%|█████▌    | 31819/57000 [00:04<00:03, 7411.93it/s] 57%|█████▋    | 32563/57000 [00:04<00:03, 7417.93it/s] 58%|█████▊    | 33306/57000 [00:04<00:03, 7421.14it/s] 60%|█████▉    | 34051/57000 [00:04<00:03, 7427.24it/s] 61%|██████    | 34798/57000 [00:04<00:02, 7439.71it/s] 62%|██████▏   | 35544/57000 [00:04<00:02, 7443.07it/s] 64%|██████▎   | 36289/57000 [00:04<00:02, 7442.33it/s] 65%|██████▍   | 37034/57000 [00:05<00:02, 7443.68it/s] 66%|██████▋   | 37782/57000 [00:05<00:02, 7452.17it/s] 68%|██████▊   | 38533/57000 [00:05<00:02, 7467.23it/s] 69%|██████▉   | 39284/57000 [00:05<00:02, 7477.61it/s] 70%|███████   | 40033/57000 [00:05<00:02, 7480.25it/s] 72%|███████▏  | 40782/57000 [00:05<00:02, 7474.06it/s] 73%|███████▎  | 41533/57000 [00:05<00:02, 7483.30it/s] 74%|███████▍  | 42282/57000 [00:05<00:01, 7470.88it/s] 75%|███████▌  | 43030/57000 [00:05<00:01, 7459.00it/s] 77%|███████▋  | 43776/57000 [00:05<00:01, 7443.25it/s] 78%|███████▊  | 44521/57000 [00:06<00:01, 7431.56it/s] 79%|███████▉  | 45265/57000 [00:06<00:01, 7422.61it/s] 81%|████████  | 46012/57000 [00:06<00:01, 7435.81it/s] 82%|████████▏ | 46756/57000 [00:06<00:01, 7434.03it/s] 83%|████████▎ | 47500/57000 [00:06<00:01, 7427.47it/s] 85%|████████▍ | 48245/57000 [00:06<00:01, 7431.27it/s] 86%|████████▌ | 48992/57000 [00:06<00:01, 7440.50it/s] 87%|████████▋ | 49737/57000 [00:06<00:00, 7441.12it/s] 89%|████████▊ | 50484/57000 [00:06<00:00, 7449.20it/s] 90%|████████▉ | 51230/57000 [00:06<00:00, 7449.61it/s] 91%|█████████ | 51977/57000 [00:07<00:00, 7453.66it/s] 92%|█████████▏| 52723/57000 [00:07<00:00, 7432.24it/s] 94%|█████████▍| 53467/57000 [00:07<00:00, 7415.68it/s] 95%|█████████▌| 54209/57000 [00:07<00:00, 7404.30it/s] 96%|█████████▋| 54952/57000 [00:07<00:00, 7410.56it/s] 98%|█████████▊| 55697/57000 [00:07<00:00, 7421.63it/s] 99%|█████████▉| 56442/57000 [00:07<00:00, 7427.24it/s]100%|██████████| 57000/57000 [00:07<00:00, 7409.90it/s]
+2022-05-05 06:56:08 - loading data from datasets/MNIST_3000/valid.json
+  0%|          | 0/3000 [00:00<?, ?it/s] 25%|██▌       | 750/3000 [00:00<00:00, 7492.86it/s] 50%|█████     | 1500/3000 [00:00<00:00, 7484.97it/s] 75%|███████▍  | 2249/3000 [00:00<00:00, 7469.16it/s]100%|█████████▉| 2996/3000 [00:00<00:00, 7469.13it/s]100%|██████████| 3000/3000 [00:00<00:00, 7471.02it/s]
+2022-05-05 06:56:09 - loading data from datasets/MNIST_3000/test.json
+  0%|          | 0/10000 [00:00<?, ?it/s]  7%|▋         | 745/10000 [00:00<00:01, 7442.47it/s] 15%|█▍        | 1492/10000 [00:00<00:01, 7453.17it/s] 22%|██▏       | 2238/10000 [00:00<00:01, 7438.88it/s] 30%|██▉       | 2984/10000 [00:00<00:00, 7445.65it/s] 37%|███▋      | 3729/10000 [00:00<00:00, 7435.37it/s] 45%|████▍     | 4473/10000 [00:00<00:00, 7428.28it/s] 52%|█████▏    | 5216/10000 [00:00<00:00, 7423.88it/s] 60%|█████▉    | 5961/10000 [00:00<00:00, 7430.73it/s] 67%|██████▋   | 6705/10000 [00:00<00:00, 7432.21it/s] 74%|███████▍  | 7449/10000 [00:01<00:00, 7379.81it/s] 82%|████████▏ | 8189/10000 [00:01<00:00, 7385.08it/s] 89%|████████▉ | 8928/10000 [00:01<00:00, 7381.85it/s] 97%|█████████▋| 9667/10000 [00:01<00:00, 7368.68it/s]100%|██████████| 10000/10000 [00:01<00:00, 7403.95it/s]
+2022-05-05 06:56:13 - ('DecisionTreeClassifier', 'LogisticRegression')
+2022-05-05 06:56:13 - Using LF classes: [functools.partial(<class 'sklearn.tree._classes.DecisionTreeClassifier'>, max_depth=1), <class 'sklearn.linear_model._logistic.LogisticRegression'>]
+Fitting MulticlassAdaptor... Class 0
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 1
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 2
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 3
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 4
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 5
+  0%|          | 0/23 [00:00<?, ?it/s]  0%|          | 0/23 [00:12<?, ?it/s]
+Fitting MulticlassAdaptor... Class 6
+  0%|          | 0/23 [00:00<?, ?it/s]  4%|▍         | 1/23 [00:12<04:38, 12.66s/it]  4%|▍         | 1/23 [00:12<04:40, 12.74s/it]
+Traceback (most recent call last):
+  File "examples/fwrench_examples/mnist.py", line 184, in <module>
+    fire.Fire(main)
+  File "/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
+    target=component.__name__)
+  File "/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "examples/fwrench_examples/mnist.py", line 127, in main
+    selector.fit(valid_data_embed, train_data_embed)
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/examples/fwrench_examples/utils.py", line 83, in fit
+    self.lf_selectors[i].fit(labeled_data_i, unlabeled_data_i)
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/lf_selectors/snuba_lf_selector.py", line 59, in fit
+    model=self.lf_generator, scoring_fn=self.scoring_fn)
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/lf_selectors/snuba/heuristic_generator.py", line 143, in run_synthesizer
+    hf, feat_combos = self.syn.generate_heuristics(model, max_cardinality)
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/lf_selectors/snuba/synthesizer.py", line 87, in generate_heuristics
+    heuristics.append(self.fit_function(comb, classifier))
+  File "/hdd2/nick/github.com/Kaylee0501/FWRENCH/fwrench/lf_selectors/snuba/synthesizer.py", line 68, in fit_function
+    clf.fit(X, self.val_ground)
+  File "/home/nick/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/sklearn/linear_model/_logistic.py", line 1376, in fit
+    " class: %r" % classes_[0])
+ValueError: This solver needs samples of at least 2 classes in the data, but the data contains only one class: -1

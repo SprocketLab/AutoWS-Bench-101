@@ -14,9 +14,9 @@ do
     em_hard_labels=True
     snuba_combo_samples=1_000
 
-    for n_labeled_points in 100 200 300 400 500 600 700 800 900 1000
+    for n_labeled_points in 100 
     do 
-        savedir=${resdir}/snuba_cardinality_${snuba_cardinality}
+        savedir=${resdir}/n_labeled_points_${n_labeled_points}
         mkdir -p ${savedir}
         python fwrench/applications/mnist.py \
             --embedding=${embedding} \
@@ -38,7 +38,7 @@ do
     em_hard_labels=True
     snuba_combo_samples=1_000
 
-    for snuba_cardinality in 1 2 4 8 16 32 64 128 256 512
+    for snuba_cardinality in 64 128 256 512  #1 2 4 8 16 32 
     do 
         savedir=${resdir}/snuba_cardinality_${snuba_cardinality}
         mkdir -p ${savedir}

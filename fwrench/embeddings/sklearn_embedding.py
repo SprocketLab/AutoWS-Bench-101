@@ -1,13 +1,14 @@
 from .base_embedding import BaseEmbedding
 import numpy as np
 
+
 class SklearnEmbedding(BaseEmbedding):
     def __init__(self, embedder):
         self.embedder = embedder
 
     def fit(self, *data):
-        ''' Allows for multiple dataset objects
-        '''
+        """ Allows for multiple dataset objects
+        """
         X_nps = []
         for d in data:
             X_nps.append(self._unpack_data(d))
@@ -26,17 +27,17 @@ class SklearnEmbedding(BaseEmbedding):
         return self._repack_data(data, X_np_emb)
 
 
-if __name__ == '__main__':
-    ''' Example usage... 
-    '''
+if __name__ == "__main__":
+    """ Example usage... 
+    """
     from sklearn.decomposition import PCA
     from wrench.dataset import load_dataset
 
-    dataset_home = '../../datasets'
-    data = 'basketball'
+    dataset_home = "../../datasets"
+    data = "basketball"
     train_data, valid_data, test_data = load_dataset(
-        dataset_home, data, 
-        extract_feature=True,)
+        dataset_home, data, extract_feature=True,
+    )
 
     pca = PCA(n_components=10)
     embedder = SklearnEmbedding(pca)
@@ -48,4 +49,4 @@ if __name__ == '__main__':
     valid_data = embedder.transform(valid_data)
     test_data = embedder.transform(test_data)
 
-    print(len(test_data.examples[4]['feature']))
+    print(len(test_data.examples[4]["feature"]))
