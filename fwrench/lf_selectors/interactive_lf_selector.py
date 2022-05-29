@@ -127,8 +127,9 @@ class IWS_Selector(BaseSelector):
             self.isbinary = True
             heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
             L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
+            print(L_val.shape)
             LFs = sparse.csr_matrix(L_val)
-            svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
+            svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
             LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
             x_val = np.array([d['feature'] for d in labeled_data.examples])
             start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
@@ -157,7 +158,7 @@ class IWS_Selector(BaseSelector):
                 y_val_backup[where_neg] = -1
                 L_val, heuristics, feat_combos = self.unipolar_lf_generator(hfs, feat_combos, i)
                 LFs = sparse.csr_matrix(L_val)
-                svd = TruncatedSVD(n_components=150, n_iter=20, random_state=42) # copy from example, need futher analysis...
+                svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
                 LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
                 x_val = np.array([d['feature'] for d in labeled_data.examples])
                 start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
