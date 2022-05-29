@@ -1,5 +1,6 @@
 import logging
 import random
+import copy
 from functools import partial
 
 import fire
@@ -26,6 +27,46 @@ from wrench.endmodel import EndClassifierModel, MLPModel
 from wrench.evaluation import f1_score_
 from wrench.labelmodel import Snorkel
 from wrench.logging import LoggingHandler
+
+
+def run_supervised(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    logger,
+):
+    # Train logistic regression classifier on the validation embeddings
+    X_valid = np.array([d["feature"] for d in valid_data_embed.examples])
+    y_valid = np.array(valid_data_embed.labels)
+
+    clf = LogisticRegression()
+    clf.fit(X_valid, y_valid)
+    logger.info(f"LogisticRegression supervised: {clf.score(X_valid, y_valid)}")
+
+    X_train = np.array([d["feature"] for d in train_data_embed.examples])
+    y_train = np.array(train_data_embed.labels)
+    logger.info(f"LogisticRegression unlabeled train: {clf.score(X_train, y_train)}")
+
+    aggregated_hard_labels = clf.predict(X_train)
+    aggregated_soft_labels = clf.predict_proba(X_train)
+
+    train_data_covered = copy.deepcopy(train_data)
+    train_data_covered.n_lf = 1
+    train_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
+    train_data_covered = train_data_covered.get_covered_subset()
+
+    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+
+
+def run_goggles():
+    raise NotImplementedError
+
+
+def run_iws():
+    raise NotImplementedError
 
 
 def run_snuba(
