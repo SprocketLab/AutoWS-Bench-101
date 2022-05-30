@@ -62,18 +62,13 @@ def main(
     elif embedding == "resnet18":
         embedder = feats.ResNet18Embedding()
     elif embedding == "vae":
-<<<<<<< HEAD:fwrench/applications/mnist_pipeline.py
-        embedder = VAE2DEmbedding()
-    elif embedding == 'clip':
-        embedder = CLIPEmbedding()
-    elif embedding == 'clip_zeroshot':
-        embedder = ZeroShotCLIPEmbedding()
-    
-=======
         embedder = feats.VAE2DEmbedding()
+    elif embedding == "clip":
+        embedder = feats.CLIPEmbedding()
+    elif embedding == "clip_zeroshot":
+        embedder = feats.ZeroShotCLIPEmbedding()
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
->>>>>>> 3fa6ae659dd99109a4e59d7fda53c10163e2d392:fwrench/applications/pipeline.py
     else:
         raise NotImplementedError
 
@@ -119,6 +114,18 @@ def main(
         raise NotImplementedError
     elif lf_selector == "supervised":
         train_covered, hard_labels, soft_labels = autows.run_supervised(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
+    elif lf_selector == "clip_zero_shot" and (
+        embedding == "clip_zeroshot" or embedding == "oracle"
+    ):
+        train_covered, hard_labels, soft_labels = autows.run_zero_shot_clip(
             valid_data,
             train_data,
             test_data,

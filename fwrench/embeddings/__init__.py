@@ -5,3 +5,5 @@ from .resnet_embedding import *
 from .vgg16_embedding import *
 from .chain_embedding import *
 from .oracle_embedding import *
+from .clip_embedding import *
+from .clip_zeroshot_embedding import *
