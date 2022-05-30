@@ -12,6 +12,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from fwrench.embeddings.vae_embedding import VAE2DEmbedding
+from fwrench.embeddings.resnet_embedding import ResNet18Embedding
+from fwrench.embeddings.flatten_embedding import FlattenEmbedding
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -26,7 +29,7 @@ import fwrench.utils as utils
 def main(data_dir='MNIST_3000', 
         dataset_home='../../datasets',
         even_odd=False,
-        embedding='vae', # raw | pca | resnet18 | vae
+        embedding='raw', # raw | pca | resnet18 | vae
         lf_class_options='default', # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
         lf_selector='interactive', # snuba | interactive | goggles
         em_hard_labels=True, # Use hard labels in the end model
@@ -66,7 +69,7 @@ def main(data_dir='MNIST_3000',
         dataset_type='NumericDataset')
 
     # Create subset of labeled dataset
-    #valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
 
     binary_mode = even_odd
     if even_odd:
@@ -84,11 +87,19 @@ def main(data_dir='MNIST_3000',
     valid_data = utils.normalize01(valid_data)
     test_data = utils.normalize01(test_data)
     
-    
     # Dimensionality reduction...
-    pca = PCA(n_components=40)
-    embedder = SklearnEmbedding(pca)
-    #embedder = SklearnEmbedding(umap.UMAP(n_components=100))
+    if embedding == 'raw': 
+        embedder = FlattenEmbedding() 
+    elif embedding == 'pca':
+        emb = PCA(n_components=100)
+        embedder = SklearnEmbedding(emb)
+    elif embedding == 'resnet18':
+        embedder = ResNet18Embedding()
+    elif embedding == 'vae':
+        embedder = VAE2DEmbedding()
+    else:
+        raise NotImplementedError
+
     embedder.fit(train_data, valid_data, test_data)
     train_data_embed = embedder.transform(train_data)
     valid_data_embed = embedder.transform(valid_data)
@@ -133,7 +144,7 @@ def main(data_dir='MNIST_3000',
             scoring_fn=scoring_fn,
             num_iter = 30,
             b=0.5, # TODO change this to 0.9 and run overnight 
-            cardinality=2, npredict = 100)
+            cardinality=1, npredict = 100)
         selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=10) 
         selector.fit(valid_data_embed, train_data_embed)
 
