@@ -10,8 +10,12 @@ import sklearn
 import torch
 from fwrench.datasets import MNISTDataset
 from fwrench.embeddings import *
+
 from fwrench.embeddings.resnet_embedding import ResNet18Embedding
 from fwrench.embeddings.vae_embedding import VAE2DEmbedding
+from fwrench.embeddings.clip_embedding import CLIPEmbedding
+from fwrench.embeddings.clip_zeroshot_embedding import ZeroShotCLIPEmbedding
+
 from fwrench.lf_selectors import SnubaSelector
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
@@ -97,6 +101,11 @@ def main(
         embedder = ResNet18Embedding()
     elif embedding == "vae":
         embedder = VAE2DEmbedding()
+    elif embedding == 'clip':
+        embedder = CLIPEmbedding()
+    elif embedding == 'clip_zeroshot':
+        embedder = ZeroShotCLIPEmbedding()
+    
     else:
         raise NotImplementedError
 

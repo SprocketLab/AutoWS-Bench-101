@@ -23,10 +23,10 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
         with torch.no_grad():
             inputs = self.processor(text=label_text, images=x, return_tensors="pt")
             outputs = self.model(pixel_values=inputs.pixel_values, input_ids=inputs.input_ids, return_dict=True)
-            # print('IMAGE EMBEDS', outputs['image_embeds'].shape)
-            # print('VISION MODEL OUTPUTS', outputs['vision_model_output']['pooler_output'].shape)
+            # print(outputs['logits_per_image'].shape)
+            # print(outputs.keys())
             # exit()
-            return outputs['vision_model_output']['pooler_output'].detach().cpu().numpy()
+            return outputs['logits_per_image'].detach().cpu().numpy()
 
     def fit(self, *data):
         pass
