@@ -6,7 +6,42 @@ import numpy as np
 from fwrench.lf_selectors import IWS_Selector, SnubaSelector
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
 from wrench.labelmodel import Snorkel
+
+
+def run_zero_shot_clip(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    logger,
+):
+    def softmax(z):
+        assert len(z.shape) == 2
+        s = np.max(z, axis=1)
+        s = s[:, np.newaxis]
+        e_x = np.exp(z - s)
+        div = np.sum(e_x, axis=1)
+        div = div[:, np.newaxis]
+        return e_x / div
+
+    X_train = np.array([d["feature"] for d in train_data_embed.examples])
+    aggregated_hard_labels = np.argmax(X_train, axis=1)
+    aggregated_soft_labels = softmax(X_train)
+
+    train_data_covered = copy.deepcopy(train_data)
+    train_data_covered.n_lf = 1
+    train_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
+    train_data_covered = train_data_covered.get_covered_subset()
+
+    logger.info(
+        f"zero-shot acc: {accuracy_score(aggregated_hard_labels, train_data.labels)}"
+    )
+
+    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
 def run_supervised(
