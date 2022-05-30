@@ -10,8 +10,6 @@ import sklearn
 import torch
 from fwrench.datasets import MNISTDataset
 from fwrench.embeddings import *
-from fwrench.embeddings.resnet_embedding import ResNet18Embedding
-from fwrench.embeddings.vae_embedding import VAE2DEmbedding
 from fwrench.lf_selectors import SnubaSelector
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
@@ -73,6 +71,7 @@ def main(
     train_data = MNISTDataset("train", name="MNIST")
     valid_data = MNISTDataset("valid", name="MNIST")
     test_data = MNISTDataset("test", name="MNIST")
+    n_classes = 10
 
     data = data_dir
     train_data, valid_data, test_data = load_dataset(
@@ -97,6 +96,8 @@ def main(
         embedder = ResNet18Embedding()
     elif embedding == "vae":
         embedder = VAE2DEmbedding()
+    elif embedding == "oracle":
+        embedder = OracleEmbedding(n_classes)
     else:
         raise NotImplementedError
 
