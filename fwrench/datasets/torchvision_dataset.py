@@ -242,37 +242,37 @@ class SphericalDataset(TorchVisionDataset):
 
 
 def main():
-    MNISTDataset("train")
-    MNISTDataset("valid")
-    MNISTDataset("test")
+    # MNISTDataset("train")
+    # MNISTDataset("valid")
+    # MNISTDataset("test")
 
-    FashionMNISTDataset("train")
-    FashionMNISTDataset("valid")
-    FashionMNISTDataset("test")
+    # FashionMNISTDataset("train")
+    # FashionMNISTDataset("valid")
+    # FashionMNISTDataset("test")
 
-    EMNISTDataset("byclass", "train")
-    EMNISTDataset("byclass", "valid")
-    EMNISTDataset("byclass", "test")
+    # EMNISTDataset("byclass", "train")
+    # EMNISTDataset("byclass", "valid")
+    # EMNISTDataset("byclass", "test")
 
-    KMNISTDataset("train")
-    KMNISTDataset("valid")
-    KMNISTDataset("test")
+    # KMNISTDataset("train")
+    # KMNISTDataset("valid")
+    # KMNISTDataset("test")
 
-    QMNISTDataset("train")
-    QMNISTDataset("valid")
-    QMNISTDataset("test")
+    # QMNISTDataset("train")
+    # QMNISTDataset("valid")
+    # QMNISTDataset("test")
 
-    SVHNDataset("train")
-    SVHNDataset("valid")
-    SVHNDataset("test")
+    # SVHNDataset("train")
+    # SVHNDataset("valid")
+    # SVHNDataset("test")
 
-    CIFAR10Dataset("train")
-    CIFAR10Dataset("valid")
-    CIFAR10Dataset("test")
+    # CIFAR10Dataset("train")
+    # CIFAR10Dataset("valid")
+    # CIFAR10Dataset("test")
 
-    CIFAR100Dataset("train")
-    CIFAR100Dataset("valid")
-    CIFAR100Dataset("test")
+    # CIFAR100Dataset("train")
+    # CIFAR100Dataset("valid")
+    # CIFAR100Dataset("test")
 
     SphericalDataset("train")
     SphericalDataset("valid")

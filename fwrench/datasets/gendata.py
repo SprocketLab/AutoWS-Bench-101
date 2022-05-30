@@ -1,4 +1,4 @@
-'''Module to generate the spherical mnist data set'''
+"""Module to generate the spherical mnist data set"""
 
 import gzip
 import pickle
@@ -27,9 +27,9 @@ def rand_rotation_matrix(deflection=1.0, randnums=None):
 
     theta, phi, z = randnums
 
-    theta = theta * 2.0*deflection*np.pi  # Rotation about the pole (Z).
-    phi = phi * 2.0*np.pi  # For direction of pole deflection.
-    z = z * 2.0*deflection  # For magnitude of pole deflection.
+    theta = theta * 2.0 * deflection * np.pi  # Rotation about the pole (Z).
+    phi = phi * 2.0 * np.pi  # For direction of pole deflection.
+    z = z * 2.0 * deflection  # For magnitude of pole deflection.
 
     # Compute a vector V used for distributing points over the sphere
     # via the reflection I - V Transpose(V).  This formulation of V
@@ -38,11 +38,7 @@ def rand_rotation_matrix(deflection=1.0, randnums=None):
     # has length sqrt(2) to eliminate the 2 in the Householder matrix.
 
     r = np.sqrt(z)
-    V = (
-        np.sin(phi) * r,
-        np.cos(phi) * r,
-        np.sqrt(2.0 - z)
-    )
+    V = (np.sin(phi) * r, np.cos(phi) * r, np.sqrt(2.0 - z))
 
     st = np.sin(theta)
     ct = np.cos(theta)
@@ -58,14 +54,14 @@ def rand_rotation_matrix(deflection=1.0, randnums=None):
 def rotate_grid(rot, grid):
     x, y, z = grid
     xyz = np.array((x, y, z))
-    x_r, y_r, z_r = np.einsum('ij,jab->iab', rot, xyz)
+    x_r, y_r, z_r = np.einsum("ij,jab->iab", rot, xyz)
     return x_r, y_r, z_r
 
 
 def get_projection_grid(b, grid_type="Driscoll-Healy"):
-    ''' returns the spherical grid in euclidean
+    """ returns the spherical grid in euclidean
     coordinates, where the sphere's center is moved
-    to (0, 0, 1)'''
+    to (0, 0, 1)"""
     theta, phi = S2.meshgrid(b=b, grid_type=grid_type)
     x_ = np.sin(theta) * np.cos(phi)
     y_ = np.sin(theta) * np.sin(phi)
@@ -74,10 +70,10 @@ def get_projection_grid(b, grid_type="Driscoll-Healy"):
 
 
 def project_sphere_on_xy_plane(grid, projection_origin):
-    ''' returns xy coordinates on the plane
+    """ returns xy coordinates on the plane
     obtained from projecting each point of
     the spherical grid along the ray from
-    the projection origin through the sphere '''
+    the projection origin through the sphere """
 
     sx, sy, sz = projection_origin
     x, y, z = grid
@@ -87,8 +83,8 @@ def project_sphere_on_xy_plane(grid, projection_origin):
     qx = t * (x - sx) + x
     qy = t * (y - sy) + y
 
-    xmin = 1/2 * (-1 - sx) + -1
-    ymin = 1/2 * (-1 - sy) + -1
+    xmin = 1 / 2 * (-1 - sx) + -1
+    ymin = 1 / 2 * (-1 - sy) + -1
 
     # ensure that plane projection
     # ends up on southern hemisphere
@@ -99,7 +95,7 @@ def project_sphere_on_xy_plane(grid, projection_origin):
 
 
 def sample_within_bounds(signal, x, y, bounds):
-    ''' '''
+    """ """
     xmin, xmax, ymin, ymax = bounds
 
     idxs = (xmin <= x) & (x < xmax) & (ymin <= y) & (y < ymax)
@@ -114,7 +110,7 @@ def sample_within_bounds(signal, x, y, bounds):
 
 
 def sample_bilinear(signal, rx, ry):
-    ''' '''
+    """ """
 
     signal_dim_x = signal.shape[1]
     signal_dim_y = signal.shape[2]
@@ -141,15 +137,15 @@ def sample_bilinear(signal, rx, ry):
     signal_11 = sample_within_bounds(signal, ix1, iy1, bounds)
 
     # linear interpolation in x-direction
-    fx1 = (ix1-rx) * signal_00 + (rx-ix0) * signal_10
-    fx2 = (ix1-rx) * signal_01 + (rx-ix0) * signal_11
+    fx1 = (ix1 - rx) * signal_00 + (rx - ix0) * signal_10
+    fx2 = (ix1 - rx) * signal_01 + (rx - ix0) * signal_11
 
     # linear interpolation in y-direction
     return (iy1 - ry) * fx1 + (ry - iy0) * fx2
 
 
 def project_2d_on_sphere(signal, grid, projection_origin=None):
-    ''' '''
+    """ """
     if projection_origin is None:
         projection_origin = (0, 0, 2 + NORTHPOLE_EPSILON)
 
@@ -171,94 +167,62 @@ def project_2d_on_sphere(signal, grid, projection_origin=None):
 
 
 def gener_spherical_mnist():
-    ''' '''
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--bandwidth",
-                        help="the bandwidth of the S2 signal",
-                        type=int,
-                        default=30,
-                        required=False)
-    parser.add_argument("--noise",
-                        help="the rotational noise applied on the sphere",
-                        type=float,
-                        default=1.0,
-                        required=False)
-    parser.add_argument("--chunk_size",
-                        help="size of image chunk with same rotation",
-                        type=int,
-                        default=500,
-                        required=False)
-    parser.add_argument("--mnist_data_folder",
-                        help="folder for saving the mnist data",
-                        type=str,
-                        default="MNIST_data",
-                        required=False)
-    parser.add_argument("--output_file",
-                        help="file for saving the data output (.gz file)",
-                        type=str,
-                        default="s2_mnist.gz",
-                        required=False)
-    parser.add_argument("--no_rotate_train",
-                        help="do not rotate train set",
-                        dest='no_rotate_train', action='store_true')
-    parser.add_argument("--no_rotate_test",
-                        help="do not rotate test set",
-                        dest='no_rotate_test', action='store_true')
-
-    args = parser.parse_args()
+    # args = parser.parse_args()
+    bandwidth = 30
+    noise = 1.0
+    chunk_size = 500
+    mnist_data_folder = "MNIST_data"
+    output_file = "s2_mnist.gz"
+    no_rotate_train = False
+    no_rotate_test = False
 
     print("getting mnist data")
-    trainset = datasets.MNIST(root=args.mnist_data_folder, train=True, download=True)
-    testset = datasets.MNIST(root=args.mnist_data_folder, train=False, download=True)
+    trainset = datasets.MNIST(root=mnist_data_folder, train=True, download=True)
+    testset = datasets.MNIST(root=mnist_data_folder, train=False, download=True)
     mnist_train = {}
-    mnist_train['images'] = trainset.train_data.numpy()
-    mnist_train['labels'] = trainset.train_labels.numpy()
+    mnist_train["images"] = trainset.train_data.numpy()
+    mnist_train["labels"] = trainset.train_labels.numpy()
     mnist_test = {}
-    mnist_test['images'] = testset.test_data.numpy()
-    mnist_test['labels'] = testset.test_labels.numpy()
-    
-    grid = get_projection_grid(b=args.bandwidth)
+    mnist_test["images"] = testset.test_data.numpy()
+    mnist_test["labels"] = testset.test_labels.numpy()
+
+    grid = get_projection_grid(b=bandwidth)
 
     # result
     dataset = {}
 
-    no_rotate = {"train": args.no_rotate_train, "test": args.no_rotate_test}
+    no_rotate = {"train": no_rotate_train, "test": no_rotate_test}
 
     for label, data in zip(["train", "test"], [mnist_train, mnist_test]):
 
         print("projecting {0} data set".format(label))
         current = 0
-        signals = data['images'].reshape(-1, 28, 28).astype(np.float64)
+        signals = data["images"].reshape(-1, 28, 28).astype(np.float64)
         n_signals = signals.shape[0]
         projections = np.ndarray(
-            (signals.shape[0], 2 * args.bandwidth, 2 * args.bandwidth),
-            dtype=np.uint8)
+            (signals.shape[0], 2 * bandwidth, 2 * bandwidth), dtype=np.uint8
+        )
 
         while current < n_signals:
 
             if not no_rotate[label]:
-                rot = rand_rotation_matrix(deflection=args.noise)
+                rot = rand_rotation_matrix(deflection=noise)
                 rotated_grid = rotate_grid(rot, grid)
             else:
                 rotated_grid = grid
 
-            idxs = np.arange(current, min(n_signals,
-                                          current + args.chunk_size))
+            idxs = np.arange(current, min(n_signals, current + chunk_size))
             chunk = signals[idxs]
             projections[idxs] = project_2d_on_sphere(chunk, rotated_grid)
-            current += args.chunk_size
+            current += chunk_size
             print("\r{0}/{1}".format(current, n_signals), end="")
         print("")
-        dataset[label] = {
-            'images': projections,
-            'labels': data['labels']
-        }
+        dataset[label] = {"images": projections, "labels": data["labels"]}
     print("writing pickle")
-    with gzip.open(args.output_file, 'wb') as f:
+    with gzip.open(output_file, "wb") as f:
         pickle.dump(dataset, f)
     print("done")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gener_spherical_mnist()
