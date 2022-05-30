@@ -62,18 +62,15 @@ def main(
     elif embedding == "resnet18":
         embedder = feats.ResNet18Embedding()
     elif embedding == "vae":
-<<<<<<< HEAD:fwrench/applications/mnist_pipeline.py
         embedder = VAE2DEmbedding()
     elif embedding == 'clip':
         embedder = CLIPEmbedding()
     elif embedding == 'clip_zeroshot':
         embedder = ZeroShotCLIPEmbedding()
     
-=======
         embedder = feats.VAE2DEmbedding()
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
->>>>>>> 3fa6ae659dd99109a4e59d7fda53c10163e2d392:fwrench/applications/pipeline.py
     else:
         raise NotImplementedError
 
