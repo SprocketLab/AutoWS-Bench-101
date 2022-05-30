@@ -122,7 +122,8 @@ def mixture_metric(
 
     if abstain_symbol is not None:
         # filter out abstains
-        cover = y_hat.nonzero()[0]
+        # FIXME
+        cover = y_hat != abstain_symbol  # y_hat.nonzero()[0]
         y_covered = y[cover]
         y_hat_covered = y_hat[cover]
     else:

@@ -113,7 +113,19 @@ def main(
             logger,
         )
     elif lf_selector == "snuba_multiclass":
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_snuba_multiclass(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            snuba_cardinality,
+            snuba_combo_samples,
+            snuba_iterations,
+            lf_class_options,
+            logger,
+        )
     elif lf_selector == "iws":
         train_covered, hard_labels, soft_labels = autows.run_snuba(
             valid_data,
