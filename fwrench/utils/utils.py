@@ -1,4 +1,6 @@
 import copy
+import math
+
 import numpy as np
 from sklearn.metrics import *
 
@@ -72,6 +74,33 @@ def normalize01(dset):
             float
         )
         dset.examples[i]["feature"] /= float(np.max(dset.examples[i]["feature"]))
+    return dset
+
+
+def bitreversal_permutation(n):
+    log_n = int(math.log2(n))
+    assert n == 1 << log_n, "n must be a power of 2"
+    perm = np.arange(n).reshape(n, 1)
+    for i in range(log_n):
+        n1 = perm.shape[0] // 2
+        perm = np.hstack((perm[:n1], perm[n1:]))
+    perm = perm.squeeze(0)
+    return perm
+
+
+def row_col_permute(dset):
+    for i in range(len(dset.examples)):
+        dset.examples[i]["feature"] = np.array(dset.examples[i]["feature"]).astype(
+            float
+        )
+        x = dset.examples[i]["feature"]
+        xlim = x.shape[1]
+        ylim = x.shape[2]
+        rowperm = bitreversal_permutation(32)
+        rowperm = np.extract(rowperm < xlim, rowperm)
+        colperm = bitreversal_permutation(32)
+        colperm = np.extract(colperm < ylim, colperm)
+        dset.examples[i]["feature"] = x[:, rowperm][:, :, colperm]
     return dset
 
 

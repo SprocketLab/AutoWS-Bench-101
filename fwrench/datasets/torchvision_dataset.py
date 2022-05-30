@@ -8,7 +8,7 @@ from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
 
-# from .gendata import gener_spherical_mnist
+from .gendata import gener_spherical_mnist
 import torch.utils.data as data_utils
 import torch
 
@@ -241,37 +241,37 @@ class SphericalDataset(TorchVisionDataset):
 
 
 def main():
-    MNISTDataset("train")
-    MNISTDataset("valid")
-    MNISTDataset("test")
+    # MNISTDataset("train")
+    # MNISTDataset("valid")
+    # MNISTDataset("test")
 
-    FashionMNISTDataset("train")
-    FashionMNISTDataset("valid")
-    FashionMNISTDataset("test")
+    # FashionMNISTDataset("train")
+    # FashionMNISTDataset("valid")
+    # FashionMNISTDataset("test")
 
-    EMNISTDataset("byclass", "train")
-    EMNISTDataset("byclass", "valid")
-    EMNISTDataset("byclass", "test")
+    # EMNISTDataset("byclass", "train")
+    # EMNISTDataset("byclass", "valid")
+    # EMNISTDataset("byclass", "test")
 
-    KMNISTDataset("train")
-    KMNISTDataset("valid")
-    KMNISTDataset("test")
+    # KMNISTDataset("train")
+    # KMNISTDataset("valid")
+    # KMNISTDataset("test")
 
-    QMNISTDataset("train")
-    QMNISTDataset("valid")
-    QMNISTDataset("test")
+    # QMNISTDataset("train")
+    # QMNISTDataset("valid")
+    # QMNISTDataset("test")
 
-    SVHNDataset("train")
-    SVHNDataset("valid")
-    SVHNDataset("test")
+    # SVHNDataset("train")
+    # SVHNDataset("valid")
+    # SVHNDataset("test")
 
-    CIFAR10Dataset("train")
-    CIFAR10Dataset("valid")
-    CIFAR10Dataset("test")
+    # CIFAR10Dataset("train")
+    # CIFAR10Dataset("valid")
+    # CIFAR10Dataset("test")
 
-    CIFAR100Dataset("train")
-    CIFAR100Dataset("valid")
-    CIFAR100Dataset("test")
+    # CIFAR100Dataset("train")
+    # CIFAR100Dataset("valid")
+    # CIFAR100Dataset("test")
 
     SphericalDataset("train")
     SphericalDataset("valid")

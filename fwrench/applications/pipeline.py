@@ -58,6 +58,18 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_kmnist(
             n_labeled_points, dataset_home
         )
+    elif dataset == "cifar10":
+        train_data, valid_data, test_data, k_cls, model = settings.get_cifar10(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "spherical_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_spherical_mnist(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "permuted_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_permuted_mnist(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
