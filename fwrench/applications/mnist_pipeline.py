@@ -10,8 +10,6 @@ import sklearn
 import torch
 from fwrench.datasets import MNISTDataset
 from fwrench.embeddings import *
-from fwrench.embeddings.resnet_embedding import ResNet18Embedding
-from fwrench.embeddings.vae_embedding import VAE2DEmbedding
 from fwrench.lf_selectors import SnubaSelector
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
@@ -31,11 +29,11 @@ from wrench.logging import LoggingHandler
 def main(
     data_dir="MNIST_3000",
     dataset_home="./datasets",
-    embedding="vae",  # raw | pca | resnet18 | vae
+    embedding="pca",  # raw | pca | resnet18 | vae
     #
     #
     lf_selector="snuba",  # snuba | interactive | goggles
-    em_hard_labels=True,  # Use hard labels in the end model
+    em_hard_labels=False,  # Use hard or soft labels for end model training
     n_labeled_points=100,  # Number of points used to train lf_selector
     #
     # Snuba options
@@ -73,6 +71,7 @@ def main(
     train_data = MNISTDataset("train", name="MNIST")
     valid_data = MNISTDataset("valid", name="MNIST")
     test_data = MNISTDataset("test", name="MNIST")
+    n_classes = 10
 
     data = data_dir
     train_data, valid_data, test_data = load_dataset(
@@ -97,6 +96,8 @@ def main(
         embedder = ResNet18Embedding()
     elif embedding == "vae":
         embedder = VAE2DEmbedding()
+    elif embedding == "oracle":
+        embedder = OracleEmbedding(n_classes)
     else:
         raise NotImplementedError
 
@@ -125,8 +126,15 @@ def main(
     elif lf_selector == "goggles":
         raise NotImplementedError
     elif lf_selector == "supervised":
-        # TODO supervised learning using a logistic regression 100 labels
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_supervised(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
     else:
         raise NotImplementedError
 

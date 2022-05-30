@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../../')
+
 import logging
 import torch
 import numpy as np
@@ -14,6 +17,8 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import jaccard_score, accuracy_score
 from fwrench.embeddings.vae_embedding import VAE2DEmbedding
 from fwrench.embeddings.resnet_embedding import ResNet18Embedding
+from fwrench.embeddings.clip_embedding import CLIPEmbedding
+from fwrench.embeddings.clip_zeroshot_embedding import ZeroShotCLIPEmbedding
 
 from wrench.dataset import load_dataset
 from wrench.logging import LoggingHandler
@@ -103,6 +108,10 @@ def main(
         embedder = ResNet18Embedding()
     elif embedding == "vae":
         embedder = VAE2DEmbedding()
+    elif embedding == 'clip':
+        embedder = CLIPEmbedding()
+    elif embedding == 'clip_zeroshot':
+        embedder = ZeroShotCLIPEmbedding()
     else:
         raise NotImplementedError
 
