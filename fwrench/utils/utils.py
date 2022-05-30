@@ -1,6 +1,7 @@
 import copy
 import math
-
+from numpy import dot
+from numpy.linalg import norm
 import numpy as np
 from sklearn.metrics import *
 

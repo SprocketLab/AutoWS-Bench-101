@@ -4,6 +4,7 @@ from functools import partial
 import fwrench.utils as utils
 import numpy as np
 from fwrench.lf_selectors import IWS_Selector, SnubaSelector
+import fwrench.lf_selectors.goggles_inference as GOGGLES_Inferencer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
