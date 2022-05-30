@@ -50,6 +50,14 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_mnist(
             n_labeled_points, dataset_home
         )
+    elif dataset == "fashion_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_fashion_mnist(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "kmnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_kmnist(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
