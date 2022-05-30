@@ -223,3 +223,31 @@ class MulticlassAdaptor:
         all_weak_labels = np.hstack(all_weak_labels)
         return all_weak_labels
 
+
+def construct_affinity_function(target_dataset, anchor_dataset):
+    ## compute cosine similarity for GOGGLES (not default setting) ##
+    cos_sim_matrix = np.zeros((len(target_dataset), len(anchor_dataset)))
+    for i in range(len(target_dataset)):
+        target_vec = np.array(target_dataset.examples[i]["feature"])
+        for j in range(len(anchor_dataset)):
+            anchor_vec = np.array(anchor_dataset.examples[j]["feature"])
+            cos_sim = dot(target_vec, anchor_vec) / (norm(target_vec) * norm(anchor_vec))
+            cos_sim_matrix[i][j] = cos_sim
+    return cos_sim_matrix
+
+def generate_label_index_dict(anchor_labels):
+    ## generate a label dictionary for goggle ##
+    label_index_dict = {}
+    for index, label in enumerate(anchor_labels):
+        if label not in label_index_dict:
+            label_index_dict[label] = []
+        label_index_dict[label].append(index)
+    return label_index_dict
+        
+def generate_dev_set(label_index_dict):
+    dev_set_indices, dev_set_labels = [], []
+    for key, values in label_index_dict.items():
+        for value in values:
+            dev_set_indices.append(value)
+            dev_set_labels.append(key)
+    return dev_set_indices, dev_set_labels

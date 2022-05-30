@@ -75,9 +75,54 @@ def run_supervised(
 
     return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
-
-def run_goggles():
-    raise NotImplementedError
+def run_goggles(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    logger):
+    
+    valid_sim_matrix = utils.construct_affinity_function(valid_data_embed, valid_data_embed)
+    valid_sim_matrix_list = valid_sim_matrix.reshape(1, len(valid_data_embed), len(valid_data_embed))
+    
+    label_index_dict = utils.generate_label_index_dict(valid_data_embed.labels)
+    dev_set_indices, dev_set_labels = utils.generate_dev_set(label_index_dict)
+    valid_soft_labels, valid_GMM_list, valid_ensemble_model = GOGGLES_Inferencer.infer_labels(valid_sim_matrix_list, dev_set_indices, dev_set_labels, evaluate=True)
+    valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
+    logger.info(f"valid data label accuracy: {accuracy_score(valid_data_embed.labels, valid_hard_labels)}")
+    
+    train_sim_matrix = utils.construct_affinity_function(train_data_embed, valid_data_embed)
+    train_sim_matrix_list = train_sim_matrix.reshape(1, len(train_data_embed), len(valid_data_embed))
+    
+    train_LPs = []
+    for i, af_matrix in enumerate(train_sim_matrix_list):
+        lp = valid_GMM_list[i].predict(af_matrix)
+        train_LPs.append(lp)
+    train_LPs_array = np.hstack(train_LPs)
+    
+    train_soft_labels = valid_ensemble_model.E_step(train_LPs_array, evaluate=False, new=True)
+    train_hard_labels = np.argmax(train_soft_labels, axis=1).astype(int)
+    logger.info(f"train data label accuracy: {accuracy_score(train_data_embed.labels, train_hard_labels)}")
+    
+    """
+    test_sim_matrix = utils.construct_affinity_function(test_data_embed, valid_data_embed)
+    test_sim_matrix_list = test_sim_matrix.reshape(1, len(test_data_embed), len(valid_data_embed))
+    print(test_sim_matrix_list.shape)
+    
+    test_LPs = []
+    for i, af_matrix in enumerate(test_sim_matrix_list):
+        lp = valid_GMM_list[i].predict(af_matrix)
+        test_LPs.append(lp)
+    test_LPs_array = np.hstack(test_LPs)
+    
+    test_soft_labels = valid_ensemble_model.E_step(test_LPs_array, evaluate=False, new=True)
+    test_hard_labels = np.argmax(test_soft_labels, axis=1).astype(int)
+    logger.info(f"test data label accuracy: {accuracy_score(test_data_embed.labels, test_hard_labels)}")
+    """
+    
+    return train_data, train_hard_labels, train_soft_labels
 
 
 def run_iws(
