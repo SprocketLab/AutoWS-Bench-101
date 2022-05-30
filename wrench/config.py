@@ -29,6 +29,14 @@ DEFAULT_LENET_CONFIG = {
     #to do
 }
 
+DEFAULT_RESNET18_CONFIG = {
+    #to do
+}
+
+DEFAULT_S2CNN_CONFIG = {
+    #to do
+}
+
 DEFAULT_IMAGE_CLASSIFIER_CONFIG = {
     'model_name': 'resnet18',
 }
@@ -50,6 +58,8 @@ DEFAULT_BACKBONE_MAP = {
     'ImageClassifier': DEFAULT_IMAGE_CLASSIFIER_CONFIG,
     'BERT'           : DEFAULT_BERT_CONFIG,
     'LENET'          : DEFAULT_LENET_CONFIG,
+    'ResNet18'       : DEFAULT_RESNET18_CONFIG,
+    'S2ConvNet'      : DEFAULT_S2CNN_CONFIG,
 }
 
 DEFAULT_LABEL_MODEL_CONFIG = {
