@@ -1,28 +1,16 @@
 import logging
 import random
-from functools import partial
 
 import fire
 import fwrench.utils as utils
 import fwrench.utils.autows as autows
 import numpy as np
-import sklearn
 import torch
 from fwrench.datasets import MNISTDataset
 from fwrench.embeddings import *
-from fwrench.lf_selectors import SnubaSelector
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.gaussian_process.kernels import RBF
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, jaccard_score
-from sklearn.naive_bayes import GaussianNB
-from sklearn.tree import DecisionTreeClassifier
 from wrench.dataset import load_dataset
-from wrench.endmodel import EndClassifierModel, MLPModel
-from wrench.evaluation import f1_score_
-from wrench.labelmodel import FlyingSquid, MajorityVoting, Snorkel
+from wrench.endmodel import EndClassifierModel
 from wrench.logging import LoggingHandler
 
 
@@ -40,23 +28,15 @@ def main(
     snuba_combo_samples=-1,  # -1 uses all feat. combos
     # TODO this needs to work for Snuba and IWS
     snuba_cardinality=2,  # Only used if lf_selector='snuba'
-    default_weight=1.0,  # weight for the default metric for snuba. The weights don't need to sum to one, they're normalized internally.
-    accuracy_weight=0.0,
-    balanced_accuracy_weight=0.0,
-    precision_weight=0.0,
-    recall_weight=0.0,
-    matthews_weight=0.0,  # Don't use this. it causes the PDB to launch for some reason... Probably an internal sklearn thing.
-    cohen_kappa_weight=0.0,
-    jaccard_weight=0.0,
-    fbeta_weight=0.0,  # Currently just F1
     snuba_iterations=23,
     lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
     #
-    #
+    # Interactive Weak Supervision options
+    iws_iterations=30,
     seed=123,
 ):
 
-    ################ HOUSEKEEPING/SELF-CARE ###################################
+    ################ HOUSEKEEPING/SELF-CARE 😊 ################################
     random.seed(seed)
     logging.basicConfig(
         format="%(asctime)s - %(message)s",
@@ -81,7 +61,8 @@ def main(
     # Create subset of labeled dataset
     valid_data = valid_data.create_subset(np.arange(n_labeled_points))
 
-    # TODO also hacky... normalize MNIST data because it comes unnormalized
+    # TODO also hacky...
+    # normalize MNIST data because it comes unnormalized apparently...
     train_data = utils.normalize01(train_data)
     valid_data = utils.normalize01(valid_data)
     test_data = utils.normalize01(test_data)
@@ -122,7 +103,19 @@ def main(
             logger,
         )
     elif lf_selector == "iws":
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_snuba(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            snuba_cardinality,
+            snuba_combo_samples,
+            iws_iterations,
+            lf_class_options,
+            logger,
+        )
     elif lf_selector == "goggles":
         raise NotImplementedError
     elif lf_selector == "supervised":
@@ -162,7 +155,7 @@ def main(
     acc = model.test(test_data, "acc")
     logger.info(f"end model (LeNet) test acc:    {acc}")
     return acc
-    ################ PROFIT ###################################################
+    ################ PROFIT 🤑 #################################################
 
 
 if __name__ == "__main__":
