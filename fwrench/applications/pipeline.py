@@ -143,7 +143,15 @@ def main(
     elif lf_selector == "iws_multiclass":
         raise NotImplementedError
     elif lf_selector == "goggles":
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_goggles(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
     elif lf_selector == "supervised":
         train_covered, hard_labels, soft_labels = autows.run_supervised(
             valid_data,
