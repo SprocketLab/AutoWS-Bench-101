@@ -196,8 +196,8 @@ def main(
     # logger.info(f"---LeNet eval---")
     # acc = model.test(test_data, "acc")
     # logger.info(f"end model (LeNet) test acc:    {acc}")
-    return acc
     ################ PROFIT 🤑 #################################################
+    return acc
 
 
 if __name__ == "__main__":
