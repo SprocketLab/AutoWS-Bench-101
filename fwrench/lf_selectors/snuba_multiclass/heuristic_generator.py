@@ -20,6 +20,7 @@ class HeuristicGenerator(object):
         val_ground,
         train_ground=None,
         b=0.5,
+        classes=10
     ):
         """ 
         Initialize HeuristicGenerator object
@@ -39,6 +40,7 @@ class HeuristicGenerator(object):
         self.syn = None
         self.hf = []
         self.feat_combos = []
+        self.classes = classes
 
     def apply_heuristics(self, heuristics, primitive_matrix, feat_combos, beta_opt):
         """ 
@@ -225,9 +227,10 @@ class HeuristicGenerator(object):
         """
         ###THIS IS WHERE THE SNORKEL FLAG IS SET!!!!
         # TODO replace this with the actual Snorkel label model
-        self.vf = Verifier(self.L_train, self.L_val, self.val_ground, has_snorkel=False)
+        self.vf = Verifier(self.L_train, self.L_val, self.val_ground, classes=self.classes)
         self.vf.train_gen_model()
         self.vf.assign_marginals()
+        print(self.vf.train_marginals)
 
     def gamma_optimizer(self, marginals):
         """ 

@@ -8,6 +8,7 @@ import fwrench.utils.data_settings as settings
 import numpy as np
 import torch
 from sklearn.decomposition import PCA
+from sklearn.metrics import accuracy_score
 from wrench.logging import LoggingHandler
 
 
@@ -124,6 +125,7 @@ def main(
             snuba_combo_samples,
             snuba_iterations,
             lf_class_options,
+            k_cls,
             logger,
         )
     elif lf_selector == "iws":
@@ -177,21 +179,25 @@ def main(
     else:
         raise NotImplementedError
 
+    # TODO swtich to test set
+    acc = accuracy_score(train_covered.labels, hard_labels)
+    logger.info(f"label model train acc:    {acc}")
+
     ################ TRAIN END MODEL ##########################################
-    model.fit(
-        dataset_train=train_covered,
-        y_train=hard_labels if em_hard_labels else soft_labels,
-        dataset_valid=valid_data,
-        evaluation_step=50,
-        metric="acc",
-        patience=1000,
-        device=device,
-    )
-    logger.info(f"---LeNet eval---")
-    acc = model.test(test_data, "acc")
-    logger.info(f"end model (LeNet) test acc:    {acc}")
-    return acc
+    # model.fit(
+    #     dataset_train=train_covered,
+    #     y_train=hard_labels if em_hard_labels else soft_labels,
+    #     dataset_valid=valid_data,
+    #     evaluation_step=50,
+    #     metric="acc",
+    #     patience=1000,
+    #     device=device,
+    # )
+    # logger.info(f"---LeNet eval---")
+    # acc = model.test(test_data, "acc")
+    # logger.info(f"end model (LeNet) test acc:    {acc}")
     ################ PROFIT 🤑 #################################################
+    return acc
 
 
 if __name__ == "__main__":

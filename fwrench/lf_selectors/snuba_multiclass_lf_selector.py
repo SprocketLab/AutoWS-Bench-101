@@ -24,12 +24,14 @@ class SnubaMulticlassSelector(BaseSelector):
         cardinality=1,
         combo_samples=-1,
         iters=23,
+        k_cls=10,
     ):
         super().__init__(lf_generator, scoring_fn)
         self.b = b
         self.cardinality = cardinality
         self.combo_samples = combo_samples
         self.iters = iters
+        self.k_cls = k_cls
 
     def fit(self, labeled_data, unlabeled_data):
         """ NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
@@ -61,6 +63,7 @@ class SnubaMulticlassSelector(BaseSelector):
             self.val_ground,
             self.train_ground,
             b=self.b,
+            classes=self.k_cls,
         )
         for i in tqdm(range(3, self.iters + 3)):
             # Repeat synthesize-prune-verify at each iterations
@@ -94,6 +97,7 @@ class SnubaMulticlassSelector(BaseSelector):
             training_coverage.append(tc)
 
             # Find low confidence datapoints in the labeled set
+            # TODO
             self.hg.find_feedback()
             idx = self.hg.feedback_idx
 

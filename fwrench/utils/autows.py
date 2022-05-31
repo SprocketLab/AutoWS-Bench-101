@@ -29,20 +29,20 @@ def run_zero_shot_clip(
         div = div[:, np.newaxis]
         return e_x / div
 
-    X_train = np.array([d["feature"] for d in train_data_embed.examples])
-    aggregated_hard_labels = np.argmax(X_train, axis=1)
-    aggregated_soft_labels = softmax(X_train)
+    X_test = np.array([d["feature"] for d in test_data_embed.examples])
+    aggregated_hard_labels = np.argmax(X_test, axis=1)
+    aggregated_soft_labels = softmax(X_test)
 
-    train_data_covered = copy.deepcopy(train_data)
-    train_data_covered.n_lf = 1
-    train_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
-    train_data_covered = train_data_covered.get_covered_subset()
+    test_data_covered = copy.deepcopy(test_data)
+    test_data_covered.n_lf = 1
+    test_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
+    test_data_covered = test_data_covered.get_covered_subset()
 
     logger.info(
-        f"zero-shot acc: {accuracy_score(aggregated_hard_labels, train_data.labels)}"
+        f"zero-shot acc: {accuracy_score(aggregated_hard_labels, test_data.labels)}"
     )
 
-    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
 def run_supervised(
@@ -62,19 +62,19 @@ def run_supervised(
     clf.fit(X_valid, y_valid)
     logger.info(f"LogisticRegression supervised: {clf.score(X_valid, y_valid)}")
 
-    X_train = np.array([d["feature"] for d in train_data_embed.examples])
-    y_train = np.array(train_data_embed.labels)
-    logger.info(f"LogisticRegression unlabeled train: {clf.score(X_train, y_train)}")
+    X_test = np.array([d["feature"] for d in test_data_embed.examples])
+    y_test = np.array(test_data_embed.labels)
+    logger.info(f"LogisticRegression unlabeled train: {clf.score(X_test, y_test)}")
 
-    aggregated_hard_labels = clf.predict(X_train)
-    aggregated_soft_labels = clf.predict_proba(X_train)
+    aggregated_hard_labels = clf.predict(X_test)
+    aggregated_soft_labels = clf.predict_proba(X_test)
 
-    train_data_covered = copy.deepcopy(train_data)
-    train_data_covered.n_lf = 1
-    train_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
-    train_data_covered = train_data_covered.get_covered_subset()
+    test_data_covered = copy.deepcopy(test_data)
+    test_data_covered.n_lf = 1
+    test_data_covered.weak_labels = [[l] for l in aggregated_hard_labels]
+    test_data_covered = test_data_covered.get_covered_subset()
 
-    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
 def run_goggles(
@@ -145,6 +145,7 @@ def run_goggles(
     logger.info(f"test data label accuracy: {accuracy_score(test_data_embed.labels, test_hard_labels)}")
     """
 
+    # TODO return test_data, test_hard_labels, test_soft_labels
     return train_data, train_hard_labels, train_soft_labels
 
 
@@ -206,18 +207,17 @@ def run_iws(
     label_model = Snorkel()
     label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
 
-    # Train end model
     #### Filter out uncovered training data
-    train_data_covered = train_data.get_covered_subset()
-    aggregated_hard_labels = label_model.predict(train_data_covered)
-    aggregated_soft_labels = label_model.predict_proba(train_data_covered)
+    test_data_covered = test_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(test_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(test_data_covered)
 
     # Get actual label model accuracy using hard labels
     utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
     utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
-    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
 def run_snuba(
@@ -280,18 +280,17 @@ def run_snuba(
     label_model = Snorkel()
     label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
 
-    # Train end model
     #### Filter out uncovered training data
-    train_data_covered = train_data.get_covered_subset()
-    aggregated_hard_labels = label_model.predict(train_data_covered)
-    aggregated_soft_labels = label_model.predict_proba(train_data_covered)
+    test_data_covered = test_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(test_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(test_data_covered)
 
     # Get actual label model accuracy using hard labels
     utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
     utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
-    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
 def run_snuba_multiclass(
@@ -305,6 +304,7 @@ def run_snuba_multiclass(
     snuba_combo_samples,
     snuba_iterations,
     lf_class_options,
+    k_cls,
     logger,
 ):
     if lf_class_options == "default":
@@ -335,6 +335,7 @@ def run_snuba_multiclass(
         cardinality=snuba_cardinality,
         combo_samples=snuba_combo_samples,
         iters=snuba_iterations,
+        k_cls=k_cls,
     )
     # selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10)
     selector.fit(valid_data_embed, train_data_embed)
@@ -349,16 +350,15 @@ def run_snuba_multiclass(
     label_model = Snorkel()
     label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
 
-    # Train end model
     #### Filter out uncovered training data
-    train_data_covered = train_data.get_covered_subset()
-    aggregated_hard_labels = label_model.predict(train_data_covered)
-    aggregated_soft_labels = label_model.predict_proba(train_data_covered)
+    test_data_covered = test_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(test_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(test_data_covered)
 
     # Get actual label model accuracy using hard labels
     utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
     utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
-    return train_data_covered, aggregated_hard_labels, aggregated_soft_labels
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
