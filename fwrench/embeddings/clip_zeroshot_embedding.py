@@ -22,16 +22,18 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
 
     def extract_feature_batch(self, x, label_text):
         with torch.no_grad():
-            inputs = self.processor(text=label_text, images=x, return_tensors="pt")
+            inputs = self.processor(text=label_text, images=x, return_tensors="pt",
+            padding=True)
             outputs = self.model(
-                pixel_values=inputs.pixel_values,
-                input_ids=inputs.input_ids,
-                return_dict=True,
+                # pixel_values=inputs.pixel_values,
+                # input_ids=inputs.input_ids,
+                # return_dict=True,
+                **inputs
             )
-            # print(outputs['logits_per_image'].shape)
-            # print(outputs.keys())
-            # exit()
-            return outputs["logits_per_image"].detach().cpu().numpy()
+            image_features = outputs['vision_model_output']['pooler_output'].norm(dim=-1, keepdim=True)
+            # text_features = outputs['text_model_output']['pooler_output'].norm(dim=-1, keepdim=True)
+            # similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+            return outputs['logits_per_image']
 
     def fit(self, *data):
         pass
@@ -39,9 +41,7 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
     def transform(self, data, bs=1280):
         X_np, y = self._unpack_data(data, flatten=False, return_y=True)
         y = np.unique(y)
-        label_text = [str(y_) for y_ in y]
-        # print(label_text)
-        # exit()
+        label_text = [f"{y_}" for y_ in y]
         if X_np.shape[1] == 1:  # Repeat since MNIST is greyscale
             X_np = X_np.repeat(3, axis=1)
         elif X_np.shape[1] > 3:  # Probably need to permute
