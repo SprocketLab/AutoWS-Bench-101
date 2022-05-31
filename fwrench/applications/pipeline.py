@@ -50,6 +50,26 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_mnist(
             n_labeled_points, dataset_home
         )
+    elif dataset == "fashion_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_fashion_mnist(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "kmnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_kmnist(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "cifar10":
+        train_data, valid_data, test_data, k_cls, model = settings.get_cifar10(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "spherical_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_spherical_mnist(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "permuted_mnist":
+        train_data, valid_data, test_data, k_cls, model = settings.get_permuted_mnist(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
@@ -93,7 +113,19 @@ def main(
             logger,
         )
     elif lf_selector == "snuba_multiclass":
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_snuba_multiclass(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            snuba_cardinality,
+            snuba_combo_samples,
+            snuba_iterations,
+            lf_class_options,
+            logger,
+        )
     elif lf_selector == "iws":
         train_covered, hard_labels, soft_labels = autows.run_snuba(
             valid_data,
@@ -111,7 +143,15 @@ def main(
     elif lf_selector == "iws_multiclass":
         raise NotImplementedError
     elif lf_selector == "goggles":
-        raise NotImplementedError
+        train_covered, hard_labels, soft_labels = autows.run_goggles(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
     elif lf_selector == "supervised":
         train_covered, hard_labels, soft_labels = autows.run_supervised(
             valid_data,

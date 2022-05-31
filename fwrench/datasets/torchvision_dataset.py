@@ -7,8 +7,9 @@ from torch import Generator
 from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
+from torchvision import transforms
 
-# from .gendata import gener_spherical_mnist
+from .gendata import gener_spherical_mnist
 import torch.utils.data as data_utils
 import torch
 
@@ -75,7 +76,6 @@ class MNISTDataset(TorchVisionDataset):
 
     def download(self):
         trainvalid = datasets.MNIST(self.download_path, train=True, download=True)
-        print(trainvalid)
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
         )
@@ -182,11 +182,12 @@ class CIFAR10Dataset(TorchVisionDataset):
         super().__init__(name, split, **kwargs)
 
     def download(self):
-        trainvalid = datasets.CIFAR10(self.download_path, train=True, download=True)
+        trans = transforms.ToTensor()
+        trainvalid = datasets.CIFAR10(self.download_path, train=True, transform=trans, download=True)
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
         )
-        test_split = datasets.CIFAR10(self.download_path, train=False, download=True)
+        test_split = datasets.CIFAR10(self.download_path, train=False,transform=trans, download=True)
 
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
@@ -241,37 +242,37 @@ class SphericalDataset(TorchVisionDataset):
 
 
 def main():
-    MNISTDataset("train")
-    MNISTDataset("valid")
-    MNISTDataset("test")
+    # MNISTDataset("train")
+    # MNISTDataset("valid")
+    # MNISTDataset("test")
 
-    FashionMNISTDataset("train")
-    FashionMNISTDataset("valid")
-    FashionMNISTDataset("test")
+    # FashionMNISTDataset("train")
+    # FashionMNISTDataset("valid")
+    # FashionMNISTDataset("test")
 
-    EMNISTDataset("byclass", "train")
-    EMNISTDataset("byclass", "valid")
-    EMNISTDataset("byclass", "test")
+    # EMNISTDataset("byclass", "train")
+    # EMNISTDataset("byclass", "valid")
+    # EMNISTDataset("byclass", "test")
 
-    KMNISTDataset("train")
-    KMNISTDataset("valid")
-    KMNISTDataset("test")
+    # KMNISTDataset("train")
+    # KMNISTDataset("valid")
+    # KMNISTDataset("test")
 
-    QMNISTDataset("train")
-    QMNISTDataset("valid")
-    QMNISTDataset("test")
+    # QMNISTDataset("train")
+    # QMNISTDataset("valid")
+    # QMNISTDataset("test")
 
-    SVHNDataset("train")
-    SVHNDataset("valid")
-    SVHNDataset("test")
+    # SVHNDataset("train")
+    # SVHNDataset("valid")
+    # SVHNDataset("test")
 
-    CIFAR10Dataset("train")
-    CIFAR10Dataset("valid")
-    CIFAR10Dataset("test")
+    # CIFAR10Dataset("train")
+    # CIFAR10Dataset("valid")
+    # CIFAR10Dataset("test")
 
-    CIFAR100Dataset("train")
-    CIFAR100Dataset("valid")
-    CIFAR100Dataset("test")
+    # CIFAR100Dataset("train")
+    # CIFAR100Dataset("valid")
+    # CIFAR100Dataset("test")
 
     SphericalDataset("train")
     SphericalDataset("valid")

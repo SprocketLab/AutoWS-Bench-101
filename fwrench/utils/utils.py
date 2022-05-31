@@ -1,4 +1,7 @@
 import copy
+import math
+from numpy import dot
+from numpy.linalg import norm
 import numpy as np
 from sklearn.metrics import *
 
@@ -75,6 +78,33 @@ def normalize01(dset):
     return dset
 
 
+def bitreversal_permutation(n):
+    log_n = int(math.log2(n))
+    assert n == 1 << log_n, "n must be a power of 2"
+    perm = np.arange(n).reshape(n, 1)
+    for i in range(log_n):
+        n1 = perm.shape[0] // 2
+        perm = np.hstack((perm[:n1], perm[n1:]))
+    perm = perm.squeeze(0)
+    return perm
+
+
+def row_col_permute(dset):
+    for i in range(len(dset.examples)):
+        dset.examples[i]["feature"] = np.array(dset.examples[i]["feature"]).astype(
+            float
+        )
+        x = dset.examples[i]["feature"]
+        xlim = x.shape[1]
+        ylim = x.shape[2]
+        rowperm = bitreversal_permutation(32)
+        rowperm = np.extract(rowperm < xlim, rowperm)
+        colperm = bitreversal_permutation(32)
+        colperm = np.extract(colperm < ylim, colperm)
+        dset.examples[i]["feature"] = x[:, rowperm][:, :, colperm]
+    return dset
+
+
 def mixture_metric(
     y,
     y_hat,
@@ -93,7 +123,8 @@ def mixture_metric(
 
     if abstain_symbol is not None:
         # filter out abstains
-        cover = y_hat.nonzero()[0]
+        # FIXME
+        cover = y_hat != abstain_symbol  # y_hat.nonzero()[0]
         y_covered = y[cover]
         y_hat_covered = y_hat[cover]
     else:
@@ -194,3 +225,31 @@ class MulticlassAdaptor:
         all_weak_labels = np.hstack(all_weak_labels)
         return all_weak_labels
 
+
+def construct_affinity_function(target_dataset, anchor_dataset):
+    ## compute cosine similarity for GOGGLES (not default setting) ##
+    cos_sim_matrix = np.zeros((len(target_dataset), len(anchor_dataset)))
+    for i in range(len(target_dataset)):
+        target_vec = np.array(target_dataset.examples[i]["feature"])
+        for j in range(len(anchor_dataset)):
+            anchor_vec = np.array(anchor_dataset.examples[j]["feature"])
+            cos_sim = dot(target_vec, anchor_vec) / (norm(target_vec) * norm(anchor_vec))
+            cos_sim_matrix[i][j] = cos_sim
+    return cos_sim_matrix
+
+def generate_label_index_dict(anchor_labels):
+    ## generate a label dictionary for goggle ##
+    label_index_dict = {}
+    for index, label in enumerate(anchor_labels):
+        if label not in label_index_dict:
+            label_index_dict[label] = []
+        label_index_dict[label].append(index)
+    return label_index_dict
+        
+def generate_dev_set(label_index_dict):
+    dev_set_indices, dev_set_labels = [], []
+    for key, values in label_index_dict.items():
+        for value in values:
+            dev_set_indices.append(value)
+            dev_set_labels.append(key)
+    return dev_set_indices, dev_set_labels

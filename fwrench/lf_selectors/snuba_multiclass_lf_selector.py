@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from .base_lf_selector import BaseSelector
-from .snuba.heuristic_generator import HeuristicGenerator
+from .snuba_multiclass.heuristic_generator import HeuristicGenerator
 
 
 def flip(x):
@@ -15,7 +15,7 @@ def flip(x):
         return x
 
 
-class SnubaSelector(BaseSelector):
+class SnubaMulticlassSelector(BaseSelector):
     def __init__(
         self,
         lf_generator,
@@ -35,8 +35,9 @@ class SnubaSelector(BaseSelector):
         """ NOTE adapted from https://github.com/HazyResearch/reef/blob/bc7c1ccaf40ea7bf8f791035db551595440399e3/%5B1%5D%20generate_reef_labels.ipynb
         """
 
-        if labeled_data.n_class != 2:
-            raise NotImplementedError
+        # 😈
+        # if labeled_data.n_class != 2:
+        #    raise NotImplementedError
 
         x_train = np.array([d["feature"] for d in unlabeled_data.examples])
         x_val = np.array([d["feature"] for d in labeled_data.examples])
@@ -44,6 +45,7 @@ class SnubaSelector(BaseSelector):
         self.train_primitive_matrix = x_train
         self.train_ground = None  # y_train # NOTE just used for eval in Snuba...
         self.val_primitive_matrix = x_val
+        # TODO NOTE CHANGE
         self.val_ground = (y_val * 2) - 1  # Flip negative class to -1
 
         validation_accuracy = []
@@ -108,7 +110,6 @@ class SnubaSelector(BaseSelector):
 
     def predict(self, unlabeled_data):
         X = np.array([d["feature"] for d in unlabeled_data.examples])
-        # print(self.hg.feat_combos)
 
         beta_opt = self.hg.syn.find_optimal_beta(
             self.hg.hf,
@@ -117,13 +118,10 @@ class SnubaSelector(BaseSelector):
             self.hg.val_ground,
             self.scoring_fn,
         )
-        # TODO ^ triple check that this is right?
 
         lf_outputs = self.hg.apply_heuristics(
             self.hg.hf, X, self.hg.feat_combos, beta_opt
         )
-        # TODO ^ triple check that this is right?
-        # should be == training_marginals when using train_data
 
         # Need to flip the outputs of snuba...
         vflip = np.vectorize(flip)
