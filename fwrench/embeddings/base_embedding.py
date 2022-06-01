@@ -7,6 +7,9 @@ class BaseEmbedding(ABC):
         self.shape = None
 
     def _unpack_data(self, data, flatten=True, return_y=False):
+        # print(dir(data))
+        # print(data.dataset.classes)
+        # exit()
         X = np.array([d['feature'] for d in data.examples])
         self.shape = X[0].shape
         if flatten:

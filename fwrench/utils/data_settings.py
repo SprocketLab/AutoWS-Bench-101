@@ -135,7 +135,6 @@ def get_cifar10(
     valid_data = CIFAR10Dataset("valid", name="CIFAR10")
     test_data = CIFAR10Dataset("test", name="CIFAR10")
     n_classes = 10
-
     data = data_dir
     train_data, valid_data, test_data = load_dataset(
         dataset_home, data, extract_feature=True, dataset_type="NumericDataset"

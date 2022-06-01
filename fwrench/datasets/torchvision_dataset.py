@@ -188,7 +188,6 @@ class CIFAR10Dataset(TorchVisionDataset):
             trainvalid, train_p=self.train_p
         )
         test_split = datasets.CIFAR10(self.download_path, train=False,transform=trans, download=True)
-
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)

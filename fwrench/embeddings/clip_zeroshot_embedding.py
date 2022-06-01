@@ -6,13 +6,18 @@ from tqdm import tqdm
 
 from transformers import CLIPProcessor, CLIPModel
 
-# label_text = [str(i) for i in range(10)]
-
+classes_ = {
+    "mnist": [f"{i}" for i in range(10)],
+    "cifar10": ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'],
+    
+}
 
 class ZeroShotCLIPEmbedding(BaseEmbedding):
-    def __init__(self):
+    def __init__(self, dataset, prompt=None):
         self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        self.dataset = dataset
+        self.prompt = prompt
 
     def get_image_as_list(self, dataset):
         images = []
@@ -24,24 +29,21 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
         with torch.no_grad():
             inputs = self.processor(text=label_text, images=x, return_tensors="pt",
             padding=True)
-            outputs = self.model(
-                # pixel_values=inputs.pixel_values,
-                # input_ids=inputs.input_ids,
-                # return_dict=True,
-                **inputs
-            )
-            image_features = outputs['vision_model_output']['pooler_output'].norm(dim=-1, keepdim=True)
-            # text_features = outputs['text_model_output']['pooler_output'].norm(dim=-1, keepdim=True)
-            # similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+            outputs = self.model(**inputs)
             return outputs['logits_per_image']
 
     def fit(self, *data):
         pass
 
     def transform(self, data, bs=1280):
-        X_np, y = self._unpack_data(data, flatten=False, return_y=True)
-        y = np.unique(y)
-        label_text = [f"{y_}" for y_ in y]
+        X_np = self._unpack_data(data, flatten=False, return_y=False)
+        y = classes_[self.dataset]
+        
+        if self.prompt: #promps are assumed to be before the label. e,g., "This is an image of the digit {label}"
+            label_text = [f"{self.prompt} {y_}" for y_ in y]
+        else:
+            label_text = [f"{y_}" for y_ in y]
+        print(f"CLIP ZERO SHOT W/ TEXTS {label_text}")
         if X_np.shape[1] == 1:  # Repeat since MNIST is greyscale
             X_np = X_np.repeat(3, axis=1)
         elif X_np.shape[1] > 3:  # Probably need to permute

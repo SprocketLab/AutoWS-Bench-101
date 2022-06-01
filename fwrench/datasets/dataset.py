@@ -90,7 +90,6 @@ class FWRENCHDataset(ABC, TorchDataset):
 
         with open(meta_json_filepath) as meta_json_file:
             meta_json = load(meta_json_file)
-
             feature_dtype = getattr(np, meta_json["feature"]["dtype"])
             feature_shape = meta_json["feature"]["shape"]
             label_dtype = getattr(np, meta_json["label"]["dtype"])
@@ -108,9 +107,10 @@ class FWRENCHDataset(ABC, TorchDataset):
                 feature[k] = np.load(split_feature_dir / v["data"]["feature"])
                 label[k] = v["label"]
                 weak_labels[k] = np.array(v["weak_labels"])
-
         self.data = FWRENCHDataset._FeatureLabel(feature, label)
         self.weak_labels = np.array(weak_labels)
+        
+
 
     def __getitem__(self, index: int):
         if isinstance(self.data, FWRENCHDataset._FeatureLabel):
@@ -170,7 +170,6 @@ class FWRENCHDataset(ABC, TorchDataset):
         output_json_path = self.path / FWRENCHDataset._split_json_filename(self.split)
 
         output = {}
-
         for i, (feature, label) in enumerate(self.data):
             key = str(i)
 

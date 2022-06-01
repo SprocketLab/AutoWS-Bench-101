@@ -32,6 +32,7 @@ def main(
     # Interactive Weak Supervision options
     iws_iterations=30,
     seed=123,
+    prompt=None
 ):
 
     ################ HOUSEKEEPING/SELF-CARE 😊 ################################
@@ -87,7 +88,7 @@ def main(
     elif embedding == "clip":
         embedder = feats.CLIPEmbedding()
     elif embedding == "clip_zeroshot":
-        embedder = feats.ZeroShotCLIPEmbedding()
+        embedder = feats.ZeroShotCLIPEmbedding(dataset=dataset, prompt=prompt)
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
     else:
