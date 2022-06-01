@@ -103,7 +103,7 @@ def run_goggles(
     valid_sim_matrix_array = np.array(valid_sim_matrix_list).reshape(
         len(valid_data_embed_list), len(valid_data_embed), len(valid_data_embed)
     )
-    # print("valid_sim_matrix shape: ", valid_sim_matrix_array.shape)
+    print("valid_sim_matrix shape: ", valid_sim_matrix_array.shape)
     
     label_index_dict = utils.generate_label_index_dict(valid_data.labels)
     dev_set_indices, dev_set_labels = utils.generate_dev_set(label_index_dict)
@@ -114,6 +114,7 @@ def run_goggles(
     ) = GOGGLES_Inferencer.infer_labels(
         valid_sim_matrix_array, dev_set_indices, dev_set_labels, evaluate=True
     )
+    # print("PI: ", valid_ensemble_model.pi, "MU: ", valid_ensemble_model.mu)
     
     valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
     logger.info(
@@ -130,7 +131,7 @@ def run_goggles(
     train_sim_matrix_array = np.array(train_sim_matrix_list).reshape(
         len(train_sim_matrix_list), len(train_data_embed), len(valid_data_embed)
     )
-    # print("train_sim_matrix shape: ", train_sim_matrix_array.shape)
+    print("train_sim_matrix shape: ", train_sim_matrix_array.shape)
     
     train_LPs = []
     for i, af_matrix in enumerate(train_sim_matrix_array):
@@ -156,7 +157,7 @@ def run_goggles(
     test_sim_matrix_array = np.array(test_sim_matrix_list).reshape(
         len(test_sim_matrix_list), len(test_data_embed), len(valid_data_embed)
     )
-    # print("test_sim_matrix shape: ", test_sim_matrix_array.shape)
+    print("test_sim_matrix shape: ", test_sim_matrix_array.shape)
     
     test_LPs = []
     for i, af_matrix in enumerate(test_sim_matrix_array):
