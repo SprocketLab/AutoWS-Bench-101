@@ -4,6 +4,7 @@ from numpy import dot
 from numpy.linalg import norm
 import numpy as np
 from sklearn.metrics import *
+from tqdm import trange
 
 
 def get_accuracy_coverage(data, label_model, logger, split="train"):
@@ -229,7 +230,7 @@ class MulticlassAdaptor:
 def construct_affinity_function(target_dataset, anchor_dataset):
     ## compute cosine similarity for GOGGLES (not default setting) ##
     cos_sim_matrix = np.zeros((len(target_dataset), len(anchor_dataset)))
-    for i in range(len(target_dataset)):
+    for i in trange(len(target_dataset)):
         target_vec = np.array(target_dataset.examples[i]["feature"])
         for j in range(len(anchor_dataset)):
             anchor_vec = np.array(anchor_dataset.examples[j]["feature"])
