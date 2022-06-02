@@ -238,6 +238,45 @@ class SphericalDataset(TorchVisionDataset):
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
+        
+        
+class ECG_Time_Series_Dataset(TorchVisionDataset):
+    def __init__(self, split: str, name: str = "ECG", **kwargs):
+        self.data_module = ECGDataModule()
+        self.data_module.setup(stage=None)
+        super().__init__(name, split, **kwargs)
+
+    def download(self):
+        
+        train_data = self.data_module.ecg_train.data
+        train_labels = self.data_module.ecg_train.targets
+    
+        valid_data = self.data_module.ecg_valid.data
+        valid_labels = self.data_module.ecg_valid.targets
+    
+        trainvalid_data = torch.from_numpy(np.concatenate((train_data, valid_data), axis=0))
+        trainvalid_labels = torch.from_numpy((np.concatenate((train_labels, valid_labels), axis=0)))
+        
+        trainvalid = data_utils.TensorDataset(trainvalid_data, trainvalid_labels)
+        
+        train_split, valid_split = TorchVisionDataset._split(
+            trainvalid, train_p=self.train_p
+        )
+
+        test_data = torch.from_numpy(self.data_module.ecg_test.data)
+        test_labels = torch.from_numpy(self.data_module.ecg_test.targets)
+
+        test_split = data_utils.TensorDataset(test_data, test_labels)
+        valid_size = len(valid_split)
+        
+        self._set_path_suffix(valid_size)
+        
+        if self.split == "train":
+            self._set_data(train_split, None, None)
+        elif self.split == "valid":
+            self._set_data(None, valid_split, None)
+        elif self.split == "test":
+            self._set_data(None, None, test_split)
 
 
 def main():
@@ -272,6 +311,10 @@ def main():
     # CIFAR100Dataset("train")
     # CIFAR100Dataset("valid")
     # CIFAR100Dataset("test")
+    
+    # ECG_Time_Series_Dataset("train")
+    # ECG_Time_Series_Dataset("valid")
+    # ECG_Time_Series_Dataset("test")
 
     SphericalDataset("train")
     SphericalDataset("valid")
