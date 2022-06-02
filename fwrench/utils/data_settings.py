@@ -8,6 +8,7 @@ from fwrench.datasets import (
     KMNISTDataset,
     SphericalDataset,
     CIFAR10Dataset,
+    ECG_Time_Series_Dataset,
 )
 from wrench.dataset import load_dataset
 from wrench.endmodel import EndClassifierModel
