@@ -91,9 +91,8 @@ def read_data_physionet_4_with_val(path, window_size=1000, stride=500):
     # read pkl
     if os.path.exists(os.path.join(path, "challenge2017.pkl")) == False:
         os.system("wget -P " + path + " https://pde-xd.s3.amazonaws.com/ECG/challenge2017.pkl")
-    else:
-        with open(os.path.join(path, "challenge2017.pkl"), "rb") as fin:
-            res = pickle.load(fin)
+    with open(os.path.join(path, "challenge2017.pkl"), "rb") as fin:
+        res = pickle.load(fin)
     ## scale data
     all_data = res["data"]
     for i in range(len(all_data)):
