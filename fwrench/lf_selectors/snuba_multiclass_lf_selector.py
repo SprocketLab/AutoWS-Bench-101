@@ -48,7 +48,8 @@ class SnubaMulticlassSelector(BaseSelector):
         self.train_ground = None  # y_train # NOTE just used for eval in Snuba...
         self.val_primitive_matrix = x_val
         # TODO NOTE CHANGE
-        self.val_ground = (y_val * 2) - 1  # Flip negative class to -1
+        # self.val_ground = (y_val * 2) - 1  # Flip negative class to -1
+        self.val_ground = y_val
 
         validation_accuracy = []
         training_accuracy = []
@@ -128,5 +129,6 @@ class SnubaMulticlassSelector(BaseSelector):
         )
 
         # Need to flip the outputs of snuba...
-        vflip = np.vectorize(flip)
-        return vflip(lf_outputs)
+        #vflip = np.vectorize(flip)
+        #return vflip(lf_outputs)
+        return lf_outputs

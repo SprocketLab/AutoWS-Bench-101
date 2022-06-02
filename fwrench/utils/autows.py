@@ -358,7 +358,7 @@ def run_snuba_multiclass(
     selector = SnubaMulticlassSelector(
         lf_generator=lf_classes,
         scoring_fn=scoring_fn,
-        b=0.5,  # TODO
+        b=0.1,  # TODO
         cardinality=snuba_cardinality,
         combo_samples=snuba_combo_samples,
         iters=snuba_iterations,
