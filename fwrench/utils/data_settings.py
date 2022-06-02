@@ -245,3 +245,36 @@ def get_permuted_mnist(
     )
 
     return train_data, valid_data, test_data, n_classes, model
+
+def get_ecg(
+    n_labeled_points, dataset_home, data_dir="ECG_14752",
+):
+
+    train_data = ECG_Time_Series_Dataset("train", name="ECG")
+    valid_data = ECG_Time_Series_Dataset("valid", name="ECG")
+    test_data = ECG_Time_Series_Dataset("test", name="ECG")
+    n_classes = 4
+
+    data = data_dir
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, extract_feature=True, dataset_type="NumericDataset"
+    )
+
+    # Create subset of labeled dataset
+    # train_data = train_data.create_subset(np.arange(3000))
+    # test_data = test_data.create_subset(np.arange(1000))
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
+    # Create end model
+    model = EndClassifierModel(
+        batch_size=256,
+        test_batch_size=512,
+        n_steps=1_000,
+        backbone="LENET",
+        optimizer="SGD",
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+        binary_mode=False,
+    )
+
+    return train_data, valid_data, test_data, n_classes, model
