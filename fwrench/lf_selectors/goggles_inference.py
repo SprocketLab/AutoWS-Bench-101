@@ -1,7 +1,6 @@
 import random
 import numpy as np
-from .goggles.semi_supervised_models import SemiGMM
-from .goggles.semi_supervised_models import SemiBMM
+from .goggles.semi_supervised_models import SemiGMM, SemiBMM
 
 def infer_labels(affinity_matrix_list, dev_set_indices, dev_set_labels, evaluate=True):
     random.seed(123)

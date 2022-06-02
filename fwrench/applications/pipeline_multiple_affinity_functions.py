@@ -75,6 +75,10 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_permuted_mnist(
             n_labeled_points, dataset_home
         )
+    elif dataset == "ecg":
+        train_data, valid_data, test_data, k_cls, model = settings.get_ecg(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
