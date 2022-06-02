@@ -186,7 +186,9 @@ def main(
 
     # TODO swtich to test set
     acc = accuracy_score(test_covered.labels, hard_labels)
+    cov = float(len(test_covered.labels)) / float(len(test_data.labels))
     logger.info(f"label model train acc:    {acc}")
+    logger.info(f"label model coverage:     {cov}")
 
     ################ TRAIN END MODEL ##########################################
     # model.fit(
