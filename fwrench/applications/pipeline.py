@@ -91,6 +91,8 @@ def main(
         embedder = feats.ZeroShotCLIPEmbedding(dataset=dataset, prompt=prompt)
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
+    elif embedding == "openai":
+        embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
     else:
         raise NotImplementedError
 
@@ -166,7 +168,7 @@ def main(
             logger,
         )
     elif lf_selector == "clip_zero_shot" and (
-        embedding == "clip_zeroshot" or embedding == "oracle"
+        embedding == "clip_zeroshot" or embedding == "oracle" or embedding == "openai"
     ):
         train_covered, hard_labels, soft_labels = autows.run_zero_shot_clip(
             valid_data,

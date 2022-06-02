@@ -7,3 +7,4 @@ from .chain_embedding import *
 from .oracle_embedding import *
 from .clip_embedding import *
 from .clip_zeroshot_embedding import *
+from .openai_clip_embedding import *

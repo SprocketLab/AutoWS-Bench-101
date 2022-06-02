@@ -1,10 +1,10 @@
 import numpy as np
 import torch
 from .base_embedding import BaseEmbedding
-from transformers import CLIPProcessor, CLIPVisionModel
 from tqdm import tqdm
-
-from transformers import CLIPProcessor, CLIPModel
+import clip
+from PIL import Image
+import numpy as np
 
 classes_ = {
     "mnist": [f"a photo of the number {i}" for i in range(10)],
@@ -14,30 +14,36 @@ classes_ = {
     "fashion_mnist": ["t-shirt or top", "trouser", "pullover", "dress", "coat", "sandal", "shirt", "sneaker", "bag", "ankle boot"]
 }
 
-class ZeroShotCLIPEmbedding(BaseEmbedding):
+class OpenAICLIPEmbedding(BaseEmbedding):
     def __init__(self, dataset, prompt=None):
-        self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-        self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model, self.preprocess = clip.load('ViT-B/32', self.device)
         self.dataset = dataset
         self.prompt = prompt
 
-    def get_image_as_list(self, dataset):
-        images = []
-        for imgs in dataset:
-            images.append((imgs.detach().cpu().numpy()))
-        return images
-
-    def extract_feature_batch(self, x, label_text):
+    def extract_features(self, X, label_text):
+        text_inputs = torch.cat([clip.tokenize(label_t) for label_t in label_text]).to(self.device)
+        similarity_all = []
         with torch.no_grad():
-            inputs = self.processor(text=label_text, images=x, return_tensors="pt",
-            padding=True)
-            outputs = self.model(**inputs)
-            return outputs['logits_per_image']
+            text_features = self.model.encode_text(text_inputs)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
+        print("Extracting features...")
+        for x_idx in tqdm(range(X.shape[0])):
+            x_single = X[x_idx, :, :, :]
+            x_single = np.uint8(np.transpose(x_single, (1,2,0)))*255
+            image_input = self.preprocess(Image.fromarray(x_single)).unsqueeze(0).to(self.device)
+            with torch.no_grad():
+                image_features = self.model.encode_image(image_input)
+                image_features /= image_features.norm(dim=-1, keepdim=True)
+                similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+                similarity_all.append(similarity.detach().cpu())
+        similarity_all = torch.cat(similarity_all)
+        return similarity_all
 
     def fit(self, *data):
         pass
 
-    def transform(self, data, bs=1280):
+    def transform(self, data, bs=5120):
         X_np = self._unpack_data(data, flatten=False, return_y=False)
         y = classes_[self.dataset]
         
@@ -45,7 +51,7 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
             label_text = [f"{self.prompt} {y_}" for y_ in y]
         else:
             label_text = [f"{y_}" for y_ in y]
-        print(f"CLIP ZERO SHOT W/ TEXTS {label_text}")
+        print(f"OPENAI CLIP ZERO SHOT W/ TEXTS {label_text}")
         if X_np.shape[1] == 1:  # Repeat since MNIST is greyscale
             X_np = X_np.repeat(3, axis=1)
         elif X_np.shape[1] > 3:  # Probably need to permute
@@ -54,16 +60,7 @@ class ZeroShotCLIPEmbedding(BaseEmbedding):
             X = torch.from_numpy(X_np)
             X = X.type(torch.FloatTensor)
             X.cuda()
-            X_list = self.get_image_as_list(X)
-            X_feats = []
-            # manual batching
-            print(f"CLIP extractor requires batching... bs = {bs}")
-            for batch_start in tqdm(range(0, len(X_list), bs)):
-                out_ = self.extract_feature_batch(
-                    X_list[batch_start : batch_start + bs], label_text
-                )
-                X_feats.extend(out_)
-        X_feats = np.vstack(X_feats)
+            X_feats = self.extract_features(X, label_text)
         return self._repack_data(data, X_feats)
 
     def fit_transform(self, data, ngpus=1, max_epochs=5, hidden_size=128):
