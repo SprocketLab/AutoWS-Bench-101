@@ -14,6 +14,7 @@ import torch.utils.data as data_utils
 import torch
 
 from .dataset import FWRENCHDataset
+from .ecg_dataset import ECGDataModule
 
 
 class TorchVisionDataset(FWRENCHDataset):
