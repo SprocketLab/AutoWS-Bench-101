@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score, f1_score
 
 from .synthesizer import Synthesizer
 from .verifier import Verifier
@@ -20,7 +20,7 @@ class HeuristicGenerator(object):
         val_ground,
         train_ground=None,
         b=0.5,
-        classes=10
+        classes=10,
     ):
         """ 
         Initialize HeuristicGenerator object
@@ -226,8 +226,9 @@ class HeuristicGenerator(object):
         Generates Verifier object and saves marginals
         """
         ###THIS IS WHERE THE SNORKEL FLAG IS SET!!!!
-        # TODO replace this with the actual Snorkel label model
-        self.vf = Verifier(self.L_train, self.L_val, self.val_ground, classes=self.classes)
+        self.vf = Verifier(
+            self.L_train, self.L_val, self.val_ground, classes=self.classes
+        )
         self.vf.train_gen_model()
         self.vf.assign_marginals()
         print(self.vf.train_marginals)
@@ -252,6 +253,7 @@ class HeuristicGenerator(object):
         # incorrect_idx = self.vf.find_incorrect_points(b=self.b)
 
         gamma_opt = self.gamma_optimizer(self.vf.val_marginals)
+        # Gamma optimizer doesn't actually use the marginals?
         # gamma_opt = self.gamma
         vague_idx = self.vf.find_vague_points(b=self.b, gamma=gamma_opt)
         incorrect_idx = vague_idx
@@ -265,15 +267,24 @@ class HeuristicGenerator(object):
         self.train_marginals = self.vf.train_marginals
 
         def calculate_accuracy(marginals, b, ground):
-            total = np.shape(np.where(marginals != 0.5))[1]
-            labels = np.sign(2 * (marginals - 0.5))
-            return np.sum(labels == ground) / float(total)
+            # TODO not sure what the marginals != 0.5 means...
+            # I assume it's covered points?
+            # total = np.shape(np.where(marginals != 0.5))[1]
+            # labels = np.sign(2 * (marginals - 0.5))
+            preds = np.argmax(marginals, axis=1)
+            if ground is not None:
+                return accuracy_score(preds, ground)
+            else:
+                return None
 
         def calculate_coverage(marginals, b, ground):
-            total = np.shape(np.where(marginals != 0.5))[1]
-            labels = np.sign(2 * (marginals - 0.5))
-            return total / float(len(labels))
+            # TODO not sure how to use marginals to get coverage in this case
+            # total = np.shape(np.where(marginals != 0.5))[1]
+            # labels = np.sign(2 * (marginals - 0.5))
+            # return total / float(len(labels))
+            return 1.0
 
+        # NOTE changed indexing
         self.val_accuracy = calculate_accuracy(
             self.val_marginals, self.b, self.val_ground
         )
