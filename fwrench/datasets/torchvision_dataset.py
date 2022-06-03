@@ -131,9 +131,12 @@ class EMNISTDataset(TorchVisionDataset):
 
 class KMNISTDataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "KMNIST", **kwargs):
+        # print("CONSTRUCTOR")
         super().__init__(name, split, **kwargs)
 
     def download(self):
+        # print("DOWNLOAD PATH", self.download_path)
+        # exit()
         trainvalid = datasets.KMNIST(self.download_path, train=True, download=True)
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
