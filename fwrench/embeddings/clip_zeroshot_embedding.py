@@ -5,14 +5,7 @@ from transformers import CLIPProcessor, CLIPVisionModel
 from tqdm import tqdm
 
 from transformers import CLIPProcessor, CLIPModel
-
-classes_ = {
-    "mnist": [f"a photo of the number {i}" for i in range(10)],
-    "spherical_mnist": [f"{i}" for i in range(10)],
-    # ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"],
-    "cifar10": ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'],
-    "fashion_mnist": ["t-shirt or top", "trouser", "pullover", "dress", "coat", "sandal", "shirt", "sneaker", "bag", "ankle boot"]
-}
+from .zeroshot_labels import classes_
 
 class ZeroShotCLIPEmbedding(BaseEmbedding):
     def __init__(self, dataset, prompt=None):
