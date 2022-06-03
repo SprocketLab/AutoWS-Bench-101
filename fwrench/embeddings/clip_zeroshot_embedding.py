@@ -5,12 +5,7 @@ from transformers import CLIPProcessor, CLIPVisionModel
 from tqdm import tqdm
 
 from transformers import CLIPProcessor, CLIPModel
-
-classes_ = {
-    "mnist": [f"{i}" for i in range(10)],
-    "cifar10": ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'],
-    
-}
+from .zeroshot_labels import classes_
 
 class ZeroShotCLIPEmbedding(BaseEmbedding):
     def __init__(self, dataset, prompt=None):

@@ -25,14 +25,14 @@ def main(
     # Snuba options
     snuba_combo_samples=-1,  # -1 uses all feat. combos
     # TODO this needs to work for Snuba and IWS
-    snuba_cardinality=2,  # Only used if lf_selector='snuba'
+    snuba_cardinality=1,  # Only used if lf_selector='snuba'
     snuba_iterations=23,
     lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
     #
     # Interactive Weak Supervision options
     iws_iterations=30,
     seed=123,
-    prompt=None
+    prompt=None,
 ):
 
     ################ HOUSEKEEPING/SELF-CARE 😊 ################################
@@ -72,6 +72,10 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_permuted_mnist(
             n_labeled_points, dataset_home
         )
+    elif dataset == "ecg":
+        train_data, valid_data, test_data, k_cls, model = settings.get_ecg(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
@@ -91,6 +95,8 @@ def main(
         embedder = feats.ZeroShotCLIPEmbedding(dataset=dataset, prompt=prompt)
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
+    elif embedding == "openai":
+        embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
     else:
         raise NotImplementedError
 
@@ -101,7 +107,7 @@ def main(
 
     ################ AUTOMATED WEAK SUPERVISION ###############################
     if lf_selector == "snuba":
-        train_covered, hard_labels, soft_labels = autows.run_snuba(
+        test_covered, hard_labels, soft_labels = autows.run_snuba(
             valid_data,
             train_data,
             test_data,
@@ -115,7 +121,7 @@ def main(
             logger,
         )
     elif lf_selector == "snuba_multiclass":
-        train_covered, hard_labels, soft_labels = autows.run_snuba_multiclass(
+        test_covered, hard_labels, soft_labels = autows.run_snuba_multiclass(
             valid_data,
             train_data,
             test_data,
@@ -130,7 +136,7 @@ def main(
             logger,
         )
     elif lf_selector == "iws":
-        train_covered, hard_labels, soft_labels = autows.run_snuba(
+        test_covered, hard_labels, soft_labels = autows.run_snuba(
             valid_data,
             train_data,
             test_data,
@@ -146,7 +152,7 @@ def main(
     elif lf_selector == "iws_multiclass":
         raise NotImplementedError
     elif lf_selector == "goggles":
-        train_covered, hard_labels, soft_labels = autows.run_goggles(
+        test_covered, hard_labels, soft_labels = autows.run_goggles(
             valid_data,
             train_data,
             test_data,
@@ -156,7 +162,7 @@ def main(
             logger,
         )
     elif lf_selector == "supervised":
-        train_covered, hard_labels, soft_labels = autows.run_supervised(
+        test_covered, hard_labels, soft_labels = autows.run_supervised(
             valid_data,
             train_data,
             test_data,
@@ -166,9 +172,9 @@ def main(
             logger,
         )
     elif lf_selector == "clip_zero_shot" and (
-        embedding == "clip_zeroshot" or embedding == "oracle"
+        embedding == "clip_zeroshot" or embedding == "oracle" or embedding == "openai"
     ):
-        train_covered, hard_labels, soft_labels = autows.run_zero_shot_clip(
+        test_covered, hard_labels, soft_labels = autows.run_zero_shot_clip(
             valid_data,
             train_data,
             test_data,
@@ -181,8 +187,10 @@ def main(
         raise NotImplementedError
 
     # TODO swtich to test set
-    acc = accuracy_score(train_covered.labels, hard_labels)
+    acc = accuracy_score(test_covered.labels, hard_labels)
+    cov = float(len(test_covered.labels)) / float(len(test_data.labels))
     logger.info(f"label model train acc:    {acc}")
+    logger.info(f"label model coverage:     {cov}")
 
     ################ TRAIN END MODEL ##########################################
     # model.fit(

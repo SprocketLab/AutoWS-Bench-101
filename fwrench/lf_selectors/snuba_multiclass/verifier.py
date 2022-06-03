@@ -48,13 +48,12 @@ class Verifier(object):
         Find val set indices where marginals are within thresh of b 
         """
         # TODO argmax multiclass
-        print(self.val_marginals)
-        val_idx = np.where(np.abs(self.val_marginals - b) <= gamma)
+        val_idx = np.where(np.abs(np.argmax(self.val_marginals, axis=1) - b) <= gamma)
         return val_idx[0]
 
     def find_incorrect_points(self, b=0.5):
         """ Find val set indices where marginals are incorrect """
-        # TODO argmax multiclass
+        # TODO argmax multiclass???
         val_labels = 2 * (self.val_marginals > b) - 1
         val_idx = np.where(val_labels != self.val_ground)
         return val_idx[0]

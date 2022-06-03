@@ -114,13 +114,14 @@ def run_goggles(
     ) = GOGGLES_Inferencer.infer_labels(
         valid_sim_matrix_array, dev_set_indices, dev_set_labels, evaluate=True
     )
-    # print("PI: ", valid_ensemble_model.pi, "MU: ", valid_ensemble_model.mu)
+    print("PI: ", np.array(valid_ensemble_model.pi))
     
     valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
     logger.info(
         f"valid data label accuracy: {accuracy_score(valid_data.labels, valid_hard_labels)}"
     )
     
+    """
     train_sim_matrix_list = []
     for train_data_embed, valid_data_embed in zip(train_data_embed_list, valid_data_embed_list):
         train_sim_matrix = utils.construct_affinity_function(
@@ -146,6 +147,7 @@ def run_goggles(
     logger.info(
         f"train data label accuracy: {accuracy_score(train_data.labels, train_hard_labels)}"
     )
+    """
     
     test_sim_matrix_list = []
     for test_data_embed, valid_data_embed in zip(test_data_embed_list, valid_data_embed_list):
@@ -358,7 +360,7 @@ def run_snuba_multiclass(
     selector = SnubaMulticlassSelector(
         lf_generator=lf_classes,
         scoring_fn=scoring_fn,
-        b=0.5,  # TODO
+        b=0.1,  # TODO
         cardinality=snuba_cardinality,
         combo_samples=snuba_combo_samples,
         iters=snuba_iterations,

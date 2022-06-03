@@ -3,7 +3,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.cluster import KMeans
 from .cluster_class_mapping import solve_mapping
 
-DEL = 1e-300
+DEL = 1e-5
 
 def update_prob_using_mapping(prob, dev_set_indices, dev_set_labels, evaluate=False):
     cluster_labels = np.argmax(prob, axis=1)
@@ -12,7 +12,7 @@ def update_prob_using_mapping(prob, dev_set_indices, dev_set_labels, evaluate=Fa
     prob = prob[:, cluster_class_mapping]
     return prob
 
-def pmf_bernoulli(X,mu):
+def pmf_bernoulli(X, mu):
     return np.exp(np.sum(X * np.log(mu + DEL) + (1 - X) * np.log(1 - mu + DEL), axis=1))
 
 class ConvergenceMeter:
