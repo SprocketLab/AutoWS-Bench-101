@@ -27,6 +27,7 @@ classes_ = {
     "spherical_mnist": [f"{i}" for i in range(10)],
     "cifar10": [f'a photo of a {classname}.' for classname in cifar10_labels],
     "fashion_mnist": [templates[0].format(classname) for classname in fashion_mnist_labels],
-    "spherical_mnist": [f"a photo of the number: \"{i}\" stereographically projected onto a sphere and back to the plane." for i in range(10)]
+    "spherical_mnist": [f"a photo of the number: \"{i}\" stereographically projected onto a sphere and back to the plane." for i in range(10)],
+    "permuted_mnist": [f"a photo of the number: \"{i}\" permuted by a bit reversal permutation." for i in range(10)],
     # [f"a photo of {label}" for label in fashion_mnist_labels],
 }
