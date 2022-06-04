@@ -1,0 +1,24 @@
+Traceback (most recent call last):
+  File "fwrench/applications/pipeline.py", line 221, in <module>
+    fire.Fire(main)
+  File "/home/ubuntu/anaconda3/envs/FWRENCH2/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/ubuntu/anaconda3/envs/FWRENCH2/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
+    target=component.__name__)
+  File "/home/ubuntu/anaconda3/envs/FWRENCH2/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "fwrench/applications/pipeline.py", line 86, in main
+    n_labeled_points, dataset_home
+  File "/home/ubuntu/FWRENCH/fwrench/utils/data_settings.py", line 324, in get_navier_stokes
+    train_data = NavierStokesDataset("train", name="NavierStokes")
+  File "/home/ubuntu/FWRENCH/fwrench/datasets/torchvision_dataset.py", line 344, in __init__
+    super().__init__(name, split, **kwargs)
+  File "/home/ubuntu/FWRENCH/fwrench/datasets/torchvision_dataset.py", line 43, in __init__
+    super().__init__(name, split, path, download, download_path)
+  File "/home/ubuntu/FWRENCH/fwrench/datasets/dataset.py", line 70, in __init__
+    self.download()
+  File "/home/ubuntu/FWRENCH/fwrench/datasets/torchvision_dataset.py", line 349, in download
+    valid_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy")
+  File "/home/ubuntu/anaconda3/envs/FWRENCH2/lib/python3.7/site-packages/numpy/lib/npyio.py", line 417, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy'

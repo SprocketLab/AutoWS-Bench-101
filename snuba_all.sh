@@ -13,14 +13,15 @@ for seed in 0
 do 
     for emb in raw pca resnet18 openai # vae
     do 
-        for dataset in mnist cifar10 spherical_mnist permuted_mnist ecg 
-        do
+        #for dataset in mnist cifar10 spherical_mnist permuted_mnist ecg 
+        #do
         # TODO add navier stokes
+        dataset=navier_stokes
 
             savedir=${resdir}/${seed}/${emb}/${dataset}
             mkdir -p ${savedir}
 
-            python fwrench/applications/pipeline.py \
+            python -u fwrench/applications/pipeline.py \
                 --lf_selector=${lf_selector} \
                 --n_labeled_points=${n_labeled_points} \
                 --snuba_cardinality=${snuba_cardinality} \
@@ -30,6 +31,6 @@ do
                 --dataset=${dataset} \
                 |& tee -a ${savedir}/res_seed${seed}.log
 
-        done
+        #done
     done
 done
