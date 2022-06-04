@@ -191,11 +191,15 @@ class CIFAR10Dataset(TorchVisionDataset):
 
     def download(self):
         trans = transforms.ToTensor()
-        trainvalid = datasets.CIFAR10(self.download_path, train=True, transform=trans, download=True)
+        trainvalid = datasets.CIFAR10(
+            self.download_path, train=True, transform=trans, download=True
+        )
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
         )
-        test_split = datasets.CIFAR10(self.download_path, train=False,transform=trans, download=True)
+        test_split = datasets.CIFAR10(
+            self.download_path, train=False, transform=trans, download=True
+        )
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
@@ -246,8 +250,8 @@ class SphericalDataset(TorchVisionDataset):
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
-        
-        
+
+
 class ECG_Time_Series_Dataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "ECG", **kwargs):
         self.data_module = ECGDataModule()
@@ -255,18 +259,22 @@ class ECG_Time_Series_Dataset(TorchVisionDataset):
         super().__init__(name, split, **kwargs)
 
     def download(self):
-        
+
         train_data = self.data_module.ecg_train.data
         train_labels = self.data_module.ecg_train.targets
-    
+
         valid_data = self.data_module.ecg_valid.data
         valid_labels = self.data_module.ecg_valid.targets
-    
-        trainvalid_data = torch.from_numpy(np.concatenate((train_data, valid_data), axis=0))
-        trainvalid_labels = torch.from_numpy((np.concatenate((train_labels, valid_labels), axis=0)))
-        
+
+        trainvalid_data = torch.from_numpy(
+            np.concatenate((train_data, valid_data), axis=0)
+        )
+        trainvalid_labels = torch.from_numpy(
+            (np.concatenate((train_labels, valid_labels), axis=0))
+        )
+
         trainvalid = data_utils.TensorDataset(trainvalid_data, trainvalid_labels)
-        
+
         train_split, valid_split = TorchVisionDataset._split(
             trainvalid, train_p=self.train_p
         )
@@ -276,15 +284,16 @@ class ECG_Time_Series_Dataset(TorchVisionDataset):
 
         test_split = data_utils.TensorDataset(test_data, test_labels)
         valid_size = len(valid_split)
-        
+
         self._set_path_suffix(valid_size)
-        
+
         if self.split == "train":
             self._set_data(train_split, None, None)
         elif self.split == "valid":
             self._set_data(None, valid_split, None)
         elif self.split == "test":
             self._set_data(None, None, test_split)
+
 
 class EmberDataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "ember_2017", **kwargs):
@@ -294,7 +303,7 @@ class EmberDataset(TorchVisionDataset):
             target_path = "ember_dataset_2017_2.tar.bz2"
             response = requests.get(url, stream=True)
             if response.status_code == 200:
-                with open(target_path, 'wb') as f:
+                with open(target_path, "wb") as f:
                     f.write(response.raw.read())
         if not (os.path.isdir('ember_2017_2')):
             tar = tarfile.open("ember_dataset_2017_2.tar.bz2", "r:bz2")  
@@ -363,7 +372,7 @@ def main():
     # CIFAR100Dataset("train")
     # CIFAR100Dataset("valid")
     # CIFAR100Dataset("test")
-    
+
     # ECG_Time_Series_Dataset("train")
     # ECG_Time_Series_Dataset("valid")
     # ECG_Time_Series_Dataset("test")

@@ -92,19 +92,19 @@ def run_goggles(
         train_data_embed_list = [train_data_embed_list]
     if type(test_data_embed_list) != list:
         test_data_embed_list = [test_data_embed_list]
-        
+
     valid_sim_matrix_list = []
     for valid_data_embed in valid_data_embed_list:
         valid_sim_matrix = utils.construct_affinity_function(
             valid_data_embed, valid_data_embed
         )
         valid_sim_matrix_list.append(valid_sim_matrix)
-        
+
     valid_sim_matrix_array = np.array(valid_sim_matrix_list).reshape(
         len(valid_data_embed_list), len(valid_data_embed), len(valid_data_embed)
     )
     print("valid_sim_matrix shape: ", valid_sim_matrix_array.shape)
-    
+
     label_index_dict = utils.generate_label_index_dict(valid_data.labels)
     dev_set_indices, dev_set_labels = utils.generate_dev_set(label_index_dict)
     (
@@ -115,12 +115,12 @@ def run_goggles(
         valid_sim_matrix_array, dev_set_indices, dev_set_labels, evaluate=True
     )
     print("PI: ", np.array(valid_ensemble_model.pi))
-    
+
     valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
     logger.info(
         f"valid data label accuracy: {accuracy_score(valid_data.labels, valid_hard_labels)}"
     )
-    
+
     """
     train_sim_matrix_list = []
     for train_data_embed, valid_data_embed in zip(train_data_embed_list, valid_data_embed_list):
@@ -148,19 +148,21 @@ def run_goggles(
         f"train data label accuracy: {accuracy_score(train_data.labels, train_hard_labels)}"
     )
     """
-    
+
     test_sim_matrix_list = []
-    for test_data_embed, valid_data_embed in zip(test_data_embed_list, valid_data_embed_list):
+    for test_data_embed, valid_data_embed in zip(
+        test_data_embed_list, valid_data_embed_list
+    ):
         test_sim_matrix = utils.construct_affinity_function(
             test_data_embed, valid_data_embed
         )
         test_sim_matrix_list.append(test_sim_matrix)
-        
+
     test_sim_matrix_array = np.array(test_sim_matrix_list).reshape(
         len(test_sim_matrix_list), len(test_data_embed), len(valid_data_embed)
     )
     print("test_sim_matrix shape: ", test_sim_matrix_array.shape)
-    
+
     test_LPs = []
     for i, af_matrix in enumerate(test_sim_matrix_array):
         lp = valid_GMM_list[i].predict(af_matrix)
@@ -391,4 +393,3 @@ def run_snuba_multiclass(
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
     return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
-
