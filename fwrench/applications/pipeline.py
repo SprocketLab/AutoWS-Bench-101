@@ -81,6 +81,10 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_ember_2017(
             n_labeled_points, dataset_home
         )
+    elif dataset == "navier_stokes":
+        train_data, valid_data, test_data, k_cls, model = settings.get_navier_stokes(
+            n_labeled_points, dataset_home
+        )
     else:
         raise NotImplementedError
 
