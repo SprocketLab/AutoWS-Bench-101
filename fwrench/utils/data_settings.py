@@ -14,6 +14,7 @@ from fwrench.datasets import (
 )
 from wrench.dataset import load_dataset
 from wrench.endmodel import EndClassifierModel
+import os, shutil
 
 
 def get_mnist(
@@ -175,6 +176,8 @@ def get_spherical_mnist(
     train_data = SphericalDataset("train", name="SphericalMNIST")
     valid_data = SphericalDataset("valid", name="SphericalMNIST")
     test_data = SphericalDataset("test", name="SphericalMNIST")
+    os.remove('ember_dataset_2017_2.tar.bz2')
+    shutil.rmtree('ember_2017_2')
     n_classes = 10
 
     data = data_dir
@@ -283,12 +286,15 @@ def get_ecg(
     return train_data, valid_data, test_data, n_classes, model
 
 def get_ember_2017(
-    n_labeled_points, dataset_home, data_dir="ember_2017_30000",
+    # 600000 training / 200000 testing
+    # sometimes work,sometimes get killed. Maybe only implement a subset?
+    n_labeled_points, dataset_home, data_dir="ember_2017_15000",
 ):
 
     train_data = EmberDataset('train', name='ember_2017')
     valid_data = EmberDataset('valid', name='ember_2017')
     test_data = EmberDataset('test', name='ember_2017')
+
     n_classes = 2
 
     data = data_dir

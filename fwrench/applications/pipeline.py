@@ -26,11 +26,12 @@ def main(
     snuba_combo_samples=-1,  # -1 uses all feat. combos
     # TODO this needs to work for Snuba and IWS
     snuba_cardinality=1,  # Only used if lf_selector='snuba'
+    iws_cardinality = 1,
     snuba_iterations=23,
     lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
     #
     # Interactive Weak Supervision options
-    iws_iterations=30,
+    iws_iterations=25,
     seed=123,
     prompt=None,
 ):
@@ -74,6 +75,10 @@ def main(
         )
     elif dataset == "ecg":
         train_data, valid_data, test_data, k_cls, model = settings.get_ecg(
+            n_labeled_points, dataset_home
+        )
+    elif dataset == "ember":
+        train_data, valid_data, test_data, k_cls, model = settings.get_ember_2017(
             n_labeled_points, dataset_home
         )
     else:
@@ -136,15 +141,14 @@ def main(
             logger,
         )
     elif lf_selector == "iws":
-        test_covered, hard_labels, soft_labels = autows.run_snuba(
+        test_covered, hard_labels, soft_labels = autows.run_iws(
             valid_data,
             train_data,
             test_data,
             valid_data_embed,
             train_data_embed,
             test_data_embed,
-            snuba_cardinality,
-            snuba_combo_samples,
+            iws_cardinality,
             iws_iterations,
             lf_class_options,
             logger,

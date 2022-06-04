@@ -186,7 +186,6 @@ def run_iws(
     train_data_embed,
     test_data_embed,
     cardinality,
-    combo_samples,  # TODO
     iterations,  # TODO
     lf_class_options,
     logger,
@@ -223,8 +222,6 @@ def run_iws(
     )
     selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=10)
     selector.fit(valid_data_embed, train_data_embed)
-    for i in range(len(selector.lf_selectors)):
-        logger.info(f"Selector {i} stats\n")
 
     train_weak_labels = selector.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
@@ -245,6 +242,10 @@ def run_iws(
     utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
     utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
+
+    logger.info(
+        f"iws acc: {accuracy_score(aggregated_hard_labels, test_data.labels)}"
+    )
 
     return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
