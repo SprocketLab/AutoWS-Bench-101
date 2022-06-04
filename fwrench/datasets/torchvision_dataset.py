@@ -252,7 +252,7 @@ class SphericalDataset(TorchVisionDataset):
         self._set_data(train_split, valid_split, test_split)
 
 
-class ECG_Time_Series_Dataset(TorchVisionDataset):
+class ECGTimeSeriesDataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "ECG", **kwargs):
         self.data_module = ECGDataModule()
         self.data_module.setup(stage=None)
