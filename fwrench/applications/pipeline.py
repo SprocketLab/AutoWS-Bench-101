@@ -1,5 +1,6 @@
 import logging
 import random
+import copy
 
 import fire
 import fwrench.embeddings as feats
@@ -26,7 +27,7 @@ def main(
     snuba_combo_samples=-1,  # -1 uses all feat. combos
     # TODO this needs to work for Snuba and IWS
     snuba_cardinality=1,  # Only used if lf_selector='snuba'
-    iws_cardinality = 1,
+    iws_cardinality=1,
     snuba_iterations=23,
     lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
     #
@@ -109,10 +110,16 @@ def main(
     else:
         raise NotImplementedError
 
-    embedder.fit(train_data, valid_data, test_data)
-    train_data_embed = embedder.transform(train_data)
-    valid_data_embed = embedder.transform(valid_data)
-    test_data_embed = embedder.transform(test_data)
+    if (embedding == "resnet18") and (dataset == "ecg"):
+        embedder.fit(valid_data, test_data)
+        valid_data_embed = embedder.transform(valid_data)
+        test_data_embed = embedder.transform(test_data)
+        train_data_embed = copy.deepcopy(valid_data_embed)
+    else:
+        embedder.fit(train_data, valid_data, test_data)
+        train_data_embed = embedder.transform(train_data)
+        valid_data_embed = embedder.transform(valid_data)
+        test_data_embed = embedder.transform(test_data)
 
     ################ AUTOMATED WEAK SUPERVISION ###############################
     if lf_selector == "snuba":
