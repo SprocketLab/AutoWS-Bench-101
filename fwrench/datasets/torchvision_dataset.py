@@ -292,14 +292,16 @@ class ECG_Time_Series_Dataset(TorchVisionDataset):
 class EmberDataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "ember_2017", **kwargs):
         url = "https://ember.elastic.co/ember_dataset_2017_2.tar.bz2"
-        target_path = "ember_dataset_2017_2.tar.bz2"
-        response = requests.get(url, stream=True)
-        if response.status_code == 200:
-            with open(target_path, 'wb') as f:
-                f.write(response.raw.read())
-        tar = tarfile.open("ember_dataset_2017_2.tar.bz2", "r:bz2")  
-        tar.extractall()
-        tar.close()
+        if not (os.path.exists("ember_dataset_2017_2.tar.bz2")):
+            target_path = "ember_dataset_2017_2.tar.bz2"
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                with open(target_path, 'wb') as f:
+                    f.write(response.raw.read())
+        if not (os.path.isdir('ember_dataset_2017_2')):
+            tar = tarfile.open("ember_dataset_2017_2.tar.bz2", "r:bz2")  
+            tar.extractall()
+            tar.close()
         super().__init__(name, split, **kwargs)
 
     def download(self):
@@ -323,8 +325,6 @@ class EmberDataset(TorchVisionDataset):
         valid_size = len(valid_split)
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
-        os.remove("ember_dataset_2017_2.tar.bz2")
-        shutil.rmtree('ember_2017_2')
 
 
 def main():
