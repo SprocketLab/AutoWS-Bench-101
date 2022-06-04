@@ -176,8 +176,6 @@ def get_spherical_mnist(
     train_data = SphericalDataset("train", name="SphericalMNIST")
     valid_data = SphericalDataset("valid", name="SphericalMNIST")
     test_data = SphericalDataset("test", name="SphericalMNIST")
-    os.remove('ember_dataset_2017_2.tar.bz2')
-    shutil.rmtree('ember_2017_2')
     n_classes = 10
 
     data = data_dir

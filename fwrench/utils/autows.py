@@ -245,10 +245,6 @@ def run_iws(
     utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
-    logger.info(
-        f"iws acc: {accuracy_score(aggregated_hard_labels, test_data.labels)}"
-    )
-
     return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
 
 
