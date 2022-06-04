@@ -9,6 +9,8 @@ from fwrench.datasets import (
     SphericalDataset,
     CIFAR10Dataset,
     ECG_Time_Series_Dataset,
+    EmberDataset,
+    
 )
 from wrench.dataset import load_dataset
 from wrench.endmodel import EndClassifierModel
@@ -255,6 +257,39 @@ def get_ecg(
     valid_data = ECG_Time_Series_Dataset("valid", name="ECG")
     test_data = ECG_Time_Series_Dataset("test", name="ECG")
     n_classes = 4
+
+    data = data_dir
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, extract_feature=True, dataset_type="NumericDataset"
+    )
+
+    # Create subset of labeled dataset
+    # train_data = train_data.create_subset(np.arange(3000))
+    # test_data = test_data.create_subset(np.arange(1000))
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
+    # Create end model
+    model = EndClassifierModel(
+        batch_size=256,
+        test_batch_size=512,
+        n_steps=1_000,
+        backbone="LENET",
+        optimizer="SGD",
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+        binary_mode=False,
+    )
+
+    return train_data, valid_data, test_data, n_classes, model
+
+def get_ember_2017(
+    n_labeled_points, dataset_home, data_dir="ember_2017_30000",
+):
+
+    train_data = EmberDataset('train', name='ember_2017')
+    valid_data = EmberDataset('valid', name='ember_2017')
+    test_data = EmberDataset('test', name='ember_2017')
+    n_classes = 2
 
     data = data_dir
     train_data, valid_data, test_data = load_dataset(

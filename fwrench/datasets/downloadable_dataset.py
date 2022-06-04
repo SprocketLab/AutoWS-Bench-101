@@ -9,7 +9,7 @@ from urllib.request import urlopen
 
 import numpy as np
 
-from dataset import FWRENCHDataset
+from .dataset import FWRENCHDataset
 
 
 @dataclass
@@ -66,11 +66,9 @@ class DownloadableDataset(FWRENCHDataset):
             download_filepath = self.download_path / filename
 
             if not download_filepath.exists():
-                with (
-                    open(download_filepath, "wb") as download_file,
-                    urlopen(url.url) as download_request,
-                ):
-                    copyfileobj(download_request, download_file)
+                download_file = open(download_filepath, "wb")
+                download_request = urlopen(url.url)
+                copyfileobj(download_request, download_file)
 
             checksum = DownloadableDataset._check_md5(download_filepath)
             if checksum != url.md5:

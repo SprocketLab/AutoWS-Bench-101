@@ -8,13 +8,20 @@ from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import random_split
 from torchvision import datasets
 from torchvision import transforms
+import requests
+import tarfile
 
 from .gendata import gener_spherical_mnist
 import torch.utils.data as data_utils
 import torch
+import os, shutil
 
 from .dataset import FWRENCHDataset
 from .ecg_dataset import ECGDataModule
+import sys
+ADD_PATH = Path(__file__).resolve(strict=True).parents[2] / "fwrench/datasets"
+sys.path.append(ADD_PATH)
+from .ember import create_vectorized_features, read_vectorized_features, create_metadata
 
 
 class TorchVisionDataset(FWRENCHDataset):
@@ -281,6 +288,43 @@ class ECG_Time_Series_Dataset(TorchVisionDataset):
             self._set_data(None, valid_split, None)
         elif self.split == "test":
             self._set_data(None, None, test_split)
+
+class EmberDataset(TorchVisionDataset):
+    def __init__(self, split: str, name: str = "ember_2017", **kwargs):
+        url = "https://ember.elastic.co/ember_dataset_2017_2.tar.bz2"
+        target_path = "ember_dataset_2017_2.tar.bz2"
+        response = requests.get(url, stream=True)
+        if response.status_code == 200:
+            with open(target_path, 'wb') as f:
+                f.write(response.raw.read())
+        tar = tarfile.open("ember_dataset_2017_2.tar.bz2", "r:bz2")  
+        tar.extractall()
+        tar.close()
+        super().__init__(name, split, **kwargs)
+
+    def download(self):
+        data_dir = "ember_2017_2"
+        create_vectorized_features(data_dir)
+        _ = create_metadata(data_dir)
+        X_train, y_train = read_vectorized_features(data_dir, "train")
+        # Filter unlabeled data
+        train_rows = (y_train != -1)
+        train_data = torch.from_numpy(X_train[train_rows])
+        train_labels = torch.from_numpy(y_train[train_rows])
+        trainvalid = data_utils.TensorDataset(train_data, train_labels)
+        train_split, valid_split = TorchVisionDataset._split(
+            trainvalid, train_p=self.train_p
+        )
+        X_test, y_test = read_vectorized_features(data_dir, "test")
+        test_rows = (y_test != -1)
+        test_data = torch.from_numpy(X_test[test_rows])
+        test_labels = torch.from_numpy(y_test[test_rows])
+        test_split = data_utils.TensorDataset(test_data, test_labels)
+        valid_size = len(valid_split)
+        self._set_path_suffix(valid_size)
+        self._set_data(train_split, valid_split, test_split)
+        os.remove("ember_dataset_2017_2.tar.bz2")
+        shutil.rmtree('ember_2017_2')
 
 
 def main():
