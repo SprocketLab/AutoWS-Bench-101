@@ -29,5 +29,6 @@ classes_ = {
     "fashion_mnist": [templates[0].format(classname) for classname in fashion_mnist_labels],
     "spherical_mnist": [f"a photo of the number: \"{i}\" stereographically projected onto a sphere and back to the plane." for i in range(10)],
     "permuted_mnist": [f"a photo of the number: \"{i}\" permuted by a bit reversal permutation." for i in range(10)],
+    "navier_stokes": ["The Navier-Stokes equation in the turbulent regime with low viscosity: 1e-5.", "The Navier-Stokes equation with high viscosity: 1e-3."],
     # [f"a photo of {label}" for label in fashion_mnist_labels],
 }
