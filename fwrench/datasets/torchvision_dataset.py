@@ -321,7 +321,7 @@ class EmberDataset(TorchVisionDataset):
         X_train = X_train[train_rows]
         y_train = y_train[train_rows]
         train_selection = random.sample(range(X_train.shape[0]), int(X_train.shape[0]*0.5))
-        train_data = torch.from_numpy(X_train[train_selection])
+        train_data = torch.from_numpy(np.expand_dims(X_train[train_selection], axis=0))
         train_labels = torch.from_numpy(y_train[train_selection].astype(int))
         trainvalid = data_utils.TensorDataset(train_data, train_labels)
         train_split, valid_split = TorchVisionDataset._split(
@@ -332,7 +332,7 @@ class EmberDataset(TorchVisionDataset):
         X_test = X_test[test_rows]
         y_test = y_test[test_rows]
         test_selection = random.sample(range(X_test.shape[0]), int(X_test.shape[0]*0.5))
-        test_data = torch.from_numpy(X_test[test_selection])
+        test_data = torch.from_numpy(np.expand_dims(X_test[test_selection], axis=0))
         test_labels = torch.from_numpy(y_test[test_selection].astype(int))
         test_split = data_utils.TensorDataset(test_data, test_labels)
         valid_size = len(valid_split)
