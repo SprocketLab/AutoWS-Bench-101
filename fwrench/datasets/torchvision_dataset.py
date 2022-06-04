@@ -339,6 +339,36 @@ class EmberDataset(TorchVisionDataset):
         self._set_path_suffix(valid_size)
         self._set_data(train_split, valid_split, test_split)
 
+class NavierStokesDataset(TorchVisionDataset):
+    def __init__(self, split: str, name: str = "NavierStokes", **kwargs):
+        super().__init__(name, split, **kwargs)
+
+    def download(self):
+        
+        ## TODO: change the path.....
+        valid_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy")
+        valid_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_val.npy")
+        train_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy")
+        train_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_val.npy")
+        test_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_test_transpose.npy")
+        test_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_test.npy")
+        
+        valid_data = torch.from_numpy(valid_X_np)
+        valid_labels = torch.from_numpy(valid_y_np)
+        valid_split = data_utils.TensorDataset(valid_data, valid_labels)
+        
+        train_data = torch.from_numpy(train_X_np)
+        train_labels = torch.from_numpy(train_y_np)
+        train_split = data_utils.TensorDataset(train_data, train_labels)
+        
+        test_data = torch.from_numpy(test_X_np)
+        test_labels = torch.from_numpy(test_y_np)
+        test_split = data_utils.TensorDataset(test_data, test_labels)
+        
+        valid_size = len(valid_split)
+        
+        self._set_path_suffix(valid_size)
+        self._set_data(train_split, valid_split, test_split)
 
 def main():
     # MNISTDataset("train")
@@ -373,9 +403,13 @@ def main():
     # CIFAR100Dataset("valid")
     # CIFAR100Dataset("test")
 
-    # ECG_Time_Series_Dataset("train")
-    # ECG_Time_Series_Dataset("valid")
-    # ECG_Time_Series_Dataset("test")
+    # ECGTimeSeriesDataset("train")
+    # ECGTimeSeriesDataset("valid")
+    # ECGTimeSeriesDataset("test")
+    
+    # NavierStokesDataset("train")
+    # NavierStokesDataset("valid")
+    # NavierStokesDataset("test")
 
     SphericalDataset("train")
     SphericalDataset("valid")

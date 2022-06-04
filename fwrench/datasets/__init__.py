@@ -10,6 +10,7 @@ from .torchvision_dataset import (
     CIFAR10Dataset,
     CIFAR100Dataset,
     SphericalDataset,
-    ECG_Time_Series_Dataset,
+    ECGTimeSeriesDataset,
     EmberDataset,
+    NavierStokesDataset,
 )
