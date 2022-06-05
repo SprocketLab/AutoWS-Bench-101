@@ -19,7 +19,7 @@ import os, random
 from .dataset import FWRENCHDataset
 from .ecg_dataset import ECGDataModule
 from .navier_stokes_dataset import check_and_download
-from .ember import create_vectorized_features, read_vectorized_features, create_metadata
+from .ember import create_vectorized_features, read_vectorized_features
 
 
 class TorchVisionDataset(FWRENCHDataset):
@@ -294,7 +294,6 @@ class ECGTimeSeriesDataset(TorchVisionDataset):
             self._set_data(None, valid_split, None)
         elif self.split == "test":
             self._set_data(None, None, test_split)
-
 
 class EmberDataset(TorchVisionDataset):
     def __init__(self, split: str, name: str = "ember_2017", **kwargs):
