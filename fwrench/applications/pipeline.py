@@ -95,7 +95,7 @@ def main(
         emb = PCA(n_components=100)
         embedder = feats.SklearnEmbedding(emb)
     elif embedding == "resnet18":
-        embedder = feats.ResNet18Embedding()
+        embedder = feats.ResNet18Embedding(dataset)
     elif embedding == "vae":
         embedder = feats.VAE2DEmbedding()
     elif embedding == "clip":

@@ -6,10 +6,11 @@ import torchvision.models as models
 from .base_embedding import BaseEmbedding
 
 class ResNet18Embedding(BaseEmbedding):
-    def __init__(self):
+    def __init__(self, dataset='mnist'):
         resnet = models.resnet18(pretrained=True)
         self.model = torch.nn.Sequential(*list(resnet.children())[:-1])
         self.model.eval()
+        self.image_data = True if dataset != 'ember' else False
 
     def fit(self, *data):
         pass
@@ -18,8 +19,12 @@ class ResNet18Embedding(BaseEmbedding):
         X_np = self._unpack_data(data, flatten=False)
         if X_np.shape[1] == 1: # Repeat since MNIST is greyscale
             X_np = X_np.repeat(3, axis=1)
-        elif X_np.shape[1] > 3: # Probably need to permute
+        elif X_np.shape[1] > 3 and self.image_data: # Probably need to permute
             X_np = np.transpose(X_np, (0, 3, 1, 2))
+        elif not self.image_data and len(X_np.shape) < 3:
+            X_np = np.expand_dims(X_np, axis=1)
+            X_np = np.expand_dims(X_np, axis=1)
+            X_np = X_np.repeat(3, axis=1)
         with torch.no_grad():
             # TODO batching ... 
             X = torch.from_numpy(X_np)
