@@ -15,7 +15,7 @@ from wrench.logging import LoggingHandler
 
 def main(
     dataset="mnist",
-    dataset_home="./datasets",
+    dataset_home="../../datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
     #
     #
@@ -110,7 +110,7 @@ def main(
     else:
         raise NotImplementedError
 
-    if (embedding == "resnet18") and (dataset == "ecg"):
+    if (embedding == "resnet18") and (dataset == "ecg" or dataset == "ember"):
         embedder.fit(valid_data, test_data)
         valid_data_embed = embedder.transform(valid_data)
         test_data_embed = embedder.transform(test_data)

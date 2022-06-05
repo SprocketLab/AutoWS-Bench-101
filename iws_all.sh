@@ -11,7 +11,7 @@ iws_iterations=20
 
 for seed in 0
 do 
-    for emb in raw resnet18 vae pca openai
+    for emb in openai
     do 
         for dataset in mnist cifar10 spherical_mnist permuted_mnist ecg ember
         do
