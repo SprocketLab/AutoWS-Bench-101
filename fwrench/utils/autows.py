@@ -190,6 +190,7 @@ def run_iws(
     cardinality,
     iterations,  # TODO
     lf_class_options,
+    k_cls,
     logger,
 ):
     if lf_class_options == "default":
@@ -222,7 +223,10 @@ def run_iws(
         cardinality=cardinality,
         npredict=100,
     )
-    selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=10)
+    if k_cls > 2:
+        selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=k_cls)
+    else:
+        selector = MyIWSSelector()
     selector.fit(valid_data_embed, train_data_embed)
 
     train_weak_labels = selector.predict(train_data_embed)
@@ -259,6 +263,7 @@ def run_snuba(
     snuba_combo_samples,
     snuba_iterations,
     lf_class_options,
+    k_cls,
     logger,
 ):
     if lf_class_options == "default":
@@ -291,7 +296,10 @@ def run_snuba(
         combo_samples=snuba_combo_samples,
         iters=snuba_iterations,
     )
-    selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10)
+    if k_cls > 2:
+        selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=k_cls)
+    else:
+        selector = MySnubaSelector()
     selector.fit(valid_data_embed, train_data_embed)
     for i in range(len(selector.lf_selectors)):
         logger.info(
@@ -365,7 +373,7 @@ def run_snuba_multiclass(
         iters=snuba_iterations,
         k_cls=k_cls,
     )
-    # selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=10)
+    # selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=k_cls)
     selector.fit(valid_data_embed, train_data_embed)
 
     train_weak_labels = selector.predict(train_data_embed)

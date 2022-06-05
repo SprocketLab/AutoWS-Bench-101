@@ -115,6 +115,7 @@ def main(
         valid_data_embed = embedder.transform(valid_data)
         test_data_embed = embedder.transform(test_data)
         train_data_embed = copy.deepcopy(valid_data_embed)
+        train_data = copy.deepcopy(valid_data)
     else:
         embedder.fit(train_data, valid_data, test_data)
         train_data_embed = embedder.transform(train_data)
@@ -134,6 +135,7 @@ def main(
             snuba_combo_samples,
             snuba_iterations,
             lf_class_options,
+            k_cls,
             logger,
         )
     elif lf_selector == "snuba_multiclass":
@@ -162,6 +164,7 @@ def main(
             iws_cardinality,
             iws_iterations,
             lf_class_options,
+            k_cls,
             logger,
         )
     elif lf_selector == "iws_multiclass":
