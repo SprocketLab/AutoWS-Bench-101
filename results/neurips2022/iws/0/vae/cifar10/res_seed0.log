@@ -1,90 +1,0 @@
-Files already downloaded and verified
-Files already downloaded and verified
-Files already downloaded and verified
-Files already downloaded and verified
-Files already downloaded and verified
-Files already downloaded and verified
-2022-06-04 08:00:24 - loading data from datasets/CIFAR10_2500/train.json
-  0%|          | 0/47500 [00:00<?, ?it/s]  2%|▏         | 727/47500 [00:00<00:06, 7262.98it/s]  3%|▎         | 1454/47500 [00:00<00:06, 7242.86it/s]  5%|▍         | 2179/47500 [00:00<00:06, 7152.59it/s]  6%|▌         | 2895/47500 [00:00<00:06, 7115.88it/s]  8%|▊         | 3607/47500 [00:00<00:06, 7102.34it/s]  9%|▉         | 4318/47500 [00:00<00:06, 7092.63it/s] 11%|█         | 5028/47500 [00:00<00:05, 7080.42it/s] 12%|█▏        | 5737/47500 [00:00<00:05, 7076.11it/s] 14%|█▎        | 6446/47500 [00:00<00:05, 7079.46it/s] 15%|█▌        | 7154/47500 [00:01<00:05, 7078.74it/s] 17%|█▋        | 7863/47500 [00:01<00:05, 7081.27it/s] 18%|█▊        | 8574/47500 [00:01<00:05, 7087.37it/s] 20%|█▉        | 9284/47500 [00:01<00:05, 7089.27it/s] 21%|██        | 9993/47500 [00:01<00:05, 7085.57it/s] 23%|██▎       | 10703/47500 [00:01<00:05, 7088.18it/s] 24%|██▍       | 11412/47500 [00:01<00:05, 7088.42it/s] 26%|██▌       | 12122/47500 [00:01<00:04, 7090.52it/s] 27%|██▋       | 12832/47500 [00:01<00:04, 7082.87it/s] 29%|██▊       | 13541/47500 [00:01<00:04, 7068.43it/s] 30%|██▉       | 14249/47500 [00:02<00:04, 7071.54it/s] 31%|███▏      | 14960/47500 [00:02<00:04, 7082.40it/s] 33%|███▎      | 15669/47500 [00:02<00:04, 7079.51it/s] 34%|███▍      | 16380/47500 [00:02<00:04, 7086.61it/s] 36%|███▌      | 17091/47500 [00:02<00:04, 7093.07it/s] 37%|███▋      | 17801/47500 [00:02<00:04, 7093.96it/s] 39%|███▉      | 18512/47500 [00:02<00:04, 7098.65it/s] 40%|████      | 19222/47500 [00:02<00:03, 7081.97it/s] 42%|████▏     | 19933/47500 [00:02<00:03, 7089.19it/s] 43%|████▎     | 20652/47500 [00:02<00:03, 7117.06it/s] 45%|████▍     | 21368/47500 [00:03<00:03, 7129.56it/s] 46%|████▋     | 22083/47500 [00:03<00:03, 7133.86it/s] 48%|████▊     | 22797/47500 [00:03<00:03, 7133.09it/s] 49%|████▉     | 23511/47500 [00:03<00:03, 7133.57it/s] 51%|█████     | 24227/47500 [00:03<00:03, 7141.35it/s] 53%|█████▎    | 24942/47500 [00:03<00:03, 7136.78it/s] 54%|█████▍    | 25658/47500 [00:03<00:03, 7142.37it/s] 56%|█████▌    | 26373/47500 [00:03<00:02, 7133.83it/s] 57%|█████▋    | 27087/47500 [00:03<00:02, 7114.37it/s] 59%|█████▊    | 27799/47500 [00:03<00:02, 7115.01it/s] 60%|██████    | 28511/47500 [00:04<00:02, 7106.82it/s] 62%|██████▏   | 29222/47500 [00:04<00:02, 7091.01it/s] 63%|██████▎   | 29934/47500 [00:04<00:02, 7097.84it/s] 65%|██████▍   | 30644/47500 [00:04<00:02, 7093.79it/s] 66%|██████▌   | 31354/47500 [00:04<00:02, 7091.55it/s] 68%|██████▊   | 32064/47500 [00:04<00:02, 7081.27it/s] 69%|██████▉   | 32773/47500 [00:04<00:02, 7079.93it/s] 70%|███████   | 33481/47500 [00:04<00:01, 7078.02it/s] 72%|███████▏  | 34192/47500 [00:04<00:01, 7086.88it/s] 73%|███████▎  | 34901/47500 [00:04<00:01, 7085.31it/s] 75%|███████▍  | 35610/47500 [00:05<00:01, 7081.67it/s] 76%|███████▋  | 36319/47500 [00:05<00:01, 7077.84it/s] 78%|███████▊  | 37027/47500 [00:05<00:01, 7070.96it/s] 79%|███████▉  | 37735/47500 [00:05<00:01, 7068.75it/s] 81%|████████  | 38445/47500 [00:05<00:01, 7077.58it/s] 82%|████████▏ | 39155/47500 [00:05<00:01, 7083.19it/s] 84%|████████▍ | 39867/47500 [00:05<00:01, 7093.81it/s] 85%|████████▌ | 40578/47500 [00:05<00:00, 7097.96it/s] 87%|████████▋ | 41288/47500 [00:05<00:00, 7092.73it/s] 88%|████████▊ | 41998/47500 [00:05<00:00, 7079.44it/s] 90%|████████▉ | 42706/47500 [00:06<00:00, 7075.32it/s] 91%|█████████▏| 43415/47500 [00:06<00:00, 7077.30it/s] 93%|█████████▎| 44124/47500 [00:06<00:00, 7078.19it/s] 94%|█████████▍| 44832/47500 [00:06<00:00, 7075.92it/s] 96%|█████████▌| 45542/47500 [00:06<00:00, 7082.38it/s] 97%|█████████▋| 46251/47500 [00:06<00:00, 7078.24it/s] 99%|█████████▉| 46960/47500 [00:06<00:00, 7081.66it/s]100%|██████████| 47500/47500 [00:06<00:00, 7094.38it/s]
-2022-06-04 08:00:31 - loading data from datasets/CIFAR10_2500/valid.json
-  0%|          | 0/2500 [00:00<?, ?it/s] 29%|██▊       | 714/2500 [00:00<00:00, 7130.18it/s] 57%|█████▋    | 1428/2500 [00:00<00:00, 7105.81it/s] 86%|████████▌ | 2139/2500 [00:00<00:00, 7081.65it/s]100%|██████████| 2500/2500 [00:00<00:00, 7086.87it/s]
-2022-06-04 08:00:32 - loading data from datasets/CIFAR10_2500/test.json
-  0%|          | 0/10000 [00:00<?, ?it/s]  7%|▋         | 711/10000 [00:00<00:01, 7104.82it/s] 14%|█▍        | 1422/10000 [00:00<00:01, 7082.80it/s] 21%|██▏       | 2133/10000 [00:00<00:01, 7091.41it/s] 28%|██▊       | 2843/10000 [00:00<00:01, 7093.25it/s] 36%|███▌      | 3555/10000 [00:00<00:00, 7099.44it/s] 43%|████▎     | 4265/10000 [00:00<00:00, 7094.16it/s] 50%|████▉     | 4975/10000 [00:00<00:00, 7079.71it/s] 57%|█████▋    | 5685/10000 [00:00<00:00, 7085.85it/s] 64%|██████▍   | 6398/10000 [00:00<00:00, 7099.51it/s] 71%|███████   | 7114/10000 [00:01<00:00, 7117.85it/s] 78%|███████▊  | 7827/10000 [00:01<00:00, 7119.80it/s] 85%|████████▌ | 8543/10000 [00:01<00:00, 7130.00it/s] 93%|█████████▎| 9259/10000 [00:01<00:00, 7136.93it/s]100%|█████████▉| 9974/10000 [00:01<00:00, 7139.08it/s]100%|██████████| 10000/10000 [00:01<00:00, 7112.09it/s]
-GPU available: True, used: True
-TPU available: False, using: 0 TPU cores
-IPU available: False, using: 0 IPUs
-HPU available: False, using: 0 HPUs
-LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
-
-  | Name           | Type       | Params
-----------------------------------------------
-0 | encoder        | Sequential | 427 K 
-1 | hidden2mu      | Linear     | 16.5 K
-2 | hidden2log_var | Linear     | 16.5 K
-3 | decoder        | Sequential | 428 K 
-----------------------------------------------
-889 K     Trainable params
-0         Non-trainable params
-889 K     Total params
-3.558     Total estimated model params size (MB)
-Sanity Checking: 0it [00:00, ?it/s]Sanity Checking:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:245: PossibleUserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 24 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
-  category=PossibleUserWarning,
-Traceback (most recent call last):
-  File "fwrench/applications/pipeline.py", line 217, in <module>
-    fire.Fire(main)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
-    component_trace = _Fire(component, args, parsed_flag_args, context, name)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
-    target=component.__name__)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
-    component = fn(*varargs, **kwargs)
-  File "fwrench/applications/pipeline.py", line 108, in main
-    embedder.fit(train_data, valid_data, test_data)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_embedding.py", line 37, in fit
-    self.model, datamodule=dm)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 771, in fit
-    self._fit_impl, model, train_dataloaders, val_dataloaders, datamodule, ckpt_path
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 723, in _call_and_handle_interrupt
-    return trainer_fn(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 811, in _fit_impl
-    results = self._run(model, ckpt_path=self.ckpt_path)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1236, in _run
-    results = self._run_stage()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1323, in _run_stage
-    return self._run_train()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1345, in _run_train
-    self._run_sanity_check()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1413, in _run_sanity_check
-    val_loop.run()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/base.py", line 204, in run
-    self.advance(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 154, in advance
-    dl_outputs = self.epoch_loop.run(self._data_fetcher, dl_max_batches, kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/base.py", line 204, in run
-    self.advance(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 128, in advance
-    output = self._evaluation_step(**kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 226, in _evaluation_step
-    output = self.trainer._call_strategy_hook("validation_step", *kwargs.values())
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1765, in _call_strategy_hook
-    output = fn(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/strategies/strategy.py", line 344, in validation_step
-    return self.model.validation_step(*args, **kwargs)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 116, in validation_step
-    mu, log_var, x_out = self.forward(x)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 154, in forward
-    mu, log_var = self.encode(x)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 84, in encode
-    hidden = self.encoder(x)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1051, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/container.py", line 139, in forward
-    input = module(input)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1051, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/linear.py", line 96, in forward
-    return F.linear(input, self.weight, self.bias)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/functional.py", line 1847, in linear
-    return torch._C._nn.linear(input, weight, bias)
-RuntimeError: mat1 and mat2 shapes cannot be multiplied (16x3072 and 784x392)
-                                                                   

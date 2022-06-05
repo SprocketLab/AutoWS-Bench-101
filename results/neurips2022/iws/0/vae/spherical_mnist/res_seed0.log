@@ -1,115 +1,0 @@
-/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:498: UserWarning: The given NumPy array is not writeable, and PyTorch does not support non-writeable tensors. This means you can write to the underlying (supposedly non-writeable) NumPy array using the tensor. You may want to copy the array to protect its data or make it writeable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at  /opt/conda/conda-bld/pytorch_1631630836880/work/torch/csrc/utils/tensor_numpy.cpp:180.)
-  return torch.from_numpy(parsed.astype(m[2], copy=False)).view(*s)
-/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:62: UserWarning: train_data has been renamed data
-  warnings.warn("train_data has been renamed data")
-/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:52: UserWarning: train_labels has been renamed targets
-  warnings.warn("train_labels has been renamed targets")
-/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:67: UserWarning: test_data has been renamed data
-  warnings.warn("test_data has been renamed data")
-/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torchvision/datasets/mnist.py:57: UserWarning: test_labels has been renamed targets
-  warnings.warn("test_labels has been renamed targets")
-getting mnist data
-projecting train data set
-500/600001000/600001500/600002000/600002500/600003000/600003500/600004000/600004500/600005000/600005500/600006000/600006500/600007000/600007500/600008000/600008500/600009000/600009500/6000010000/6000010500/6000011000/6000011500/6000012000/6000012500/6000013000/6000013500/6000014000/6000014500/6000015000/6000015500/6000016000/6000016500/6000017000/6000017500/6000018000/6000018500/6000019000/6000019500/6000020000/6000020500/6000021000/6000021500/6000022000/6000022500/6000023000/6000023500/6000024000/6000024500/6000025000/6000025500/6000026000/6000026500/6000027000/6000027500/6000028000/6000028500/6000029000/6000029500/6000030000/6000030500/6000031000/6000031500/6000032000/6000032500/6000033000/6000033500/6000034000/6000034500/6000035000/6000035500/6000036000/6000036500/6000037000/6000037500/6000038000/6000038500/6000039000/6000039500/6000040000/6000040500/6000041000/6000041500/6000042000/6000042500/6000043000/6000043500/6000044000/6000044500/6000045000/6000045500/6000046000/6000046500/6000047000/6000047500/6000048000/6000048500/6000049000/6000049500/6000050000/6000050500/6000051000/6000051500/6000052000/6000052500/6000053000/6000053500/6000054000/6000054500/6000055000/6000055500/6000056000/6000056500/6000057000/6000057500/6000058000/6000058500/6000059000/6000059500/6000060000/60000
-projecting test data set
-500/100001000/100001500/100002000/100002500/100003000/100003500/100004000/100004500/100005000/100005500/100006000/100006500/100007000/100007500/100008000/100008500/100009000/100009500/1000010000/10000
-writing pickle
-done
-getting mnist data
-projecting train data set
-500/600001000/600001500/600002000/600002500/600003000/600003500/600004000/600004500/600005000/600005500/600006000/600006500/600007000/600007500/600008000/600008500/600009000/600009500/6000010000/6000010500/6000011000/6000011500/6000012000/6000012500/6000013000/6000013500/6000014000/6000014500/6000015000/6000015500/6000016000/6000016500/6000017000/6000017500/6000018000/6000018500/6000019000/6000019500/6000020000/6000020500/6000021000/6000021500/6000022000/6000022500/6000023000/6000023500/6000024000/6000024500/6000025000/6000025500/6000026000/6000026500/6000027000/6000027500/6000028000/6000028500/6000029000/6000029500/6000030000/6000030500/6000031000/6000031500/6000032000/6000032500/6000033000/6000033500/6000034000/6000034500/6000035000/6000035500/6000036000/6000036500/6000037000/6000037500/6000038000/6000038500/6000039000/6000039500/6000040000/6000040500/6000041000/6000041500/6000042000/6000042500/6000043000/6000043500/6000044000/6000044500/6000045000/6000045500/6000046000/6000046500/6000047000/6000047500/6000048000/6000048500/6000049000/6000049500/6000050000/6000050500/6000051000/6000051500/6000052000/6000052500/6000053000/6000053500/6000054000/6000054500/6000055000/6000055500/6000056000/6000056500/6000057000/6000057500/6000058000/6000058500/6000059000/6000059500/6000060000/60000
-projecting test data set
-500/100001000/100001500/100002000/100002500/100003000/100003500/100004000/100004500/100005000/100005500/100006000/100006500/100007000/100007500/100008000/100008500/100009000/100009500/1000010000/10000
-writing pickle
-done
-getting mnist data
-projecting train data set
-500/600001000/600001500/600002000/600002500/600003000/600003500/600004000/600004500/600005000/600005500/600006000/600006500/600007000/600007500/600008000/600008500/600009000/600009500/6000010000/6000010500/6000011000/6000011500/6000012000/6000012500/6000013000/6000013500/6000014000/6000014500/6000015000/6000015500/6000016000/6000016500/6000017000/6000017500/6000018000/6000018500/6000019000/6000019500/6000020000/6000020500/6000021000/6000021500/6000022000/6000022500/6000023000/6000023500/6000024000/6000024500/6000025000/6000025500/6000026000/6000026500/6000027000/6000027500/6000028000/6000028500/6000029000/6000029500/6000030000/6000030500/6000031000/6000031500/6000032000/6000032500/6000033000/6000033500/6000034000/6000034500/6000035000/6000035500/6000036000/6000036500/6000037000/6000037500/6000038000/6000038500/6000039000/6000039500/6000040000/6000040500/6000041000/6000041500/6000042000/6000042500/6000043000/6000043500/6000044000/6000044500/6000045000/6000045500/6000046000/6000046500/6000047000/6000047500/6000048000/6000048500/6000049000/6000049500/6000050000/6000050500/6000051000/6000051500/6000052000/6000052500/6000053000/6000053500/6000054000/6000054500/6000055000/6000055500/6000056000/6000056500/6000057000/6000057500/6000058000/6000058500/6000059000/6000059500/6000060000/60000
-projecting test data set
-500/100001000/100001500/100002000/100002500/100003000/100003500/100004000/100004500/100005000/100005500/100006000/100006500/100007000/100007500/100008000/100008500/100009000/100009500/1000010000/10000
-writing pickle
-done
-2022-06-04 08:01:52 - loading data from datasets/SphericalMNIST_3000/train.json
-  0%|          | 0/57000 [00:00<?, ?it/s]  1%|          | 703/57000 [00:00<00:08, 7025.52it/s]  2%|▏         | 1412/57000 [00:00<00:07, 7059.82it/s]  4%|▎         | 2121/57000 [00:00<00:07, 7071.47it/s]  5%|▍         | 2829/57000 [00:00<00:07, 6978.85it/s]  6%|▌         | 3528/57000 [00:00<00:07, 6923.24it/s]  7%|▋         | 4221/57000 [00:00<00:07, 6896.84it/s]  9%|▊         | 4911/57000 [00:00<00:07, 6878.05it/s] 10%|▉         | 5599/57000 [00:00<00:07, 6861.86it/s] 11%|█         | 6286/57000 [00:00<00:07, 6852.80it/s] 12%|█▏        | 6972/57000 [00:01<00:07, 6729.33it/s] 13%|█▎        | 7646/57000 [00:01<00:07, 6658.56it/s] 15%|█▍        | 8324/57000 [00:01<00:07, 6692.41it/s] 16%|█▌        | 9005/57000 [00:01<00:07, 6726.14it/s] 17%|█▋        | 9684/57000 [00:01<00:07, 6743.21it/s] 18%|█▊        | 10364/57000 [00:01<00:06, 6759.86it/s] 19%|█▉        | 11046/57000 [00:01<00:06, 6775.83it/s] 21%|██        | 11728/57000 [00:01<00:06, 6788.32it/s] 22%|██▏       | 12410/57000 [00:01<00:06, 6796.41it/s] 23%|██▎       | 13092/57000 [00:01<00:06, 6803.16it/s] 24%|██▍       | 13780/57000 [00:02<00:06, 6824.97it/s] 25%|██▌       | 14467/57000 [00:02<00:06, 6836.65it/s] 27%|██▋       | 15155/57000 [00:02<00:06, 6849.62it/s] 28%|██▊       | 15840/57000 [00:02<00:06, 6848.60it/s] 29%|██▉       | 16527/57000 [00:02<00:05, 6852.45it/s] 30%|███       | 17213/57000 [00:02<00:05, 6851.77it/s] 31%|███▏      | 17900/57000 [00:02<00:05, 6855.68it/s] 33%|███▎      | 18587/57000 [00:02<00:05, 6857.01it/s] 34%|███▍      | 19275/57000 [00:02<00:05, 6862.23it/s] 35%|███▌      | 19964/57000 [00:02<00:05, 6869.15it/s] 36%|███▌      | 20651/57000 [00:03<00:05, 6867.84it/s] 37%|███▋      | 21338/57000 [00:03<00:05, 6866.05it/s] 39%|███▊      | 22025/57000 [00:03<00:05, 6863.30it/s] 40%|███▉      | 22712/57000 [00:03<00:04, 6863.46it/s] 41%|████      | 23399/57000 [00:03<00:04, 6858.41it/s] 42%|████▏     | 24086/57000 [00:03<00:04, 6860.96it/s] 43%|████▎     | 24773/57000 [00:03<00:04, 6859.96it/s] 45%|████▍     | 25460/57000 [00:03<00:04, 6862.29it/s] 46%|████▌     | 26148/57000 [00:03<00:04, 6864.67it/s] 47%|████▋     | 26835/57000 [00:03<00:04, 6861.49it/s] 48%|████▊     | 27522/57000 [00:04<00:04, 6861.48it/s] 49%|████▉     | 28209/57000 [00:04<00:04, 6859.44it/s] 51%|█████     | 28896/57000 [00:04<00:04, 6861.77it/s] 52%|█████▏    | 29585/57000 [00:04<00:03, 6868.36it/s] 53%|█████▎    | 30275/57000 [00:04<00:03, 6877.46it/s] 54%|█████▍    | 30963/57000 [00:04<00:03, 6876.05it/s] 56%|█████▌    | 31653/57000 [00:04<00:03, 6881.03it/s] 57%|█████▋    | 32342/57000 [00:04<00:03, 6881.16it/s] 58%|█████▊    | 33031/57000 [00:04<00:03, 6874.53it/s] 59%|█████▉    | 33719/57000 [00:04<00:03, 6872.71it/s] 60%|██████    | 34407/57000 [00:05<00:03, 6873.23it/s] 62%|██████▏   | 35095/57000 [00:05<00:03, 6870.16it/s] 63%|██████▎   | 35785/57000 [00:05<00:03, 6878.59it/s] 64%|██████▍   | 36474/57000 [00:05<00:02, 6879.65it/s] 65%|██████▌   | 37162/57000 [00:05<00:02, 6876.49it/s] 66%|██████▋   | 37851/57000 [00:05<00:02, 6879.99it/s] 68%|██████▊   | 38540/57000 [00:05<00:02, 6881.75it/s] 69%|██████▉   | 39229/57000 [00:05<00:02, 6878.77it/s] 70%|███████   | 39918/57000 [00:05<00:02, 6881.08it/s] 71%|███████   | 40607/57000 [00:05<00:02, 6880.83it/s] 72%|███████▏  | 41296/57000 [00:06<00:02, 6883.03it/s] 74%|███████▎  | 41985/57000 [00:06<00:02, 6883.53it/s] 75%|███████▍  | 42674/57000 [00:06<00:02, 6875.39it/s] 76%|███████▌  | 43362/57000 [00:06<00:01, 6868.19it/s] 77%|███████▋  | 44049/57000 [00:06<00:01, 6868.06it/s] 78%|███████▊  | 44736/57000 [00:06<00:01, 6867.99it/s] 80%|███████▉  | 45423/57000 [00:06<00:01, 6863.13it/s] 81%|████████  | 46110/57000 [00:06<00:01, 6860.10it/s] 82%|████████▏ | 46797/57000 [00:06<00:01, 6861.16it/s] 83%|████████▎ | 47484/57000 [00:06<00:01, 6860.42it/s] 85%|████████▍ | 48171/57000 [00:07<00:01, 6860.92it/s] 86%|████████▌ | 48858/57000 [00:07<00:01, 6856.02it/s] 87%|████████▋ | 49544/57000 [00:07<00:01, 6856.45it/s] 88%|████████▊ | 50230/57000 [00:07<00:00, 6846.94it/s] 89%|████████▉ | 50915/57000 [00:07<00:00, 6845.81it/s] 91%|█████████ | 51602/57000 [00:07<00:00, 6852.85it/s] 92%|█████████▏| 52291/57000 [00:07<00:00, 6861.04it/s] 93%|█████████▎| 52980/57000 [00:07<00:00, 6869.40it/s] 94%|█████████▍| 53670/57000 [00:07<00:00, 6877.02it/s] 95%|█████████▌| 54358/57000 [00:07<00:00, 6876.53it/s] 97%|█████████▋| 55048/57000 [00:08<00:00, 6880.70it/s] 98%|█████████▊| 55737/57000 [00:08<00:00, 6883.26it/s] 99%|█████████▉| 56426/57000 [00:08<00:00, 6882.34it/s]100%|██████████| 57000/57000 [00:08<00:00, 6857.52it/s]
-2022-06-04 08:02:00 - loading data from datasets/SphericalMNIST_3000/valid.json
-  0%|          | 0/3000 [00:00<?, ?it/s] 23%|██▎       | 686/3000 [00:00<00:00, 6857.60it/s] 46%|████▌     | 1373/3000 [00:00<00:00, 6859.66it/s] 69%|██████▊   | 2060/3000 [00:00<00:00, 6860.71it/s] 92%|█████████▏| 2747/3000 [00:00<00:00, 6864.13it/s]100%|██████████| 3000/3000 [00:00<00:00, 6860.89it/s]
-2022-06-04 08:02:00 - loading data from datasets/SphericalMNIST_3000/test.json
-  0%|          | 0/10000 [00:00<?, ?it/s]  7%|▋         | 687/10000 [00:00<00:01, 6867.89it/s] 14%|█▎        | 1374/10000 [00:00<00:01, 6859.02it/s] 21%|██        | 2061/10000 [00:00<00:01, 6860.32it/s] 27%|██▋       | 2748/10000 [00:00<00:01, 6860.01it/s] 34%|███▍      | 3435/10000 [00:00<00:00, 6860.49it/s] 41%|████      | 4124/10000 [00:00<00:00, 6867.59it/s] 48%|████▊     | 4811/10000 [00:00<00:00, 6866.19it/s] 55%|█████▍    | 5498/10000 [00:00<00:00, 6864.78it/s] 62%|██████▏   | 6185/10000 [00:00<00:00, 6864.97it/s] 69%|██████▊   | 6872/10000 [00:01<00:00, 6863.29it/s] 76%|███████▌  | 7560/10000 [00:01<00:00, 6867.38it/s] 82%|████████▏ | 8248/10000 [00:01<00:00, 6870.66it/s] 89%|████████▉ | 8936/10000 [00:01<00:00, 6870.64it/s] 96%|█████████▋| 9625/10000 [00:01<00:00, 6874.78it/s]100%|██████████| 10000/10000 [00:01<00:00, 6867.53it/s]
-GPU available: True, used: True
-TPU available: False, using: 0 TPU cores
-IPU available: False, using: 0 IPUs
-HPU available: False, using: 0 HPUs
-LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
-
-  | Name           | Type       | Params
-----------------------------------------------
-0 | encoder        | Sequential | 427 K 
-1 | hidden2mu      | Linear     | 16.5 K
-2 | hidden2log_var | Linear     | 16.5 K
-3 | decoder        | Sequential | 428 K 
-----------------------------------------------
-889 K     Trainable params
-0         Non-trainable params
-889 K     Total params
-3.558     Total estimated model params size (MB)
-Sanity Checking: 0it [00:00, ?it/s]Sanity Checking:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:245: PossibleUserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 24 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
-  category=PossibleUserWarning,
-Traceback (most recent call last):
-  File "fwrench/applications/pipeline.py", line 217, in <module>
-    fire.Fire(main)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
-    component_trace = _Fire(component, args, parsed_flag_args, context, name)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
-    target=component.__name__)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
-    component = fn(*varargs, **kwargs)
-  File "fwrench/applications/pipeline.py", line 108, in main
-    embedder.fit(train_data, valid_data, test_data)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_embedding.py", line 37, in fit
-    self.model, datamodule=dm)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 771, in fit
-    self._fit_impl, model, train_dataloaders, val_dataloaders, datamodule, ckpt_path
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 723, in _call_and_handle_interrupt
-    return trainer_fn(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 811, in _fit_impl
-    results = self._run(model, ckpt_path=self.ckpt_path)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1236, in _run
-    results = self._run_stage()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1323, in _run_stage
-    return self._run_train()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1345, in _run_train
-    self._run_sanity_check()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1413, in _run_sanity_check
-    val_loop.run()
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/base.py", line 204, in run
-    self.advance(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/dataloader/evaluation_loop.py", line 154, in advance
-    dl_outputs = self.epoch_loop.run(self._data_fetcher, dl_max_batches, kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/base.py", line 204, in run
-    self.advance(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 128, in advance
-    output = self._evaluation_step(**kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/loops/epoch/evaluation_epoch_loop.py", line 226, in _evaluation_step
-    output = self.trainer._call_strategy_hook("validation_step", *kwargs.values())
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/trainer/trainer.py", line 1765, in _call_strategy_hook
-    output = fn(*args, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/pytorch_lightning/strategies/strategy.py", line 344, in validation_step
-    return self.model.validation_step(*args, **kwargs)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 116, in validation_step
-    mu, log_var, x_out = self.forward(x)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 154, in forward
-    mu, log_var = self.encode(x)
-  File "/hdd2/kaylee/FWRENCH/fwrench/embeddings/vae_utils/vae.py", line 84, in encode
-    hidden = self.encoder(x)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1051, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/container.py", line 139, in forward
-    input = module(input)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/module.py", line 1051, in _call_impl
-    return forward_call(*input, **kwargs)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/modules/linear.py", line 96, in forward
-    return F.linear(input, self.weight, self.bias)
-  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/torch/nn/functional.py", line 1847, in linear
-    return torch._C._nn.linear(input, weight, bias)
-RuntimeError: mat1 and mat2 shapes cannot be multiplied (16x3600 and 784x392)
-                                                                   

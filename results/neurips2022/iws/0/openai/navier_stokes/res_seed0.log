@@ -1,0 +1,50 @@
+2022-06-05 11:50:17 - loading data from datasets/NavierStokes_100/train.json
+  0%|          | 0/100 [00:00<?, ?it/s]100%|██████████| 100/100 [00:00<00:00, 6892.07it/s]
+2022-06-05 11:50:17 - loading data from datasets/NavierStokes_100/valid.json
+  0%|          | 0/100 [00:00<?, ?it/s]100%|██████████| 100/100 [00:00<00:00, 6848.29it/s]
+2022-06-05 11:50:17 - loading data from datasets/NavierStokes_100/test.json
+  0%|          | 0/1900 [00:00<?, ?it/s] 34%|███▎      | 641/1900 [00:00<00:00, 6409.44it/s] 67%|██████▋   | 1282/1900 [00:00<00:00, 6388.37it/s]100%|██████████| 1900/1900 [00:00<00:00, 6382.29it/s]
+OPENAI CLIP ZERO SHOT W/ TEXTS ['The Navier-Stokes equation in the turbulent regime with low viscosity: 1e-5.', 'The Navier-Stokes equation with high viscosity: 1e-3.']
+Extracting image features...
+  0%|          | 0/100 [00:00<?, ?it/s]  1%|          | 1/100 [00:00<01:14,  1.32it/s] 19%|█▉        | 19/100 [00:00<00:02, 29.74it/s] 38%|███▊      | 38/100 [00:00<00:01, 59.20it/s] 57%|█████▋    | 57/100 [00:01<00:00, 86.12it/s] 76%|███████▌  | 76/100 [00:01<00:00, 109.27it/s] 95%|█████████▌| 95/100 [00:01<00:00, 128.40it/s]100%|██████████| 100/100 [00:01<00:00, 77.46it/s]
+IMAGE FEATURES SHAPE torch.Size([100, 1024])
+LOGIT SHAPE torch.Size([100, 2])
+OPENAI CLIP ZERO SHOT W/ TEXTS ['The Navier-Stokes equation in the turbulent regime with low viscosity: 1e-5.', 'The Navier-Stokes equation with high viscosity: 1e-3.']
+Extracting image features...
+  0%|          | 0/100 [00:00<?, ?it/s] 19%|█▉        | 19/100 [00:00<00:00, 186.70it/s] 38%|███▊      | 38/100 [00:00<00:00, 186.34it/s] 57%|█████▋    | 57/100 [00:00<00:00, 186.05it/s] 76%|███████▌  | 76/100 [00:00<00:00, 186.06it/s] 95%|█████████▌| 95/100 [00:00<00:00, 186.06it/s]100%|██████████| 100/100 [00:00<00:00, 186.08it/s]
+IMAGE FEATURES SHAPE torch.Size([100, 1024])
+LOGIT SHAPE torch.Size([100, 2])
+OPENAI CLIP ZERO SHOT W/ TEXTS ['The Navier-Stokes equation in the turbulent regime with low viscosity: 1e-5.', 'The Navier-Stokes equation with high viscosity: 1e-3.']
+Extracting image features...
+  0%|          | 0/1900 [00:00<?, ?it/s]  1%|          | 19/1900 [00:00<00:10, 184.06it/s]  2%|▏         | 38/1900 [00:00<00:10, 183.88it/s]  3%|▎         | 57/1900 [00:00<00:10, 184.28it/s]  4%|▍         | 76/1900 [00:00<00:09, 185.04it/s]  5%|▌         | 95/1900 [00:00<00:09, 185.21it/s]  6%|▌         | 114/1900 [00:00<00:09, 185.12it/s]  7%|▋         | 133/1900 [00:00<00:09, 183.94it/s]  8%|▊         | 152/1900 [00:00<00:09, 183.94it/s]  9%|▉         | 171/1900 [00:00<00:09, 183.99it/s] 10%|█         | 190/1900 [00:01<00:09, 184.38it/s] 11%|█         | 209/1900 [00:01<00:09, 184.75it/s] 12%|█▏        | 228/1900 [00:01<00:09, 184.97it/s] 13%|█▎        | 247/1900 [00:01<00:11, 149.75it/s] 14%|█▍        | 266/1900 [00:01<00:10, 158.83it/s] 15%|█▌        | 285/1900 [00:01<00:09, 165.90it/s] 16%|█▌        | 304/1900 [00:01<00:09, 171.21it/s] 17%|█▋        | 323/1900 [00:01<00:08, 175.28it/s] 18%|█▊        | 342/1900 [00:01<00:08, 178.16it/s] 19%|█▉        | 361/1900 [00:02<00:08, 180.09it/s] 20%|██        | 380/1900 [00:02<00:08, 181.47it/s] 21%|██        | 399/1900 [00:02<00:08, 182.39it/s] 22%|██▏       | 418/1900 [00:02<00:08, 183.07it/s] 23%|██▎       | 437/1900 [00:02<00:07, 183.62it/s] 24%|██▍       | 456/1900 [00:02<00:07, 184.01it/s] 25%|██▌       | 475/1900 [00:02<00:07, 184.32it/s] 26%|██▌       | 494/1900 [00:02<00:07, 184.41it/s] 27%|██▋       | 513/1900 [00:02<00:07, 184.02it/s] 28%|██▊       | 532/1900 [00:02<00:07, 184.19it/s] 29%|██▉       | 551/1900 [00:03<00:07, 184.34it/s] 30%|███       | 570/1900 [00:03<00:07, 184.37it/s] 31%|███       | 589/1900 [00:03<00:07, 184.39it/s] 32%|███▏      | 608/1900 [00:03<00:07, 184.43it/s] 33%|███▎      | 627/1900 [00:03<00:06, 184.55it/s] 34%|███▍      | 646/1900 [00:03<00:06, 184.61it/s] 35%|███▌      | 665/1900 [00:03<00:06, 184.57it/s] 36%|███▌      | 684/1900 [00:03<00:06, 184.12it/s] 37%|███▋      | 703/1900 [00:03<00:06, 184.29it/s] 38%|███▊      | 722/1900 [00:03<00:06, 184.08it/s] 39%|███▉      | 741/1900 [00:04<00:06, 184.19it/s] 40%|████      | 760/1900 [00:04<00:06, 184.36it/s] 41%|████      | 779/1900 [00:04<00:06, 184.56it/s] 42%|████▏     | 798/1900 [00:04<00:06, 182.54it/s] 43%|████▎     | 817/1900 [00:04<00:05, 183.03it/s] 44%|████▍     | 836/1900 [00:04<00:05, 182.97it/s] 45%|████▌     | 855/1900 [00:04<00:05, 183.04it/s] 46%|████▌     | 874/1900 [00:04<00:05, 183.31it/s] 47%|████▋     | 893/1900 [00:04<00:05, 183.43it/s] 48%|████▊     | 912/1900 [00:05<00:05, 183.55it/s] 49%|████▉     | 931/1900 [00:05<00:05, 183.83it/s] 50%|█████     | 950/1900 [00:05<00:05, 183.73it/s] 51%|█████     | 969/1900 [00:05<00:05, 183.75it/s] 52%|█████▏    | 988/1900 [00:05<00:04, 183.86it/s] 53%|█████▎    | 1007/1900 [00:05<00:04, 183.84it/s] 54%|█████▍    | 1026/1900 [00:05<00:04, 183.87it/s] 55%|█████▌    | 1045/1900 [00:05<00:04, 183.81it/s] 56%|█████▌    | 1064/1900 [00:05<00:04, 183.70it/s] 57%|█████▋    | 1083/1900 [00:05<00:04, 183.69it/s] 58%|█████▊    | 1102/1900 [00:06<00:04, 183.79it/s] 59%|█████▉    | 1121/1900 [00:06<00:04, 183.88it/s] 60%|██████    | 1140/1900 [00:06<00:04, 183.88it/s] 61%|██████    | 1159/1900 [00:06<00:04, 183.75it/s] 62%|██████▏   | 1178/1900 [00:06<00:03, 183.76it/s] 63%|██████▎   | 1197/1900 [00:06<00:03, 183.75it/s] 64%|██████▍   | 1216/1900 [00:06<00:03, 183.65it/s] 65%|██████▌   | 1235/1900 [00:06<00:03, 183.59it/s] 66%|██████▌   | 1254/1900 [00:06<00:03, 183.14it/s] 67%|██████▋   | 1273/1900 [00:06<00:03, 183.20it/s] 68%|██████▊   | 1292/1900 [00:07<00:03, 183.10it/s] 69%|██████▉   | 1311/1900 [00:07<00:03, 183.32it/s] 70%|███████   | 1330/1900 [00:07<00:03, 183.20it/s] 71%|███████   | 1349/1900 [00:07<00:03, 183.34it/s] 72%|███████▏  | 1368/1900 [00:07<00:02, 180.99it/s] 73%|███████▎  | 1387/1900 [00:07<00:02, 177.70it/s] 74%|███████▍  | 1405/1900 [00:07<00:02, 175.71it/s] 75%|███████▍  | 1423/1900 [00:07<00:02, 174.38it/s] 76%|███████▌  | 1441/1900 [00:07<00:02, 173.38it/s] 77%|███████▋  | 1459/1900 [00:08<00:02, 172.69it/s] 78%|███████▊  | 1477/1900 [00:08<00:02, 172.23it/s] 79%|███████▊  | 1495/1900 [00:08<00:02, 171.74it/s] 80%|███████▉  | 1513/1900 [00:08<00:02, 171.65it/s] 81%|████████  | 1531/1900 [00:08<00:02, 171.47it/s] 82%|████████▏ | 1549/1900 [00:08<00:02, 171.41it/s] 82%|████████▏ | 1567/1900 [00:08<00:01, 171.48it/s] 83%|████████▎ | 1585/1900 [00:08<00:01, 171.52it/s] 84%|████████▍ | 1603/1900 [00:08<00:01, 171.35it/s] 85%|████████▌ | 1621/1900 [00:08<00:01, 171.28it/s] 86%|████████▋ | 1639/1900 [00:09<00:01, 171.23it/s] 87%|████████▋ | 1657/1900 [00:09<00:01, 171.23it/s] 88%|████████▊ | 1675/1900 [00:09<00:01, 171.19it/s] 89%|████████▉ | 1693/1900 [00:09<00:01, 171.21it/s] 90%|█████████ | 1711/1900 [00:09<00:01, 171.11it/s] 91%|█████████ | 1729/1900 [00:09<00:00, 173.65it/s] 92%|█████████▏| 1748/1900 [00:09<00:00, 176.63it/s] 93%|█████████▎| 1766/1900 [00:09<00:00, 175.62it/s] 94%|█████████▍| 1784/1900 [00:09<00:00, 174.41it/s] 95%|█████████▍| 1802/1900 [00:10<00:00, 173.46it/s] 96%|█████████▌| 1821/1900 [00:10<00:00, 176.33it/s] 97%|█████████▋| 1840/1900 [00:10<00:00, 178.45it/s] 98%|█████████▊| 1859/1900 [00:10<00:00, 179.88it/s] 99%|█████████▉| 1878/1900 [00:10<00:00, 181.07it/s]100%|█████████▉| 1897/1900 [00:10<00:00, 181.75it/s]100%|██████████| 1900/1900 [00:10<00:00, 179.73it/s]IMAGE FEATURES SHAPE torch.Size([1900, 1024])
+LOGIT SHAPE torch.Size([1900, 2])
+2022-06-05 11:50:33 - Using LF classes: [functools.partial(<class 'sklearn.tree._classes.DecisionTreeClassifier'>, max_depth=1), <class 'sklearn.linear_model._logistic.LogisticRegression'>]
+(100, 6)
+|----------------------------------------------------------------------------------------------------|0.0% 0/20|█████-----------------------------------------------------------------------------------------------|5.0% 1/20
+/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive/utils.py:683: RuntimeWarning: invalid value encountered in true_divide
+  accuracy = (tp + tn) / numvotes
+Traceback (most recent call last):
+  File "fwrench/applications/pipeline.py", line 232, in <module>
+    fire.Fire(main)
+  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
+    target=component.__name__)
+  File "/hdd2/kaylee/anaconda3/envs/FWRENCH/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "fwrench/applications/pipeline.py", line 169, in main
+    logger,
+  File "/hdd2/kaylee/FWRENCH/fwrench/utils/autows.py", line 230, in run_iws
+    selector.fit(valid_data_embed, train_data_embed)
+  File "/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive_lf_selector.py", line 144, in fit
+    IWSsession.run_experiments(self.num_iter)
+  File "/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive/iws.py", line 425, in run_experiments
+    self.next_candidate()
+  File "/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive/iws.py", line 488, in next_candidate
+    self.next_candidate()
+  File "/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive/iws.py", line 472, in next_candidate
+    idx = self.random_acquisition()
+  File "/hdd2/kaylee/FWRENCH/fwrench/lf_selectors/interactive/iws.py", line 302, in random_acquisition
+    idx = np.random.choice(self.idxs[idxsbool])
+  File "mtrand.pyx", line 915, in numpy.random.mtrand.RandomState.choice
+ValueError: 'a' cannot be empty unless no samples are taken

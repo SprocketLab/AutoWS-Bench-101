@@ -1,0 +1,11 @@
+2022-06-05 04:44:58 - loading data from datasets/NavierStokes_100/train.json
+  0%|          | 0/100 [00:00<?, ?it/s]100%|██████████| 100/100 [00:00<00:00, 6926.09it/s]
+2022-06-05 04:44:58 - loading data from datasets/NavierStokes_100/valid.json
+  0%|          | 0/100 [00:00<?, ?it/s]100%|██████████| 100/100 [00:00<00:00, 6920.61it/s]
+2022-06-05 04:44:58 - loading data from datasets/NavierStokes_100/test.json
+  0%|          | 0/1900 [00:00<?, ?it/s] 34%|███▍      | 655/1900 [00:00<00:00, 6543.53it/s] 69%|██████▉   | 1310/1900 [00:00<00:00, 6519.28it/s]100%|██████████| 1900/1900 [00:00<00:00, 6516.53it/s]
+2022-06-05 04:45:02 - LogisticRegression supervised: 1.0
+2022-06-05 04:45:03 - LogisticRegression unlabeled train: 1.0
+2022-06-05 04:45:04 - label model train acc:    1.0
+2022-06-05 04:45:04 - label model coverage:     1.0
+1.0
