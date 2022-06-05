@@ -291,6 +291,10 @@ def get_ember_2017(
     valid_data = EmberDataset('valid', name='ember_2017')
     test_data = EmberDataset('test', name='ember_2017')
 
+    # could remove the tar file after loading 
+    # os.remove('ember_dataset_2017_2.tar.bz2')
+    # shutil.rmtree('ember_2017_2')
+
     n_classes = 2
 
     data = data_dir
