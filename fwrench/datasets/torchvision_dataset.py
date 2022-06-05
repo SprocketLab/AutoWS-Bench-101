@@ -18,6 +18,7 @@ import os, random
 
 from .dataset import FWRENCHDataset
 from .ecg_dataset import ECGDataModule
+from .navier_stokes_dataset import check_and_download
 from .ember import create_vectorized_features, read_vectorized_features, create_metadata
 
 
@@ -322,6 +323,7 @@ class EmberDataset(TorchVisionDataset):
         y_train = y_train[train_rows]
         train_selection = random.sample(range(X_train.shape[0]), int(X_train.shape[0]*0.5))
         train_data = torch.from_numpy(X_train[train_selection])
+        train_data = torch.unsqueeze(train_data, 1)
         train_labels = torch.from_numpy(y_train[train_selection].astype(int))
         trainvalid = data_utils.TensorDataset(train_data, train_labels)
         train_split, valid_split = TorchVisionDataset._split(
@@ -333,6 +335,7 @@ class EmberDataset(TorchVisionDataset):
         y_test = y_test[test_rows]
         test_selection = random.sample(range(X_test.shape[0]), int(X_test.shape[0]*0.5))
         test_data = torch.from_numpy(X_test[test_selection])
+        test_data = torch.unsqueeze(test_data, 1)
         test_labels = torch.from_numpy(y_test[test_selection].astype(int))
         test_split = data_utils.TensorDataset(test_data, test_labels)
         valid_size = len(valid_split)
@@ -345,13 +348,7 @@ class NavierStokesDataset(TorchVisionDataset):
 
     def download(self):
         
-        ## TODO: change the path.....
-        valid_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy")
-        valid_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_val.npy")
-        train_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_val_transpose.npy")
-        train_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_val.npy")
-        test_X_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/x_test_transpose.npy")
-        test_y_np = np.load("/home/zihengh1/FWRENCH/datasets/navier_stokes/y_test.npy")
+        train_X_np, train_y_np, valid_X_np, valid_y_np, test_X_np, test_y_np = check_and_download()
         
         valid_data = torch.from_numpy(valid_X_np)
         valid_labels = torch.from_numpy(valid_y_np)
