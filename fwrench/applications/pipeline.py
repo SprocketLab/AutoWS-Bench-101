@@ -15,7 +15,7 @@ from wrench.logging import LoggingHandler
 
 def main(
     dataset="mnist",
-    dataset_home="../../datasets",
+    dataset_home="./datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
     #
     #
