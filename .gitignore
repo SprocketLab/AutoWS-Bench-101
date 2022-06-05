@@ -142,3 +142,6 @@ results/random_search_log.txt
 
 gtsrb/*
 s2_mnist.gz
+
+ember_2017_2/
+ember_dataset_2017_2.tar.bz2

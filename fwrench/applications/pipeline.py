@@ -96,7 +96,7 @@ def main(
         emb = PCA(n_components=100)
         embedder = feats.SklearnEmbedding(emb)
     elif embedding == "resnet18":
-        embedder = feats.ResNet18Embedding()
+        embedder = feats.ResNet18Embedding(dataset)
     elif embedding == "vae":
         embedder = feats.VAE2DEmbedding()
     elif embedding == "clip":
@@ -111,7 +111,7 @@ def main(
     else:
         raise NotImplementedError
 
-    if (embedding == "resnet18") and (dataset == "ecg" or dataset == "ember"):
+    if ((embedding == "resnet18") and (dataset == "ecg")) or ((embedding == "resnet18") and (dataset == "ember")):
         embedder.fit(valid_data, test_data)
         valid_data_embed = embedder.transform(valid_data)
         test_data_embed = embedder.transform(test_data)
