@@ -301,10 +301,11 @@ def run_snuba(
     else:
         selector = MySnubaSelector()
     selector.fit(valid_data_embed, train_data_embed)
-    for i in range(len(selector.lf_selectors)):
-        logger.info(
-            f"Selector {i} stats\n{selector.lf_selectors[i].hg.heuristic_stats()}"
-        )
+    if k_cls > 2:
+        for i in range(len(selector.lf_selectors)):
+            logger.info(
+                f"Selector {i} stats\n{selector.lf_selectors[i].hg.heuristic_stats()}"
+            )
 
     train_weak_labels = selector.predict(train_data_embed)
     train_data.weak_labels = train_weak_labels.tolist()
