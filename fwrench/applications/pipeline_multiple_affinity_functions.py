@@ -16,7 +16,7 @@ from wrench.logging import LoggingHandler
 def main(
     dataset="mnist",
     dataset_home="./datasets",
-    embedding="pca",  # raw | pca | resnet18 | vae
+    # embedding="pca",  # raw | pca | resnet18 | vae
     #
     #
     lf_selector="goggles",  # snuba | interactive | goggles
@@ -35,7 +35,8 @@ def main(
     seed=123,
     #
     # GOGGLES options
-    multiple_affinity=["raw", "pca", "resnet18", "vae"],  # multiple embeddings to create affinity functions
+    multiple_affinity=["raw", "pca", "resnet18"],  # multiple embeddings to create affinity functions
+    prompt=None,
 ):
                        
     ################ HOUSEKEEPING/SELF-CARE 😊 ################################
@@ -97,7 +98,8 @@ def main(
     
     if lf_selector == "goggles":
         for embedding in multiple_affinity:
-            train_data_backup = copy.deepcopy(train_data)
+            print(embedding)
+            # train_data_backup = copy.deepcopy(train_data)
             valid_data_backup = copy.deepcopy(valid_data)
             test_data_backup = copy.deepcopy(test_data)
             
@@ -107,7 +109,7 @@ def main(
                 emb = PCA(n_components=100)
                 embedder = feats.SklearnEmbedding(emb)
             elif embedding == "resnet18":
-                embedder = feats.ResNet18Embedding()
+                embedder = feats.ResNet18Embedding(dataset)
             elif embedding == "vae":
                 embedder = feats.VAE2DEmbedding()
             elif embedding == "clip":
@@ -117,43 +119,30 @@ def main(
             elif embedding == "oracle":
                 embedder = feats.OracleEmbedding(k_cls)
             elif embedding == "openai":
+                iws_cardinality = 2
                 embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
             else:
                 raise NotImplementedError
 
-            embedder.fit(train_data_backup, valid_data_backup, test_data_backup)
-            train_data_embed = embedder.transform(train_data_backup)
-            valid_data_embed = embedder.transform(valid_data_backup)
-            test_data_embed = embedder.transform(test_data_backup)
+            if (dataset == "ember" or dataset == "ecg"):
+                embedder.fit(valid_data_backup, test_data_backup)
+                valid_data_embed = embedder.transform(valid_data_backup)
+                test_data_embed = embedder.transform(test_data_backup)
 
-            train_data_embed_list.append(train_data_embed)
-            valid_data_embed_list.append(valid_data_embed)
-            test_data_embed_list.append(test_data_embed)
+                valid_data_embed_list.append(valid_data_embed)
+                test_data_embed_list.append(test_data_embed)
+
+            else:
+                embedder.fit(train_data_backup, valid_data_backup, test_data_backup)
+                train_data_embed = embedder.transform(train_data_backup)
+                valid_data_embed = embedder.transform(valid_data_backup)
+                test_data_embed = embedder.transform(test_data_backup)
+
+                train_data_embed_list.append(train_data_embed)
+                valid_data_embed_list.append(valid_data_embed)
+                test_data_embed_list.append(test_data_embed)
     else:
-        if embedding == "raw":
-            embedder = feats.FlattenEmbedding()
-        elif embedding == "pca":
-            emb = PCA(n_components=100)
-            embedder = feats.SklearnEmbedding(emb)
-        elif embedding == "resnet18":
-            embedder = feats.ResNet18Embedding()
-        elif embedding == "vae":
-            embedder = feats.VAE2DEmbedding()
-        elif embedding == "clip":
-            embedder = feats.CLIPEmbedding()
-        elif embedding == "clip_zeroshot":
-            embedder = feats.ZeroShotCLIPEmbedding(dataset=dataset, prompt=prompt)
-        elif embedding == "oracle":
-            embedder = feats.OracleEmbedding(k_cls)
-        elif embedding == "openai":
-            embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
-        else:
-            raise NotImplementedError
-
-        embedder.fit(train_data, valid_data, test_data)
-        train_data_embed = embedder.transform(train_data)
-        valid_data_embed = embedder.transform(valid_data)
-        test_data_embed = embedder.transform(test_data)
+        print("ERROR")
     
     ################ AUTOMATED WEAK SUPERVISION ###############################
     if lf_selector == "snuba":
