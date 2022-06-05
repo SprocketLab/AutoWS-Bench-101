@@ -15,7 +15,7 @@ from wrench.logging import LoggingHandler
 
 def main(
     dataset="mnist",
-    dataset_home="../../datasets",
+    dataset_home="./datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
     #
     #
@@ -106,6 +106,7 @@ def main(
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
     elif embedding == "openai":
+        iws_cardinality = 2
         embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
     else:
         raise NotImplementedError
