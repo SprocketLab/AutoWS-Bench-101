@@ -106,7 +106,6 @@ def main(
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
     elif embedding == "openai":
-        iws_cardinality = 2
         embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
     else:
         raise NotImplementedError
