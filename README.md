@@ -33,9 +33,11 @@ Our benchmark automatic download the dataset for you. Please run [`data_settings
 
 ## Run the Experiment
 To run the whole implementation, we provide a [`pipeline`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/applications/pipeline.py). This pipeline will walk you through a full example of our framework. It allows you to choose the datasets and automatic download for you, select the embeddings, and generate a bunch of labeling functions (LFs) with the LF selectors you preferred. It then trains a `Snorkel` label model and gives you the accuracy and coverage. 
-### Examples
-#### Training MNIST with `pca` embedding and `snuba` selector
-```
+
+## Examples
+
+### Training MNIST with `pca` embedding and `snuba` selector
+```python
 import logging
 import random
 import copy
@@ -97,6 +99,72 @@ def main(
         train_data_embed, test_data_embed, snuba_cardinality,
         snuba_combo_samples, snuba_iterations, lf_class_options,
         k_cls, logger,
+    )
+    acc = accuracy_score(test_covered.labels, hard_labels)
+    cov = float(len(test_covered.labels)) / float(len(test_data.labels))
+    logger.info(f"label model train acc:    {acc}")
+    logger.info(f"label model coverage:     {cov}")
+    return acc
+
+if __name__ == "__main__":
+    fire.Fire(main)
+```
+### Training ECG with `openai` embedding and `goggles` selector
+```python
+import logging
+import random
+import copy
+
+import fire
+import fwrench.embeddings as feats
+import fwrench.utils.autows as autows
+import fwrench.utils.data_settings as settings
+import numpy as np
+import torch
+from sklearn.decomposition import PCA
+from sklearn.metrics import accuracy_score
+from wrench.logging import LoggingHandler
+
+def main(
+    dataset="ecg",
+    dataset_home="./datasets",
+    embedding="openai",  # raw | pca | resnet18 | vae
+
+    lf_selector="goggles",  # snuba | interactive | goggles
+    em_hard_labels=False,  # Use hard or soft labels for end model training
+    n_labeled_points=100,  # Number of points used to train lf_selector
+    #
+    lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
+    seed=123,
+    prompt=None,
+):
+    ################ HOUSEKEEPING/SELF-CARE 😊 ################################
+    random.seed(seed)
+    logging.basicConfig(
+        format="%(asctime)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.INFO,
+        handlers=[LoggingHandler()],
+    )
+    logger = logging.getLogger(__name__)
+    device = torch.device("cuda")
+
+    ################ LOAD DATASET #############################################
+    train_data, valid_data, test_data, k_cls, model = settings.get_ecg(
+            n_labeled_points, dataset_home
+    )
+    embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
+
+    embedder.fit(valid_data, test_data)
+    valid_data_embed = embedder.transform(valid_data)
+    test_data_embed = embedder.transform(test_data)
+    train_data_embed = copy.deepcopy(valid_data_embed)
+    train_data = copy.deepcopy(valid_data)
+
+    ################ AUTOMATED WEAK SUPERVISION ###############################
+    test_covered, hard_labels, soft_labels = autows.run_goggles(
+        valid_data, train_data, test_data, valid_data_embed,
+        train_data_embed, test_data_embed, logger,
     )
     acc = accuracy_score(test_covered.labels, hard_labels)
     cov = float(len(test_covered.labels)) / float(len(test_data.labels))
