@@ -32,7 +32,12 @@ Our benchmark automatic download the dataset for you. Please run [`data_settings
 | [NavierStokes](https://arxiv.org/abs/2010.08895)   | 2             |   100     | 100 |    1900
 
 ## Run the Experiment
-To run the whole implementation, we provide a [`pipeline`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/applications/pipeline.py). This pipeline will walk you through a full example of our framework. It allows you to choose the datasets and automatic download for you, select the embeddings, and generate a bunch of labeling functions (LFs) with the LF selectors you preferred. It then trains a `Snorkel` label model and gives you the accuracy and coverage. 
+To run the whole implementation, we provide a [`pipeline`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/applications/pipeline.py). This pipeline will walk you through a full example of our framework. It allows you to choose the datasets and automatic download for you, select the embeddings, and generate a bunch of labeling functions (LFs) with the LF selectors you preferred. It then trains a `Snorkel` label model and gives you the accuracy and coverage.
+
+```
+python3 fwrench/applications/pipeline.py --dataset='cifar10' --embedding='openai' --lf_selector='iws'
+python3 fwrench/applications/pipeline.py --dataset='ecg' --embedding='pca' --lf_selector='snuba'
+```
 
 ## Examples
 
@@ -81,7 +86,7 @@ def main(
     logger = logging.getLogger(__name__)
     device = torch.device("cuda")
 
-    ################ LOAD DATASET #############################################
+    ################ LOAD DATASET 😊  ##########################################
     train_data, valid_data, test_data, k_cls, model = settings.get_mnist(
             n_labeled_points, dataset_home
     )
