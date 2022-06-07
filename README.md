@@ -17,7 +17,7 @@ conda env create -f env_new_new.yml
 source activate FWRENCH
 ```
 ## Datasets
-Our benchmark auotomatic download the dataset for you. Please run `[data_settings.py](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py)` to download the specific dataset you need.
+Our benchmark auotomatic download the dataset for you. Please run [data_settings.py](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
 
 | Name           | # class       | 
 | -------------- | ------------- |
