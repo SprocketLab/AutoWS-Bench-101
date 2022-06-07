@@ -17,7 +17,7 @@ conda env create -f env_new_new.yml
 source activate FWRENCH
 ```
 ## Datasets
-Our benchmark auotomatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
+Our benchmark automatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
 
 | Name           | # class       | # train      |# valid       |# test        |
 | -------------- | ------------- |------------- |------------- |------------- |
@@ -32,4 +32,4 @@ Our benchmark auotomatic download the dataset for you. Please run [`data_setting
 | [NavierStokes](https://arxiv.org/abs/2010.08895)   | 2             |   100     | 100 |    1900
 
 ## Run the Experiment
-To run the whole implementation, we provide a [`pipeline`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/applications/pipeline.py). This pipeline will walk you through a full example of our framework. It allows you to choose the datasets and embeddings, generate a bunch of labeling functions (LFs) with our LF selectors. It then trains a `Snorkel` label model and gives you the accuracy and coverage. 
+To run the whole implementation, we provide a [`pipeline`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/applications/pipeline.py). This pipeline will walk you through a full example of our framework. It allows you to choose the datasets and automatic download for you, select the embeddings, and generate a bunch of labeling functions (LFs) with the LF selectors you preferred. It then trains a `Snorkel` label model and gives you the accuracy and coverage. 
