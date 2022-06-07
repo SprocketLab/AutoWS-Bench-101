@@ -5,6 +5,7 @@
 
 ## Installation
 Install anaconda: Instructions here: https://www.anaconda.com/download/  
+—
 Clone the repository:
 ```
 https://github.com/Kaylee0501/FWRENCH.git
