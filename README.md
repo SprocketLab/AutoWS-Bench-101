@@ -17,14 +17,14 @@ conda env create -f env_new_new.yml
 source activate FWRENCH
 ```
 ## Datasets
-Our benchmark auotomatic download the dataset for you. Please run [data_settings.py](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
+Our benchmark auotomatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
 
-| Name           | # class       | 
-| -------------- | ------------- |
-| MNIST          | 10            |
-| FashionMNIST   | 10            |
-| KMNIST         | 10            |
-| CIFAR10        | 10            |
+| Name           | # class       | # train      |
+| -------------- | ------------- |------------- |
+| MNIST          | 10            | 57000
+| FashionMNIST   | 10            | 57000
+| KMNIST         | 10            | 57000
+| CIFAR10        | 10            | 
 | SphericalMNIST | 10            |
 | PermutedMNIST  | 10            |
 | ECG            | 4             |
