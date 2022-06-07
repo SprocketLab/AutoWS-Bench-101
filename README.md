@@ -37,7 +37,7 @@ To run the whole implementation, we provide a [`pipeline`](https://github.com/Ka
 Please run (feel free to change the argument):
 ```
 python fwrench/applications/pipeline.py --dataset='cifar10' --embedding='openai' --lf_selector='iws'
-python fwrench/applications/pipeline.py --dataset='ecg' --embedding='pca' --lf_selector='snuba'
+python fwrench/applications/pipeline.py --dataset='ember' --embedding='pca' --lf_selector='snuba'
 ```
 
 ## Examples
@@ -115,7 +115,7 @@ def main(
 if __name__ == "__main__":
     fire.Fire(main)
 ```
-### Training ECG with `openai` embedding and `goggles` selector
+### Training ECG with `resnet18` embedding and `goggles` selector
 ```python
 import logging
 import random
@@ -134,7 +134,7 @@ from wrench.logging import LoggingHandler
 def main(
     dataset="ecg",
     dataset_home="./datasets",
-    embedding="openai",  # raw | pca | resnet18 | vae
+    embedding="resnet18",  # raw | pca | resnet18 | vae
 
     lf_selector="goggles",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
@@ -159,7 +159,7 @@ def main(
     train_data, valid_data, test_data, k_cls, model = settings.get_ecg(
             n_labeled_points, dataset_home
     )
-    embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
+    embedder = feats.ResNet18Embedding(dataset)
 
     embedder.fit(valid_data, test_data)
     valid_data_embed = embedder.transform(valid_data)
