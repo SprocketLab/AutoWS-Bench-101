@@ -13,7 +13,7 @@ cd AutoWS-Bench-101
 ```
 Create virtual environment:
 ```
-conda env create -f env_new_new.yml
+conda env create -f environment.yml
 source activate AutoWS-Bench-101
 ```
 Install CLIP:
