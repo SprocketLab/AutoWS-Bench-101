@@ -16,6 +16,10 @@ Create virtual environment:
 conda env create -f env_new_new.yml
 source activate AutoWS-Bench-101
 ```
+Install CLIP:
+```
+pip install git+https://github.com/openai/CLIP.git
+```
 ## Datasets
 Our benchmark automatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
 
