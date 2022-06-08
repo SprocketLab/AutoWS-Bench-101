@@ -8,13 +8,13 @@ Install anaconda: Instructions here: https://www.anaconda.com/download/
 
 Clone the repository:
 ```
-https://github.com/Kaylee0501/FWRENCH.git
-cd FWRENCH
+https://github.com/Kaylee0501/AutoWS-Bench-101.git
+cd AutoWS-Bench-101
 ```
 Create virtual environment:
 ```
 conda env create -f env_new_new.yml
-source activate FWRENCH
+source activate AutoWS-Bench-101
 ```
 ## Datasets
 Our benchmark automatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
