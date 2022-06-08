@@ -8,7 +8,7 @@ Install anaconda: Instructions here: https://www.anaconda.com/download/
 
 Clone the repository:
 ```
-https://github.com/Kaylee0501/AutoWS-Bench-101.git
+git clone https://github.com/Kaylee0501/AutoWS-Bench-101.git
 cd AutoWS-Bench-101
 ```
 Create virtual environment:
