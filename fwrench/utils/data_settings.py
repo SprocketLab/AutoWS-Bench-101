@@ -351,4 +351,97 @@ def get_navier_stokes(
     )
 
     return train_data, valid_data, test_data, n_classes, model
+
+def get_imdb(
+    n_labeled_points, dataset_home,  extract_fn, data_dir="imdb",
+):
+    n_classes = 2
+    
+    data = data_dir
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, extract_feature=True, extract_fn= extract_fn,
+        cache_name=extract_fn, dataset_type="TextDataset"
+    )
+
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
+    train_data = utils.convert_text_to_feature(train_data)
+    valid_data = utils.convert_text_to_feature(valid_data)
+    test_data = utils.convert_text_to_feature(test_data)
+
+    # Create end model
+    model = EndClassifierModel(
+        batch_size=256,
+        test_batch_size=512,
+        n_steps=1_000,
+        backbone="LENET",
+        optimizer="SGD",
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+        binary_mode=False,
+    )
+
+    return train_data, valid_data, test_data, n_classes, model
+
+def get_yelp(
+    n_labeled_points, dataset_home,  extract_fn, data_dir="yelp",
+):
+    n_classes = 2
+    
+    data = data_dir
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, extract_feature=True, extract_fn= extract_fn,
+        cache_name=extract_fn, dataset_type="TextDataset"
+    )
+
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
+    train_data = utils.convert_text_to_feature(train_data)
+    valid_data = utils.convert_text_to_feature(valid_data)
+    test_data = utils.convert_text_to_feature(test_data)
+
+    # Create end model
+    model = EndClassifierModel(
+        batch_size=256,
+        test_batch_size=512,
+        n_steps=1_000,
+        backbone="LENET",
+        optimizer="SGD",
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+        binary_mode=False,
+    )
+
+    return train_data, valid_data, test_data, n_classes, model
+
+def get_youtube(
+    n_labeled_points, dataset_home,  extract_fn, data_dir="youtube",
+):
+    n_classes = 2
+    
+    data = data_dir
+    train_data, valid_data, test_data = load_dataset(
+        dataset_home, data, extract_feature=True, extract_fn= extract_fn,
+        cache_name=extract_fn, dataset_type="TextDataset"
+    )
+
+    valid_data = valid_data.create_subset(np.arange(n_labeled_points))
+
+    train_data = utils.convert_text_to_feature(train_data)
+    valid_data = utils.convert_text_to_feature(valid_data)
+    test_data = utils.convert_text_to_feature(test_data)
+
+    # Create end model
+    model = EndClassifierModel(
+        batch_size=256,
+        test_batch_size=512,
+        n_steps=1_000,
+        backbone="LENET",
+        optimizer="SGD",
+        optimizer_lr=1e-1,
+        optimizer_weight_decay=0.0,
+        binary_mode=False,
+    )
+
+    return train_data, valid_data, test_data, n_classes, model
     

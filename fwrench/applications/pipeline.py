@@ -14,12 +14,14 @@ from wrench.logging import LoggingHandler
 
 
 def main(
-    dataset="mnist",
-    dataset_home="./datasets",
+    dataset="youtube",
+    dataset_home="../../datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
+    # text dataset only
+    extract_fn = "bert", # bow | bert | tfidf | sentence_transformer
     #
     #
-    lf_selector="snuba",  # snuba | interactive | goggles
+    lf_selector="iws",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
     n_labeled_points=100,  # Number of points used to train lf_selector
     #
@@ -85,6 +87,19 @@ def main(
     elif dataset == "navier_stokes":
         train_data, valid_data, test_data, k_cls, model = settings.get_navier_stokes(
             n_labeled_points, dataset_home
+        )
+    elif dataset == "imdb":
+        train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+            n_labeled_points, dataset_home, extract_fn
+        )
+    elif dataset == "yelp":
+        train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+            n_labeled_points, dataset_home, extract_fn
+        )
+    #small dataset, only for testing 
+    elif dataset == "youtube":
+        train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+            n_labeled_points, dataset_home, extract_fn
         )
     else:
         raise NotImplementedError

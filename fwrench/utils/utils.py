@@ -78,6 +78,14 @@ def normalize01(dset):
         dset.examples[i]["feature"] /= float(np.max(dset.examples[i]["feature"]))
     return dset
 
+def convert_text_to_feature(dset):
+    dset.examples = []
+    for feature in dset.features:
+        dist = {}
+        dist["feature"] = feature[np.newaxis, np.newaxis, :]
+        dset.examples.append(dist)
+    return dset
+
 
 def bitreversal_permutation(n):
     log_n = int(math.log2(n))
