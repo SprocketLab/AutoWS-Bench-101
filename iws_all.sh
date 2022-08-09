@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # Snuba sweep over all datasets and embeddings
-resdir=results/neurips2022/iws
+resdir=results/neurips2022/iws_multiclass
 mkdir -p ${resdir}
 
 iws_cardinality=1
 n_labeled_points=100
-lf_selector=iws
+lf_selector=iws_multiclass
 iws_iterations=20
 
 for seed in 0
 do 
-    for emb in openai
+    for emb in pca raw resnet18 openai 
     do 
-        for dataset in mnist cifar10 spherical_mnist permuted_mnist ecg ember
+        for dataset in mnist cifar10 spherical_mnist permuted_mnist ecg ember yelp imdb youtube
         do
         # TODO add navier stokes
 

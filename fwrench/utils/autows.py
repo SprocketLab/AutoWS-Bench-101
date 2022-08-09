@@ -3,7 +3,7 @@ from functools import partial
 
 import fwrench.utils as utils
 import numpy as np
-from fwrench.lf_selectors import IWS_Selector, SnubaSelector, SnubaMulticlassSelector
+from fwrench.lf_selectors import IWS_Selector, SnubaSelector, SnubaMulticlassSelector, IWS_MulticlassSelector
 import fwrench.lf_selectors.goggles_inference as GOGGLES_Inferencer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -227,6 +227,74 @@ def run_iws(
         selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=k_cls)
     else:
         selector = MyIWSSelector()
+    selector.fit(valid_data_embed, train_data_embed)
+
+    train_weak_labels = selector.predict(train_data_embed)
+    train_data.weak_labels = train_weak_labels.tolist()
+    valid_weak_labels = selector.predict(valid_data_embed)
+    valid_data.weak_labels = valid_weak_labels.tolist()
+    test_weak_labels = selector.predict(test_data_embed)
+    test_data.weak_labels = test_weak_labels.tolist()
+
+    label_model = Snorkel()
+    label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
+
+    #### Filter out uncovered training data
+    test_data_covered = test_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(test_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(test_data_covered)
+
+    # Get actual label model accuracy using hard labels
+    utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
+    utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
+    utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
+
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
+
+def run_iws_multiclass(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    cardinality,
+    iterations,  # TODO
+    lf_class_options,
+    k_cls,
+    logger,
+):
+    if lf_class_options == "default":
+        lf_classes = [
+            partial(DecisionTreeClassifier, max_depth=1),
+            LogisticRegression,
+        ]
+    else:
+        if not isinstance(lf_class_options, tuple):
+            lf_class_options = [lf_class_options]
+        lf_classes = []
+        for lf_cls in lf_class_options:
+            if lf_cls == "DecisionTreeClassifier":
+                lf_classes.append(partial(DecisionTreeClassifier, max_depth=1))
+            elif lf_cls == "LogisticRegression":
+                lf_classes.append(LogisticRegression)
+            else:
+                # If the lf class you need isn't implemented, add it here
+                raise NotImplementedError
+    logger.info(f"Using LF classes: {lf_classes}")
+
+    scoring_fn = partial(utils.mixture_metric)
+
+    selector = IWS_MulticlassSelector(
+        lf_generator=lf_classes,
+        scoring_fn=scoring_fn,
+        b=0.1,  # TODO
+        cardinality=cardinality,
+        npredict=100,
+        num_iter=iterations,
+        k_cls=k_cls,
+    )
+    # selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=k_cls)
     selector.fit(valid_data_embed, train_data_embed)
 
     train_weak_labels = selector.predict(train_data_embed)

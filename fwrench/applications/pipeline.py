@@ -14,14 +14,14 @@ from wrench.logging import LoggingHandler
 
 
 def main(
-    dataset="youtube",
-    dataset_home="../../datasets",
+    dataset="mnist",
+    dataset_home="./datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
     # text dataset only
     extract_fn = "bert", # bow | bert | tfidf | sentence_transformer
     #
     #
-    lf_selector="iws",  # snuba | interactive | goggles
+    lf_selector="snuba",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
     n_labeled_points=100,  # Number of points used to train lf_selector
     #
@@ -121,6 +121,7 @@ def main(
     elif embedding == "oracle":
         embedder = feats.OracleEmbedding(k_cls)
     elif embedding == "openai":
+        iws_iterations = 6
         embedder = feats.OpenAICLIPEmbedding(dataset=dataset, prompt=prompt)
     else:
         raise NotImplementedError
@@ -183,7 +184,19 @@ def main(
             logger,
         )
     elif lf_selector == "iws_multiclass":
-        raise NotImplementedError
+        test_covered, hard_labels, soft_labels = autows.run_iws_multiclass(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            iws_cardinality,
+            iws_iterations,
+            lf_class_options,
+            k_cls,
+            logger,
+        )
     elif lf_selector == "goggles":
         test_covered, hard_labels, soft_labels = autows.run_goggles(
             valid_data,

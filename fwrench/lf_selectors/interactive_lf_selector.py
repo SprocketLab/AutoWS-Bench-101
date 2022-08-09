@@ -127,7 +127,8 @@ class IWS_Selector(BaseSelector):
             self.isbinary = True
             heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
             L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
-            print(L_val.shape)
+            print("the shape of the val is: " + str(L_val.shape))
+            print(L_val)
             LFs = sparse.csr_matrix(L_val)
             svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
             LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
