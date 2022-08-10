@@ -420,16 +420,17 @@ def get_youtube(
     n_classes = 2
     
     data = data_dir
+    extract_feature=(extract_fn != None)
     train_data, valid_data, test_data = load_dataset(
-        dataset_home, data, extract_feature=True, extract_fn= extract_fn,
+        dataset_home, data, extract_feature=extract_feature, extract_fn= extract_fn,
         cache_name=extract_fn, dataset_type="TextDataset"
     )
-
     valid_data = valid_data.create_subset(np.arange(n_labeled_points))
-
-    train_data = utils.convert_text_to_feature(train_data)
-    valid_data = utils.convert_text_to_feature(valid_data)
-    test_data = utils.convert_text_to_feature(test_data)
+    
+    if extract_fn is not None:
+        train_data = utils.convert_text_to_feature(train_data)
+        valid_data = utils.convert_text_to_feature(valid_data)
+        test_data = utils.convert_text_to_feature(test_data)
 
     # Create end model
     model = EndClassifierModel(

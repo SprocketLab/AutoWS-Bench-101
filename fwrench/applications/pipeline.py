@@ -89,18 +89,31 @@ def main(
             n_labeled_points, dataset_home
         )
     elif dataset == "imdb":
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
         train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
             n_labeled_points, dataset_home, extract_fn
         )
     elif dataset == "yelp":
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
         train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
             n_labeled_points, dataset_home, extract_fn
         )
     #small dataset, only for testing 
     elif dataset == "youtube":
-        train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn
+            )
     else:
         raise NotImplementedError
 
