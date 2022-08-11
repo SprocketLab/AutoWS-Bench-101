@@ -10,13 +10,14 @@ from .clip_datasets import NLP_DATASETS, IMAGE_DATASETS
 import string
 
 class OpenAICLIPEmbedding(BaseEmbedding):
-    def __init__(self, dataset, prompt=None):
+    def __init__(self, dataset, prompt=None, batch_size=128):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model, self.preprocess = clip.load('RN50', self.device)
         self.model.eval()
         self.dataset = dataset
         self.prompt = prompt
         self.context_length = 77 #default clip https://github.com/openai/CLIP
+        self.batch_size = batch_size
 
     def extract_label_text_features(self, label_text):
         zeroshot_weights = []
@@ -58,8 +59,7 @@ class OpenAICLIPEmbedding(BaseEmbedding):
             return self.transform_image(data)
     
     def clean_texts(self, texts):
-        print("Preprocessing texts...")
-        for i, text in tqdm(enumerate(texts)):
+        for i, text in enumerate(texts):
             text = text.strip().rstrip()
             char_idx = 0
             while (char_idx < len(text)) and (not text[char_idx].isalnum()):
@@ -74,16 +74,31 @@ class OpenAICLIPEmbedding(BaseEmbedding):
             texts[i] = text
         return texts
 
+    def batch_raw_texts(self, text_list):
+        if len(text_list) < self.batch_size:
+            return text_list
+        text_batched = []
+        for i in range(0, len(text_list), self.batch_size):
+            if i+self.batch_size < len(text_list):  
+                batch = text_list[i:i+self.batch_size]
+            else:
+                batch = text_list[i:]
+            text_batched.append(batch)
+        return text_batched
+
     def transform_text(self, data):
         print("Extracting text features...")
-        X_raw, y = self._unpack_data(data, flatten=False, return_y=True, raw=True)
+        X_raw, _ = self._unpack_data(data, flatten=False, return_y=True, raw=True)
         texts = [raw_obj['text'] for raw_obj in X_raw]
         texts = self.clean_texts(texts)
-        texts = clip.tokenize(texts).to(self.device)
-        with torch.no_grad():
-            text_features = self.model.encode_text(texts).detach().cpu()
-        # print(text_features)
-        # exit()
+        texts_batched = self.batch_raw_texts(texts)
+        text_features = []
+        for batch in tqdm(texts_batched):
+            texts_batch = clip.tokenize(batch).to(self.device)
+            with torch.no_grad():
+                text_features_batch = self.model.encode_text(texts_batch).detach().cpu()
+            text_features.extend(text_features_batch)
+        text_features = torch.stack(text_features, dim=0)
         return self._repack_data(data, text_features)
     
     def transform_image(self, data):
