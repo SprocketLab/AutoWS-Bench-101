@@ -6,11 +6,17 @@ import clip
 from PIL import Image
 import numpy as np
 from .zeroshot_labels import classes_
-from .clip_datasets import NLP_DATASETS, IMAGE_DATASETS
+from .clip_datasets import NLP_DATASETS, IMAGE_DATASETS, YOUTUBE_LABELS, IMDB_LABELS, YELP_LABELS 
 import string
 
+NLP_LABELS = {
+    "youtube": YOUTUBE_LABELS,
+    "imdb": IMDB_LABELS,
+    "yelp": YELP_LABELS,
+}
+
 class OpenAICLIPEmbedding(BaseEmbedding):
-    def __init__(self, dataset, prompt=None, batch_size=128):
+    def __init__(self, dataset, prompt=None, batch_size=2560):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model, self.preprocess = clip.load('RN50', self.device)
         self.model.eval()
@@ -86,7 +92,7 @@ class OpenAICLIPEmbedding(BaseEmbedding):
             text_batched.append(batch)
         return text_batched
 
-    def transform_text(self, data):
+    def transform_text(self, data, logit=True):
         print("Extracting text features...")
         X_raw, _ = self._unpack_data(data, flatten=False, return_y=True, raw=True)
         texts = [raw_obj['text'] for raw_obj in X_raw]
@@ -99,7 +105,15 @@ class OpenAICLIPEmbedding(BaseEmbedding):
                 text_features_batch = self.model.encode_text(texts_batch).detach().cpu()
             text_features.extend(text_features_batch)
         text_features = torch.stack(text_features, dim=0)
-        return self._repack_data(data, text_features)
+        if not logit:
+            return self._repack_data(data, text_features)
+        text_features = text_features.detach().cpu().numpy()
+        label_texts = list(NLP_LABELS[self.dataset].values())
+        label_embedding = clip.tokenize(label_texts).to(self.device)
+        with torch.no_grad():
+            label_embedding = self.model.encode_text(label_embedding).detach().cpu().numpy()
+        logits = text_features @ label_embedding.T
+        return self._repack_data(data, logits)
     
     def transform_image(self, data):
         X_np = self._unpack_data(data, flatten=False, return_y=False)

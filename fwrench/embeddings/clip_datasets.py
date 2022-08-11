@@ -12,3 +12,13 @@ IMAGE_DATASETS = [
     "permuted_mnist",
     "navier_stokes",
 ]
+
+YOUTUBE_LABELS = {0: "HAM", 1: "SPAM"}
+IMDB_LABELS = {
+    0: "Negative",
+    1: "Positive"
+}
+YELP_LABELS = {
+    0: "Negative",
+    1: "Positive"
+}
