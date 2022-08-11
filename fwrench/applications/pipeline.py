@@ -93,17 +93,19 @@ def main(
             train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
                 n_labeled_points, dataset_home, extract_fn=None
             )
-        train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn
+            )
     elif dataset == "yelp":
         if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
             train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
                 n_labeled_points, dataset_home, extract_fn=None
             )
-        train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn
+            )
     #small dataset, only for testing 
     elif dataset == "youtube":
         if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':

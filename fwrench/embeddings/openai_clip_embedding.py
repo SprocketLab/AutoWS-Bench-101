@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 from .zeroshot_labels import classes_
 from .clip_datasets import NLP_DATASETS, IMAGE_DATASETS
+import string
 
 class OpenAICLIPEmbedding(BaseEmbedding):
     def __init__(self, dataset, prompt=None):
@@ -52,32 +53,38 @@ class OpenAICLIPEmbedding(BaseEmbedding):
     
     def transform(self, data):
         if self.dataset in NLP_DATASETS:
-            self.transform_text(data)
+            return self.transform_text(data)
         elif self.dataset in IMAGE_DATASETS:
-            self.transform = self.transform_image(data)
+            return self.transform_image(data)
     
-    def extract_text_feature(self, raw_text):
-        text_tokenized = clip.tokenize(raw_text, context_length=self.context_length).to(self.device)
-        text_embedding = self.model.encode_text(text_tokenized)
-        return text_embedding
-    
-    def transform_text(self, data):
-        X_raw, y = self._unpack_data(data, flatten=False, return_y=True, raw=True)
-        text_features_all = []
-        for raw_obj in tqdm(X_raw):
-            try:
-                text_orig = raw_obj['text']
-                text = text_orig[:self.context_length] # truncated to context length
-                text_embedding = self.extract_text_feature(text)
-                text_features_all.append(text_embedding)
-            except:
-                print(f"EXCEPTION ON TEXT: {text_orig} truncating to 1/10 context length and retrying..")
+    def clean_texts(self, texts):
+        print("Preprocessing texts...")
+        for i, text in tqdm(enumerate(texts)):
+            text = text.strip().rstrip()
+            char_idx = 0
+            while (char_idx < len(text)) and (not text[char_idx].isalnum()):
+                char_idx +=1
+            if char_idx < len(text):
+                text = text[char_idx:]
+            if len(text) > self.context_length:
+                text = text[:(self.context_length - 10)]
+            #### THIS IS HACKY ####
+            if "░" in text:
                 text = text[:len(text)//10]
-                text_embedding = self.extract_text_feature(text)
-                text_features_all.append(text_embedding)
-                
-        text_features_all = torch.squeeze(torch.stack(text_features_all, dim=1)).to(self.device)
-        return self._repack_data(data, text_features_all)
+            texts[i] = text
+        return texts
+
+    def transform_text(self, data):
+        print("Extracting text features...")
+        X_raw, y = self._unpack_data(data, flatten=False, return_y=True, raw=True)
+        texts = [raw_obj['text'] for raw_obj in X_raw]
+        texts = self.clean_texts(texts)
+        texts = clip.tokenize(texts).to(self.device)
+        with torch.no_grad():
+            text_features = self.model.encode_text(texts).detach().cpu()
+        # print(text_features)
+        # exit()
+        return self._repack_data(data, text_features)
     
     def transform_image(self, data):
         X_np = self._unpack_data(data, flatten=False, return_y=False)
