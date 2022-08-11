@@ -84,6 +84,7 @@ def run_goggles(
     valid_data_embed_list,
     train_data_embed_list,
     test_data_embed_list,
+    method,
     logger,
 ):
     if type(valid_data_embed_list) != list:
@@ -109,12 +110,12 @@ def run_goggles(
     dev_set_indices, dev_set_labels = utils.generate_dev_set(label_index_dict)
     (
         valid_soft_labels,
-        valid_GMM_list,
+        valid_clustering_model_list,
         valid_ensemble_model,
     ) = GOGGLES_Inferencer.infer_labels(
-        valid_sim_matrix_array, dev_set_indices, dev_set_labels, evaluate=True
+        valid_sim_matrix_array, dev_set_indices, dev_set_labels, method, evaluate=True
     )
-    print("PI: ", np.array(valid_ensemble_model.pi))
+    # print("PI: ", np.array(valid_ensemble_model.pi))
 
     valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
     logger.info(
@@ -136,7 +137,7 @@ def run_goggles(
     
     train_LPs = []
     for i, af_matrix in enumerate(train_sim_matrix_array):
-        lp = valid_GMM_list[i].predict(af_matrix)
+        lp = valid_clustering_model_list[i].predict(af_matrix)
         train_LPs.append(lp)
     train_LPs_array = np.hstack(train_LPs)
 
@@ -165,7 +166,7 @@ def run_goggles(
 
     test_LPs = []
     for i, af_matrix in enumerate(test_sim_matrix_array):
-        lp = valid_GMM_list[i].predict(af_matrix)
+        lp = valid_clustering_model_list[i].model_predict(af_matrix)
         test_LPs.append(lp)
     test_LPs_array = np.hstack(test_LPs)
 

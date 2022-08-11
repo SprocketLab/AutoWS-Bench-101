@@ -20,6 +20,8 @@ def main(
     # text dataset only
     extract_fn = "bert", # bow | bert | tfidf | sentence_transformer
     #
+    # Goggles options
+    goggles_method="SemiGMM", # SemiGMM | KMeans | Spectral
     #
     lf_selector="snuba",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
@@ -220,6 +222,7 @@ def main(
             valid_data_embed,
             train_data_embed,
             test_data_embed,
+            goggles_method,
             logger,
         )
     elif lf_selector == "supervised":
