@@ -1,11 +1,13 @@
 import os
 import pickle
+from functools import partial
 import copy
 import numpy as np
 import torch
 import pandas as pd
 from scipy import sparse
 from .base_lf_selector import BaseSelector, UnipolarLF
+from sklearn.metrics import f1_score
 import random
 from .interactive.utils import AVAILABLEDATASETS
 from sklearn.feature_extraction.text import CountVectorizer
@@ -32,12 +34,13 @@ def flip(x):
 
 class IWS_Selector(BaseSelector):
     def __init__(self, lf_generator, scoring_fn=None, num_iter = 30, 
-                b=0.5, cardinality=1, npredict = 100):
+                b=0.5, cardinality=1, npredict = 100, auto = True):
         super().__init__(lf_generator, scoring_fn)
         self.num_iter = num_iter
         self.b = b
         self.cardinality = cardinality
         self.npredict = npredict
+        self.auto = auto
 
     def apply_heuristics(self, heuristics, primitive_matrix, feat_combos, beta_opt):
         """ 
@@ -98,6 +101,17 @@ class IWS_Selector(BaseSelector):
                 L_val = np.concatenate((L_val, L_temp_val), axis=1)
         return L_val, heuristics, feat_combos 
 
+    def lf_description(self, L_val):
+        #Use F1 trade-off for reliability
+        comboscore = partial(self.scoring_fn, defaultmetric=partial(f1_score, average='micro'), abstain_symbol=0)
+        acc_cov_scores = [comboscore(
+            self.val_ground, L_val[:,i]) for i in range(np.shape(L_val)[1])] 
+        acc_cov_scores = np.nan_to_num(acc_cov_scores)
+        coverage_score = np.count_nonzero(L_val.astype(int)==0, axis=0) / np.shape(L_val)[0]
+        description = []
+        for i in range(np.shape(L_val)[1]):
+            description.append(f"accuracy is: {acc_cov_scores[i]}, coverage is: {coverage_score[i]}")
+        return description
 
     def fit(self, labeled_data, unlabeled_data):
         def index(a, inp):
@@ -123,57 +137,40 @@ class IWS_Selector(BaseSelector):
 
         numthreads = 1
         y_val = np.array(labeled_data.labels)
-        if (len(np.unique(y_val)) == 2):
-            self.isbinary = True
-            heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
-            L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
-            print("the shape of the val is: " + str(L_val.shape))
-            print(L_val)
-            LFs = sparse.csr_matrix(L_val)
-            svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
-            LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
-            x_val = np.array([d['feature'] for d in labeled_data.examples])
-            start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
-            initial_labels = {i:1 for i in start_idxs}
-            y_val = np.array(labeled_data.labels)
-            where_0 = np.where(y_val == 0)[0]
-            #need to flip the ground truth label
-            y_val[where_0] = -1
+        self.isbinary = True
+        heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
+        L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
+        print(L_val.shape)
+        LFs = sparse.csr_matrix(L_val)
+        svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
+        LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
+        x_val = np.array([d['feature'] for d in labeled_data.examples])
+        start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
+        initial_labels = {i:1 for i in start_idxs}
+        y_val = np.array(labeled_data.labels)
+        where_0 = np.where(y_val == 0)[0]
+        #need to flip the ground truth label
+        y_val[where_0] = -1
+        if self.auto:
             IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE',
-                                                     r=0.6, Ytrue=y_val, auto=True, corpus=x_val,
+                                                        r=0.6, Ytrue=y_val, auto=True, corpus=x_val,
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
-            IWSsession.run_experiments(self.num_iter)
-            LFsets = get_final_set('LSE ac', IWSsession, self.npredict,r=None)
-            sort_idx =  LFsets[1][self.num_iter-1]
-            for i in sort_idx:
-                self.hf.append(index(heuristics,i)) 
-                self.feat_combos.append(index(feat_combos,i))
         else:
-            self.isbinary = False
-            y_val_backup = copy.deepcopy(y_val)
-            hfs, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality, False)
-            for i in np.unique(y_val):
-                where_pos = np.where(y_val == i)[0]
-                y_val_backup[where_pos] = 1
-                where_neg = np.where(y_val != i)[0]
-                y_val_backup[where_neg] = -1
-                L_val, heuristics, feat_combos = self.unipolar_lf_generator(hfs, feat_combos, i)
-                LFs = sparse.csr_matrix(L_val)
-                svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
-                LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
-                x_val = np.array([d['feature'] for d in labeled_data.examples])
-                start_idxs = random.sample(range(L_val.shape[1]), 4) # don't know how to choose LFs to initialize the algorithm
-                initial_labels = {i:1 for i in start_idxs}
-                IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE',
-                                                    r=0.6, Ytrue=y_val_backup, auto=True, corpus=x_val,
+            lf_descriptions = self.lf_description(L_val)
+            LFs = sparse.coo_matrix(L_val)
+            res = x_val.astype(str).tolist()
+            corpus = []
+            for row in res:
+                corpus.append(' '.join(map(str, row)))
+            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6, 
+                                                       auto=False, oracle_response=None, corpus=corpus, fname_prefix='',
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
-                IWSsession.run_experiments(self.num_iter)
-                LFsets = get_final_set('LSE ac',IWSsession, self.npredict,r=None)
-                sort_idx =  LFsets[1][self.num_iter-1]
-                for idx in sort_idx:
-                    self.hf.append(index(heuristics,idx)) 
-                    self.feat_combos.append(index(feat_combos,idx))
-
+        IWSsession.run_experiments(self.num_iter)
+        LFsets = get_final_set('LSE ac', IWSsession, self.npredict,r=None)
+        sort_idx =  LFsets[1][self.num_iter-1]
+        for i in sort_idx:
+            self.hf.append(index(heuristics,i)) 
+            self.feat_combos.append(index(feat_combos,i))
 
 
     def predict(self, unlabeled_data):
