@@ -20,6 +20,8 @@ def main(
     # text dataset only
     extract_fn = None, # bow | bert | tfidf | sentence_transformer
     #
+    # Goggles options
+    goggles_method="SemiGMM", # SemiGMM | KMeans | Spectral
     #
     lf_selector="snuba",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
@@ -90,18 +92,33 @@ def main(
             n_labeled_points, dataset_home
         )
     elif dataset == "imdb":
-        train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn
+            )
     elif dataset == "yelp":
-        train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn
+            )
     #small dataset, only for testing 
     elif dataset == "youtube":
-        train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
-            n_labeled_points, dataset_home, extract_fn
-        )
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn
+            )
     else:
         raise NotImplementedError
 
@@ -206,6 +223,7 @@ def main(
             valid_data_embed,
             train_data_embed,
             test_data_embed,
+            goggles_method,
             logger,
         )
     elif lf_selector == "supervised":
