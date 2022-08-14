@@ -9,7 +9,6 @@ from functools import partial
 import random
 from .interactive_multiclass.iws import InteractiveWeakSupervision
 from .interactive_multiclass.utils import generate_ngram_LFs, get_final_set, train_end_classifier
-from .interactive_multiclass.iws_interactive import ExpertInteractive
 
 
 def flip(x):
@@ -155,7 +154,7 @@ class IWS_MulticlassSelector(BaseSelector):
             corpus = []
             for row in res:
                 corpus.append(' '.join(map(str, row)))
-            IWSsession = ExpertInteractive(LFs,LFfeatures,lf_descriptions, self.scoring_fn, initial_labels,acquisition='LSE',
+            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions, self.scoring_fn, initial_labels,acquisition='LSE',
                                                      r=0.6, Ytrue=y_val, auto=False, corpus=x_val,
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
         IWSsession.run_experiments(self.num_iter)

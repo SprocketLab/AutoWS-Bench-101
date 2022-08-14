@@ -20,7 +20,6 @@ from .interactive.snuba_synthesizer import Synthesizer
 
 from .interactive.utils import generate_ngram_LFs, get_final_set, train_end_classifier
 from .interactive.iws import InteractiveWeakSupervision
-from .interactive.iws_interactive import ExpertInteractive
 
 
 def flip(x):
@@ -163,7 +162,7 @@ class IWS_Selector(BaseSelector):
             corpus = []
             for row in res:
                 corpus.append(' '.join(map(str, row)))
-            IWSsession = ExpertInteractive(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6, 
+            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6, 
                                                        auto=False, oracle_response=None, corpus=corpus, fname_prefix='',
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
         IWSsession.run_experiments(self.num_iter)
