@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from wrench.labelmodel import Snorkel
-
+from sklearn.semi_supervised import LabelPropagation
 
 def run_zero_shot_clip(
     valid_data,
@@ -469,3 +469,48 @@ def run_snuba_multiclass(
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
     return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
+
+def run_label_propagation(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    logger,
+):
+    
+    index_of_labeled_data = np.arange(0, len(valid_data_embed))
+    index_of_unlabeled_data = np.arange(len(valid_data_embed), len(valid_data_embed) + len(test_data_embed))
+
+    full_datapoints = []
+    full_labels = np.array(valid_data_embed.labels + test_data_embed.labels)
+
+    for i in range(len(valid_data_embed)):
+        full_datapoints.append(valid_data_embed.examples[i]["feature"])
+    
+    for i in range(len(test_data_embed)):
+        full_datapoints.append(test_data_embed.examples[i]["feature"])
+
+    full_datapoints = np.array(full_datapoints)
+    masked_labels = np.copy(full_labels)
+    masked_labels[index_of_unlabeled_data] = -1
+    unlabeled_data = full_datapoints[index_of_unlabeled_data]
+
+    best_acc = 0
+    test_hard_labels = None
+    test_soft_labels = None
+    
+    for gamma in [0.01, 0.1, 0.5, 1, 5, 10, 20]:
+        label_prop_model = LabelPropagation(max_iter=1000, n_jobs=-1, gamma=gamma)
+        label_prop_model.fit(full_datapoints, masked_labels)
+        unlabeled_hard_prediction = label_prop_model.predict(unlabeled_data)
+        unlabeled_soft_prediction = label_prop_model.predict_proba(unlabeled_data)
+        
+        acc = accuracy_score(unlabeled_hard_prediction, full_labels[index_of_unlabeled_data])
+        if acc > best_acc:
+            best_acc = acc
+            test_hard_labels = unlabeled_hard_prediction
+            test_soft_labels = unlabeled_soft_prediction
+        
+    return test_data_embed, test_hard_labels, test_soft_labels

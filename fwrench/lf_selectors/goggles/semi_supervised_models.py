@@ -78,7 +78,7 @@ class KMeans(KMeans):
 class Spectral(SpectralClustering):
     def __init__(self, n_clusters=1, affinity="rbf"):
         self.n_clusters = n_clusters
-        super().__init__(n_clusters=n_clusters, affinity=affinity)
+        super().__init__(n_clusters=n_clusters, affinity=affinity, random_state=0)
 
     def model_fit(self, X):
         return super().fit(X)
