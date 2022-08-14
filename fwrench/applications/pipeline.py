@@ -237,6 +237,16 @@ def main(
             test_data_embed,
             logger,
         )
+    elif lf_selector == "label_prop":
+        test_covered, hard_labels, soft_labels = autows.run_label_propagation(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
     elif lf_selector == "clip_zero_shot" and (
         embedding == "clip_zeroshot" or embedding == "oracle" or embedding == "openai"
     ):
