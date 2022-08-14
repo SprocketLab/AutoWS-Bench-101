@@ -1,0 +1,15 @@
+2022-08-13 23:28:24 - loading data from datasets/yelp/train.json
+  0%|          | 0/30400 [00:00<?, ?it/s]100%|██████████| 30400/30400 [00:00<00:00, 2082118.28it/s]
+2022-08-13 23:28:24 - loading data from datasets/yelp/valid.json
+  0%|          | 0/3800 [00:00<?, ?it/s]100%|██████████| 3800/3800 [00:00<00:00, 1822984.70it/s]
+2022-08-13 23:28:24 - loading data from datasets/yelp/test.json
+  0%|          | 0/3800 [00:00<?, ?it/s]100%|██████████| 3800/3800 [00:00<00:00, 1858917.10it/s]
+2022-08-13 23:28:24 - loading features from datasets/yelp/train_bert.pkl
+2022-08-13 23:28:25 - loading features from datasets/yelp/valid_bert.pkl
+2022-08-13 23:28:25 - loading features from datasets/yelp/test_bert.pkl
+(34300, 768)
+2022-08-13 23:28:26 - LogisticRegression supervised: 0.9
+2022-08-13 23:28:26 - LogisticRegression unlabeled train: 0.7868421052631579
+2022-08-13 23:28:27 - label model train acc:    0.7868421052631579
+2022-08-13 23:28:27 - label model coverage:     1.0
+0.7868421052631579

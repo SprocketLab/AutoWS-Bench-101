@@ -1,0 +1,15 @@
+2022-08-13 23:28:31 - loading data from datasets/imdb/train.json
+  0%|          | 0/20000 [00:00<?, ?it/s]100%|██████████| 20000/20000 [00:00<00:00, 2103093.24it/s]
+2022-08-13 23:28:31 - loading data from datasets/imdb/valid.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 2040428.10it/s]
+2022-08-13 23:28:31 - loading data from datasets/imdb/test.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 2015329.62it/s]
+2022-08-13 23:28:31 - loading features from datasets/imdb/train_bert.pkl
+2022-08-13 23:28:31 - loading features from datasets/imdb/valid_bert.pkl
+2022-08-13 23:28:31 - loading features from datasets/imdb/test_bert.pkl
+(22600, 768)
+2022-08-13 23:28:32 - LogisticRegression supervised: 0.78
+2022-08-13 23:28:32 - LogisticRegression unlabeled train: 0.6464
+2022-08-13 23:28:32 - label model train acc:    0.6464
+2022-08-13 23:28:32 - label model coverage:     1.0
+0.6464

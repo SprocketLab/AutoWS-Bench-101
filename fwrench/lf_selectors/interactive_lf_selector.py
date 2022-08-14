@@ -20,6 +20,7 @@ from .interactive.snuba_synthesizer import Synthesizer
 
 from .interactive.utils import generate_ngram_LFs, get_final_set, train_end_classifier
 from .interactive.iws import InteractiveWeakSupervision
+from .interactive.iws_interactive import ExpertInteractive
 
 
 def flip(x):
@@ -127,6 +128,7 @@ class IWS_Selector(BaseSelector):
                 import pdb; pdb.set_trace()
 
         x_val = np.array([d['feature'] for d in labeled_data.examples])
+        print("the shape of x_val is: " + str(x_val.shape))
         y_val = np.array(labeled_data.labels)
         self.val_primitive_matrix = x_val
         self.val_ground = y_val
@@ -140,7 +142,6 @@ class IWS_Selector(BaseSelector):
         self.isbinary = True
         heuristics, feat_combos = self.syn.generate_heuristics(self.lf_generator, self.cardinality)
         L_val, heuristics, feat_combos = self.snuba_lf_generator(heuristics, feat_combos)
-        print(L_val.shape)
         LFs = sparse.csr_matrix(L_val)
         svd = TruncatedSVD(n_components=40, n_iter=20, random_state=42) # copy from example, need futher analysis...
         LFfeatures = svd.fit_transform(LFs.T).astype(np.float32)
@@ -162,7 +163,7 @@ class IWS_Selector(BaseSelector):
             corpus = []
             for row in res:
                 corpus.append(' '.join(map(str, row)))
-            IWSsession = InteractiveWeakSupervision(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6, 
+            IWSsession = ExpertInteractive(LFs,LFfeatures,lf_descriptions,initial_labels,acquisition='LSE', r=0.6, 
                                                        auto=False, oracle_response=None, corpus=corpus, fname_prefix='',
                                                     progressbar=True, ensemblejobs=numthreads,numshow=2)
         IWSsession.run_experiments(self.num_iter)

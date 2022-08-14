@@ -18,7 +18,7 @@ def main(
     dataset_home="./datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
     # text dataset only
-    extract_fn = None, # bow | bert | tfidf | sentence_transformer
+    extract_fn = "bert", # bow | bert | tfidf | sentence_transformer
     #
     # Goggles options
     goggles_method="SemiGMM", # SemiGMM | KMeans | Spectral
@@ -31,13 +31,13 @@ def main(
     snuba_combo_samples=-1,  # -1 uses all feat. combos
     # TODO this needs to work for Snuba and IWS
     snuba_cardinality=1,  # Only used if lf_selector='snuba'
-    iws_cardinality=3,
+    iws_cardinality=1,
     snuba_iterations=23,
     lf_class_options="default",  # default | comma separated list of lf classes to use in the selection procedure. Example: 'DecisionTreeClassifier,LogisticRegression'
     #
     # Interactive Weak Supervision options
     iws_iterations=25,
-    iws_auto = False,
+    iws_auto = True,
     seed=123,
     prompt=None,
 ):
@@ -211,6 +211,7 @@ def main(
             test_data_embed,
             iws_cardinality,
             iws_iterations,
+            iws_auto,
             lf_class_options,
             k_cls,
             logger,

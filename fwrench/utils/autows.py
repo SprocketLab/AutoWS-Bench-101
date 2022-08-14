@@ -263,6 +263,7 @@ def run_iws_multiclass(
     test_data_embed,
     cardinality,
     iterations,  # TODO
+    auto,
     lf_class_options,
     k_cls,
     logger,
@@ -292,6 +293,7 @@ def run_iws_multiclass(
         lf_generator=lf_classes,
         scoring_fn=scoring_fn,
         b=0.1,  # TODO
+        auto = auto,
         cardinality=cardinality,
         npredict=100,
         num_iter=iterations,

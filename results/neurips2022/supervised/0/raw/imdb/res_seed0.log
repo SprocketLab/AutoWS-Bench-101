@@ -1,0 +1,22 @@
+2022-08-13 23:53:13 - loading data from datasets/imdb/train.json
+  0%|          | 0/20000 [00:00<?, ?it/s]100%|██████████| 20000/20000 [00:00<00:00, 1942346.95it/s]
+2022-08-13 23:53:14 - loading data from datasets/imdb/valid.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 1965465.79it/s]
+2022-08-13 23:53:14 - loading data from datasets/imdb/test.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 1781474.69it/s]
+/hdd2/kaylee/anaconda3/envs/AutoWS-Bench-101/lib/python3.7/site-packages/sklearn/linear_model/_logistic.py:765: ConvergenceWarning: lbfgs failed to converge (status=1):
+STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
+
+Increase the number of iterations (max_iter) or scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  extra_warning_msg=_LOGISTIC_SOLVER_CONVERGENCE_MSG)
+2022-08-13 23:53:14 - loading features from datasets/imdb/train_bert.pkl
+2022-08-13 23:53:14 - loading features from datasets/imdb/valid_bert.pkl
+2022-08-13 23:53:14 - loading features from datasets/imdb/test_bert.pkl
+2022-08-13 23:53:14 - LogisticRegression supervised: 0.81
+2022-08-13 23:53:14 - LogisticRegression unlabeled train: 0.6472
+2022-08-13 23:53:17 - label model train acc:    0.6472
+2022-08-13 23:53:17 - label model coverage:     1.0
+0.6472
