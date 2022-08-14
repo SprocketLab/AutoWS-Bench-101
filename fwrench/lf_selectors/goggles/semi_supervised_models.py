@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, SpectralClustering
 from .cluster_class_mapping import solve_mapping
 
 DEL = 1e-5
@@ -42,15 +42,60 @@ class SemiGMM(GaussianMixture):
     def __init__(self, n_components=1, covariance_type='full', tol=1e-4, reg_covar=1e-6):
         super().__init__(n_components=n_components, covariance_type = covariance_type, tol=tol, reg_covar=reg_covar)
 
-    def GMM_fit(self, X):
+    def model_fit(self, X):
         return super().fit(X)
 
-    def GMM_fit_predict(self, X, y=None):
-        self.GMM_fit(X)
+    def model_fit_predict(self, X, y=None):
+        self.model_fit(X)
         return self.predict_proba(X)
     
-    def predict(self, X):
+    def model_predict(self, X):
         return self.predict_proba(X)
+
+class KMeans(KMeans):
+    def __init__(self, n_clusters=1, tol=1e-4, max_iter=1000):
+        self.n_clusters = n_clusters
+        super().__init__(n_clusters=n_clusters, tol=tol, max_iter=max_iter)
+
+    def model_fit(self, X):
+        return super().fit(X)
+
+    def model_fit_predict(self, X, y=None):
+        self.model_fit(X)
+        labels = self.predict(X)
+        labels_proba_matrix = np.zeros((len(labels), self.n_clusters))
+        for i, l in enumerate(labels):
+            labels_proba_matrix[i][l] = 1
+        return labels_proba_matrix
+    
+    def model_predict(self, X):
+        labels = self.predict(X)
+        labels_proba_matrix = np.zeros((len(labels), self.n_clusters))
+        for i, l in enumerate(labels):
+            labels_proba_matrix[i][l] = 1
+        return labels_proba_matrix
+    
+class Spectral(SpectralClustering):
+    def __init__(self, n_clusters=1, affinity="rbf"):
+        self.n_clusters = n_clusters
+        super().__init__(n_clusters=n_clusters, affinity=affinity, random_state=0)
+
+    def model_fit(self, X):
+        return super().fit(X)
+
+    def model_fit_predict(self, X, y=None):
+        labels = self.fit_predict(X)
+        labels_proba_matrix = np.zeros((len(labels), self.n_clusters))
+        for i, l in enumerate(labels):
+            labels_proba_matrix[i][l] = 1
+        return labels_proba_matrix
+    
+    def model_predict(self, X):
+        labels = self.fit_predict(X)
+        labels_proba_matrix = np.zeros((len(labels), self.n_clusters))
+        for i, l in enumerate(labels):
+            labels_proba_matrix[i][l] = 1
+        return labels_proba_matrix
     
 class SemiBMM:
     def __init__(self, n_components):

@@ -1,4 +1,4 @@
-name: FWRENCH2
+name: AutoWS-Bench-101
 channels:
   - pytorch
   - huggingface

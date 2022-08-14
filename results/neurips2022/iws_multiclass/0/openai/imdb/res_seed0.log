@@ -1,0 +1,23 @@
+2022-08-09 06:40:12 - loading data from datasets/imdb/train.json
+  0%|          | 0/20000 [00:00<?, ?it/s]100%|██████████| 20000/20000 [00:00<00:00, 2121549.82it/s]
+2022-08-09 06:40:12 - loading data from datasets/imdb/valid.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 2064938.95it/s]
+2022-08-09 06:40:12 - loading data from datasets/imdb/test.json
+  0%|          | 0/2500 [00:00<?, ?it/s]100%|██████████| 2500/2500 [00:00<00:00, 2026625.43it/s]
+2022-08-09 06:40:12 - loading features from datasets/imdb/train_bert.pkl
+2022-08-09 06:40:12 - loading features from datasets/imdb/valid_bert.pkl
+2022-08-09 06:40:12 - loading features from datasets/imdb/test_bert.pkl
+Traceback (most recent call last):
+  File "fwrench/applications/pipeline.py", line 259, in <module>
+    fire.Fire(main)
+  File "/hdd2/kaylee/anaconda3/envs/AutoWS-Bench-101/lib/python3.7/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/hdd2/kaylee/anaconda3/envs/AutoWS-Bench-101/lib/python3.7/site-packages/fire/core.py", line 471, in _Fire
+    target=component.__name__)
+  File "/hdd2/kaylee/anaconda3/envs/AutoWS-Bench-101/lib/python3.7/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "fwrench/applications/pipeline.py", line 137, in main
+    train_data_embed = embedder.transform(train_data)
+  File "/hdd2/kaylee/AutoWS-Bench-101/fwrench/embeddings/openai_clip_embedding.py", line 79, in transform
+    y = classes_[self.dataset]
+KeyError: 'imdb'

@@ -1,0 +1,15 @@
+2022-08-13 23:28:20 - loading data from datasets/youtube/train.json
+  0%|          | 0/1586 [00:00<?, ?it/s]100%|██████████| 1586/1586 [00:00<00:00, 2048080.71it/s]
+2022-08-13 23:28:20 - loading data from datasets/youtube/valid.json
+  0%|          | 0/120 [00:00<?, ?it/s]100%|██████████| 120/120 [00:00<00:00, 1548666.09it/s]
+2022-08-13 23:28:20 - loading data from datasets/youtube/test.json
+  0%|          | 0/250 [00:00<?, ?it/s]100%|██████████| 250/250 [00:00<00:00, 1736052.98it/s]
+2022-08-13 23:28:20 - loading features from datasets/youtube/train_bert.pkl
+2022-08-13 23:28:20 - loading features from datasets/youtube/valid_bert.pkl
+2022-08-13 23:28:20 - loading features from datasets/youtube/test_bert.pkl
+(1936, 768)
+2022-08-13 23:28:20 - LogisticRegression supervised: 0.96
+2022-08-13 23:28:20 - LogisticRegression unlabeled train: 0.888
+2022-08-13 23:28:20 - label model train acc:    0.888
+2022-08-13 23:28:20 - label model coverage:     1.0
+0.888

@@ -3,13 +3,13 @@ from functools import partial
 
 import fwrench.utils as utils
 import numpy as np
-from fwrench.lf_selectors import IWS_Selector, SnubaSelector, SnubaMulticlassSelector
+from fwrench.lf_selectors import IWS_Selector, SnubaSelector, SnubaMulticlassSelector, IWS_MulticlassSelector
 import fwrench.lf_selectors.goggles_inference as GOGGLES_Inferencer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from wrench.labelmodel import Snorkel
-
+from sklearn.semi_supervised import LabelPropagation
 
 def run_zero_shot_clip(
     valid_data,
@@ -84,6 +84,7 @@ def run_goggles(
     valid_data_embed_list,
     train_data_embed_list,
     test_data_embed_list,
+    method,
     logger,
 ):
     if type(valid_data_embed_list) != list:
@@ -109,12 +110,12 @@ def run_goggles(
     dev_set_indices, dev_set_labels = utils.generate_dev_set(label_index_dict)
     (
         valid_soft_labels,
-        valid_GMM_list,
+        valid_clustering_model_list,
         valid_ensemble_model,
     ) = GOGGLES_Inferencer.infer_labels(
-        valid_sim_matrix_array, dev_set_indices, dev_set_labels, evaluate=True
+        valid_sim_matrix_array, dev_set_indices, dev_set_labels, method, evaluate=True
     )
-    print("PI: ", np.array(valid_ensemble_model.pi))
+    # print("PI: ", np.array(valid_ensemble_model.pi))
 
     valid_hard_labels = np.argmax(valid_soft_labels, axis=1).astype(int)
     logger.info(
@@ -136,7 +137,7 @@ def run_goggles(
     
     train_LPs = []
     for i, af_matrix in enumerate(train_sim_matrix_array):
-        lp = valid_GMM_list[i].predict(af_matrix)
+        lp = valid_clustering_model_list[i].predict(af_matrix)
         train_LPs.append(lp)
     train_LPs_array = np.hstack(train_LPs)
 
@@ -165,7 +166,7 @@ def run_goggles(
 
     test_LPs = []
     for i, af_matrix in enumerate(test_sim_matrix_array):
-        lp = valid_GMM_list[i].predict(af_matrix)
+        lp = valid_clustering_model_list[i].model_predict(af_matrix)
         test_LPs.append(lp)
     test_LPs_array = np.hstack(test_LPs)
 
@@ -189,6 +190,7 @@ def run_iws(
     test_data_embed,
     cardinality,
     iterations,  # TODO
+    auto,
     lf_class_options,
     k_cls,
     logger,
@@ -222,11 +224,82 @@ def run_iws(
         b=0.5,  # TODO
         cardinality=cardinality,
         npredict=100,
+        auto = auto,
     )
     if k_cls > 2:
         selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=k_cls)
     else:
         selector = MyIWSSelector()
+    selector.fit(valid_data_embed, train_data_embed)
+
+    train_weak_labels = selector.predict(train_data_embed)
+    train_data.weak_labels = train_weak_labels.tolist()
+    valid_weak_labels = selector.predict(valid_data_embed)
+    valid_data.weak_labels = valid_weak_labels.tolist()
+    test_weak_labels = selector.predict(test_data_embed)
+    test_data.weak_labels = test_weak_labels.tolist()
+
+    label_model = Snorkel()
+    label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
+
+    #### Filter out uncovered training data
+    test_data_covered = test_data.get_covered_subset()
+    aggregated_hard_labels = label_model.predict(test_data_covered)
+    aggregated_soft_labels = label_model.predict_proba(test_data_covered)
+
+    # Get actual label model accuracy using hard labels
+    utils.get_accuracy_coverage(train_data, label_model, logger, split="train")
+    utils.get_accuracy_coverage(valid_data, label_model, logger, split="valid")
+    utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
+
+    return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
+
+def run_iws_multiclass(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    cardinality,
+    iterations,  # TODO
+    auto,
+    lf_class_options,
+    k_cls,
+    logger,
+):
+    if lf_class_options == "default":
+        lf_classes = [
+            partial(DecisionTreeClassifier, max_depth=1),
+            LogisticRegression,
+        ]
+    else:
+        if not isinstance(lf_class_options, tuple):
+            lf_class_options = [lf_class_options]
+        lf_classes = []
+        for lf_cls in lf_class_options:
+            if lf_cls == "DecisionTreeClassifier":
+                lf_classes.append(partial(DecisionTreeClassifier, max_depth=1))
+            elif lf_cls == "LogisticRegression":
+                lf_classes.append(LogisticRegression)
+            else:
+                # If the lf class you need isn't implemented, add it here
+                raise NotImplementedError
+    logger.info(f"Using LF classes: {lf_classes}")
+
+    scoring_fn = partial(utils.mixture_metric)
+
+    selector = IWS_MulticlassSelector(
+        lf_generator=lf_classes,
+        scoring_fn=scoring_fn,
+        b=0.1,  # TODO
+        auto = auto,
+        cardinality=cardinality,
+        npredict=100,
+        num_iter=iterations,
+        k_cls=k_cls,
+    )
+    # selector = utils.MulticlassAdaptor(MySnubaSelector, nclasses=k_cls)
     selector.fit(valid_data_embed, train_data_embed)
 
     train_weak_labels = selector.predict(train_data_embed)
@@ -398,3 +471,48 @@ def run_snuba_multiclass(
     utils.get_accuracy_coverage(test_data, label_model, logger, split="test")
 
     return test_data_covered, aggregated_hard_labels, aggregated_soft_labels
+
+def run_label_propagation(
+    valid_data,
+    train_data,
+    test_data,
+    valid_data_embed,
+    train_data_embed,
+    test_data_embed,
+    logger,
+):
+    
+    index_of_labeled_data = np.arange(0, len(valid_data_embed))
+    index_of_unlabeled_data = np.arange(len(valid_data_embed), len(valid_data_embed) + len(test_data_embed))
+
+    full_datapoints = []
+    full_labels = np.array(valid_data_embed.labels + test_data_embed.labels)
+
+    for i in range(len(valid_data_embed)):
+        full_datapoints.append(valid_data_embed.examples[i]["feature"])
+    
+    for i in range(len(test_data_embed)):
+        full_datapoints.append(test_data_embed.examples[i]["feature"])
+
+    full_datapoints = np.array(full_datapoints)
+    masked_labels = np.copy(full_labels)
+    masked_labels[index_of_unlabeled_data] = -1
+    unlabeled_data = full_datapoints[index_of_unlabeled_data]
+
+    best_acc = 0
+    test_hard_labels = None
+    test_soft_labels = None
+    
+    for gamma in [0.01, 0.1, 0.5, 1, 5, 10, 20]:
+        label_prop_model = LabelPropagation(max_iter=1000, n_jobs=-1, gamma=gamma)
+        label_prop_model.fit(full_datapoints, masked_labels)
+        unlabeled_hard_prediction = label_prop_model.predict(unlabeled_data)
+        unlabeled_soft_prediction = label_prop_model.predict_proba(unlabeled_data)
+        
+        acc = accuracy_score(unlabeled_hard_prediction, full_labels[index_of_unlabeled_data])
+        if acc > best_acc:
+            best_acc = acc
+            test_hard_labels = unlabeled_hard_prediction
+            test_soft_labels = unlabeled_soft_prediction
+        
+    return test_data_embed, test_hard_labels, test_soft_labels

@@ -1,0 +1,22 @@
+2022-08-13 23:53:31 - loading data from datasets/yelp/train.json
+  0%|          | 0/30400 [00:00<?, ?it/s]100%|██████████| 30400/30400 [00:00<00:00, 1973484.62it/s]
+2022-08-13 23:53:31 - loading data from datasets/yelp/valid.json
+  0%|          | 0/3800 [00:00<?, ?it/s]100%|██████████| 3800/3800 [00:00<00:00, 2115242.89it/s]
+2022-08-13 23:53:31 - loading data from datasets/yelp/test.json
+  0%|          | 0/3800 [00:00<?, ?it/s]100%|██████████| 3800/3800 [00:00<00:00, 2091647.66it/s]
+/hdd2/kaylee/anaconda3/envs/AutoWS-Bench-101/lib/python3.7/site-packages/sklearn/linear_model/_logistic.py:765: ConvergenceWarning: lbfgs failed to converge (status=1):
+STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
+
+Increase the number of iterations (max_iter) or scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  extra_warning_msg=_LOGISTIC_SOLVER_CONVERGENCE_MSG)
+2022-08-13 23:53:31 - loading features from datasets/yelp/train_bert.pkl
+2022-08-13 23:53:31 - loading features from datasets/yelp/valid_bert.pkl
+2022-08-13 23:53:31 - loading features from datasets/yelp/test_bert.pkl
+2022-08-13 23:54:24 - LogisticRegression supervised: 0.63
+2022-08-13 23:54:24 - LogisticRegression unlabeled train: 0.5681578947368421
+2022-08-13 23:54:26 - label model train acc:    0.5681578947368421
+2022-08-13 23:54:26 - label model coverage:     1.0
+0.5681578947368421

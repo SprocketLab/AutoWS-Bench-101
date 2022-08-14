@@ -1,4 +1,4 @@
-name: FWRENCH
+name: AutoWS-Bench-101
 channels:
   - pytorch
   - huggingface
@@ -196,11 +196,27 @@ dependencies:
     - sentence-transformers==1.1.1
     - sentencepiece==0.1.96
     - skweak==0.2.13
-    - snorkel==0.9.7
+    - snorkel==0.9.8
     - snorkel-metal==0.5.0
     - statsmodels==0.12.2
-    - tensorboard==1.15.0
+    - tensorboard==2.2.0
     - tensorboardx==1.4
     - termcolor==1.1.0
     - toolz==0.11.1
     - werkzeug==2.0.1
+    - cycler==0.11.0
+    - fonttools==4.33.3
+    - kiwisolver==1.4.2
+    - matplotlib==3.5.2
+    - pytorch-lightning==1.6.1
+    - lightning-bolts==0.5.0
+    - ftfy==6.1.1
+    - ipywidgets==7.7.0
+    - lie-learn==0.0.1.post1
+    - googledrivedownloader==0.4
+    - lightgbm==3.3.2
+    - lief==0.12.1
+
+
+
+

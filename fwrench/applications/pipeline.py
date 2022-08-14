@@ -17,7 +17,11 @@ def main(
     dataset="mnist",
     dataset_home="./datasets",
     embedding="pca",  # raw | pca | resnet18 | vae
+    # text dataset only
+    extract_fn = "bert", # bow | bert | tfidf | sentence_transformer
     #
+    # Goggles options
+    goggles_method="SemiGMM", # SemiGMM | KMeans | Spectral
     #
     lf_selector="snuba",  # snuba | interactive | goggles
     em_hard_labels=False,  # Use hard or soft labels for end model training
@@ -33,6 +37,7 @@ def main(
     #
     # Interactive Weak Supervision options
     iws_iterations=25,
+    iws_auto = True,
     seed=123,
     prompt=None,
 ):
@@ -86,6 +91,34 @@ def main(
         train_data, valid_data, test_data, k_cls, model = settings.get_navier_stokes(
             n_labeled_points, dataset_home
         )
+    elif dataset == "imdb":
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_imdb(
+                n_labeled_points, dataset_home, extract_fn
+            )
+    elif dataset == "yelp":
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_yelp(
+                n_labeled_points, dataset_home, extract_fn
+            )
+    #small dataset, only for testing 
+    elif dataset == "youtube":
+        if embedding == 'openai' or embedding == 'clip' or embedding == 'clip_zeroshot':
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn=None
+            )
+        else:
+            train_data, valid_data, test_data, k_cls, model = settings.get_youtube(
+                n_labeled_points, dataset_home, extract_fn
+            )
     else:
         raise NotImplementedError
 
@@ -163,12 +196,26 @@ def main(
             test_data_embed,
             iws_cardinality,
             iws_iterations,
+            iws_auto,
             lf_class_options,
             k_cls,
             logger,
         )
     elif lf_selector == "iws_multiclass":
-        raise NotImplementedError
+        test_covered, hard_labels, soft_labels = autows.run_iws_multiclass(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            iws_cardinality,
+            iws_iterations,
+            iws_auto,
+            lf_class_options,
+            k_cls,
+            logger,
+        )
     elif lf_selector == "goggles":
         test_covered, hard_labels, soft_labels = autows.run_goggles(
             valid_data,
@@ -177,10 +224,21 @@ def main(
             valid_data_embed,
             train_data_embed,
             test_data_embed,
+            goggles_method,
             logger,
         )
     elif lf_selector == "supervised":
         test_covered, hard_labels, soft_labels = autows.run_supervised(
+            valid_data,
+            train_data,
+            test_data,
+            valid_data_embed,
+            train_data_embed,
+            test_data_embed,
+            logger,
+        )
+    elif lf_selector == "label_prop":
+        test_covered, hard_labels, soft_labels = autows.run_label_propagation(
             valid_data,
             train_data,
             test_data,
