@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 
 
 class InteractiveWeakSupervision:
-    def __init__(self, LFs, LFfeatures, LFdescriptions, initial_labels, acquisition='LSE', r=0.6,
+    def __init__(self, LFs, LFfeatures, LFdescriptions, initial_labels, acquisition='LSE', r=0.6, usefulness = 0.7,
                  nrandom_init=None, g_inv=None, straddle_z=1.96, ensemble=None, Ytrue=None, auto=None,
                  oracle_response=None, corpus=None, fname_prefix='', save_to_disc=False, savedir='iws_runs',
                  saveinfo=None, username='user', progressbar=False, ensemblejobs=1, numshow=2, striphtml=True):
@@ -152,7 +152,8 @@ class InteractiveWeakSupervision:
                     if len(set(np.unique(Ytrue)).difference({1, -1})) > 0:
                         raise ValueError("Only binary labels handled. Labels must be {-1,1}")
                     _, _, _, _, _, _, accuracy = evaluate_complex_binary(LFs, Ytrue)
-                    self.useful = (accuracy > 0.6).astype(int)
+                    print(f'current usefulness is : {usefulness}')
+                    self.useful = (accuracy > usefulness).astype(int)
         else:
             self.auto = False
 

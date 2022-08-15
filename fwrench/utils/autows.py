@@ -191,6 +191,7 @@ def run_iws(
     cardinality,
     iterations,  # TODO
     auto,
+    usefulness,
     lf_class_options,
     k_cls,
     logger,
@@ -225,6 +226,7 @@ def run_iws(
         cardinality=cardinality,
         npredict=100,
         auto = auto,
+        usefulness = usefulness,
     )
     if k_cls > 2:
         selector = utils.MulticlassAdaptor(MyIWSSelector, nclasses=k_cls)
