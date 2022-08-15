@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 
 
 class InteractiveWeakSupervision:
-    def __init__(self, LFs, LFfeatures, LFdescriptions, initial_labels, acquisition='LSE', r=0.6,
+    def __init__(self, LFs, LFfeatures, LFdescriptions, initial_labels, acquisition='LSE', r=0.6, usefulness = 0.7,
                  nrandom_init=None, g_inv=None, straddle_z=1.96, ensemble=None, Ytrue=None, auto=None,
                  oracle_response=None, corpus=None, fname_prefix='', save_to_disc=False, savedir='iws_runs',
                  saveinfo=None, username='user', progressbar=False, ensemblejobs=1, numshow=2, striphtml=True):
@@ -152,7 +152,8 @@ class InteractiveWeakSupervision:
                     if len(set(np.unique(Ytrue)).difference({1, -1})) > 0:
                         raise ValueError("Only binary labels handled. Labels must be {-1,1}")
                     _, _, _, _, _, _, accuracy = evaluate_complex_binary(LFs, Ytrue)
-                    self.useful = (accuracy > 0.6).astype(int)
+                    #print(f'current usefulness is : {usefulness}')
+                    self.useful = (accuracy > usefulness).astype(int)
         else:
             self.auto = False
 
@@ -162,7 +163,7 @@ class InteractiveWeakSupervision:
         self.mybutton = None
         self.timing = []
         self.disptime = None
-        self.progress = None
+        self.progress = 10
         if not self.auto:
             self.finegrained = True
             self.radiolabels = [1, 1, 0, 0, 0.5]
@@ -178,65 +179,7 @@ class InteractiveWeakSupervision:
                                     "Likely NOT a useful heuristic",
                                     "NOT a useful heuristic",
                                     "I don't know"]
-            self.htmlwidget = widgets.HTML(
-                value="<h2>Loading...</h2>",
-                placeholder='Loading...',
-            )
-
-            self.htmlexamples = widgets.HTML(
-                value="<h2>Creating features for labelfunctions...</h2>",
-                placeholder='Loading...',
-            )
-
-            self.myradio = widgets.RadioButtons(
-                options=self.radiooptions,
-                value="I don't know",
-                layout={'width': 'max-content'},  # If the items' names are long
-                disabled=False
-            )
-
-            self.mybutton = widgets.Button(
-                description='Submit',
-                disabled=True,
-                button_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                tooltip='Click to submit your response',
-            )
-
-            def on_button_clicked(b):
-                b.disabled = True
-                self.donext()
-
-            self.mybutton.on_click(on_button_clicked)
-
-            self.undobutton = widgets.Button(
-                description='Undo last decision',
-                disabled=True,
-                button_style='info',  # 'success', 'info', 'warning', 'danger' or ''
-                tooltip='Go back',
-            )
-
-            def on_undo_clicked(b):
-                b.disabled = True
-                self.undo()
-
-            self.progress = widgets.IntProgress(
-                value=0,
-                min=0,
-                max=10,
-                step=1,
-                description='Initialization',
-                bar_style='',  # 'success', 'info', 'warning', 'danger' or ''
-                orientation='horizontal'
-            )
-
-            self.undobutton.on_click(on_undo_clicked)
-
-            display(self.htmlwidget)
-            display(self.myradio)
-            display(self.mybutton)
-            display(self.undobutton)
-            display(self.progress)
-            display(self.htmlexamples)
+            
 
         # set up initial labels
         # process initial labels
@@ -378,22 +321,17 @@ class InteractiveWeakSupervision:
                     self.labeldict[idx] = 0.0
         self.init_completed = False
 
-    def donext(self):
+    def donext(self, selectlabel):
         # executed when submit button is clicked
         if not self.auto:
             tnow = time.time()
-            elapsed = tnow - self.disptime
-            self.timing.append(elapsed)
 
         idx = self.curr_query
 
         label = None
         weight = None
-        for lbl, wght, val in zip(self.radiolabels, self.radioweights, self.tmpradiooptions):
-            if self.myradio.value == val:
-                label = lbl
-                weight = wght
-                break
+        label = self.radiolabels[selectlabel]
+        weight = self.radioweights[selectlabel]
         self.labeldict[idx] = label
         self.labelvector[idx] = label
 
@@ -422,6 +360,14 @@ class InteractiveWeakSupervision:
     def run_experiments(self, num_iter=200):
         self.maxiter = num_iter
         self.counter = 0
+        if not self.auto:
+            print("Please inspect this description carefully before looking at examples below:")
+            print("Please pay attention the term and the LF vote")
+            print("0: Useful heuristic")
+            print("1: Likely a useful heuristic")
+            print("2: Likely NOT a useful heuristic")
+            print("3: NOT a useful heuristic")
+            print("4: I don't know")
         self.next_candidate()
 
     def next_candidate(self):
@@ -429,7 +375,7 @@ class InteractiveWeakSupervision:
         select_random = False
         if not self.init_completed:
             if self.counter == 0 and (not self.auto):
-                self.progress.max = self.nrandom_init
+                self.progress = self.nrandom_init
             # collect some initial random responses
             if self.counter < self.nrandom_init:
                 progressstr = 'Init %d/%d'
@@ -439,18 +385,13 @@ class InteractiveWeakSupervision:
                 self.init_completed = True
                 select_random = False
                 if not self.auto:
-                    self.progress.max = self.maxiter
+                    self.progress = self.maxiter
         else:
             if self.counter >= self.maxiter:
                 if not self.auto:
-                    self.htmlwidget.value = '<p><b>Experiment completed</p></p>'
-                    self.htmlexamples.value = ''
-                    self.mybutton.description = 'Done'
-                    self.mybutton.disabled = True
-                    self.undobutton.disabled = True
+                    print("Experiment completed")
                     if self.progressbar:
-                        self.progress.description = progressstr % (self.counter, self.progress.max)
-                        self.progress.value = self.counter
+                        print_progress(self.counter, self.maxiter)
                 else:
                     if self.progressbar:
                         print_progress(self.counter, self.maxiter)
@@ -463,9 +404,7 @@ class InteractiveWeakSupervision:
                 # simple progress bar
                 print_progress(self.counter, self.maxiter)
             else:
-                # html progress bar
-                self.progress.description = progressstr % (self.counter, self.progress.max)
-                self.progress.value = self.counter
+                print_progress(self.counter, self.maxiter)
 
         if select_random:
             # random during initialization
@@ -487,37 +426,13 @@ class InteractiveWeakSupervision:
             # weight vector already assigned at initialization in auto mode
             self.next_candidate()
         else:
-            self.mybutton.description = 'Submit'
             self.curr_query = idx
             self.show_candidate(idx)
-            self.mybutton.disabled = False
-            self.undobutton.disabled = False
         return
 
     def show_candidate(self, idx):
-        htmltext = '<br><br>'
-        htmltext += '<p><h3>Please inspect this description carefully before looking at examples below:</h3></p>'
-        htmltext += '<p>Please pay attention the <b>term</b> and the <b>LF vote</b></p>'
-        htmltext += '<p>Description of heuristic: <b>%s</b></p>' % self.LFdescriptions[idx]
-        htmltext += '<p>Is this labeling function <b>better than chance</b>?</b><p>'
-        self.htmlwidget.value = htmltext
-        if self.numshow > 0:
-            htmltext = '<br><p><h3>Here are examples of where this heuristic might apply</h3></p>'
-            htmltext += '<p><ul>'
-
-            idxs = self.LFs.row[self.LFs.col == idx]
-            if len(idxs) > self.numshow:
-                idxs_select = np.random.choice(idxs, self.numshow, replace=False)
-            else:
-                idxs_select = idxs
-            for i in idxs_select:
-                document = self.corpus[i]
-                document = document.replace('\n', ' ')
-                document = document.replace('<br />', ' ')
-                soup = BeautifulSoup(document, features="html.parser")
-                if self.striphtml:
-                    document = soup.get_text()
-                htmltext += '<li>' + document + '</li>'
-            htmltext += '</ul><p>'
-            self.htmlexamples.value = htmltext
-        self.disptime = time.time()
+        print("\n")
+        print(f"Description of heuristic: {self.LFdescriptions[idx]}")
+        print("Is this labeling function etter than chance?")
+        val = input("Enter your value: ")
+        self.donext(int(val))

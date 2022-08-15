@@ -38,6 +38,7 @@ def main(
     # Interactive Weak Supervision options
     iws_iterations=25,
     iws_auto = True,
+    iws_usefulness = 0.6,
     seed=123,
     prompt=None,
 ):
@@ -197,6 +198,7 @@ def main(
             iws_cardinality,
             iws_iterations,
             iws_auto,
+            iws_usefulness,
             lf_class_options,
             k_cls,
             logger,
