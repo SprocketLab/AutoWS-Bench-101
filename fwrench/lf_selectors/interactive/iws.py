@@ -152,7 +152,7 @@ class InteractiveWeakSupervision:
                     if len(set(np.unique(Ytrue)).difference({1, -1})) > 0:
                         raise ValueError("Only binary labels handled. Labels must be {-1,1}")
                     _, _, _, _, _, _, accuracy = evaluate_complex_binary(LFs, Ytrue)
-                    print(f'current usefulness is : {usefulness}')
+                    #print(f'current usefulness is : {usefulness}')
                     self.useful = (accuracy > usefulness).astype(int)
         else:
             self.auto = False
