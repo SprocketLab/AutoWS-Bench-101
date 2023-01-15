@@ -21,6 +21,7 @@ Install CLIP:
 pip install git+https://github.com/openai/CLIP.git
 ```
 ## Datasets
+The datasets can be downloaded via [this](https://drive.google.com/drive/folders/1hqN9HRCOWpfPdJ0aelQAvtYlGBV1cyxx).
 Our benchmark automatic download the dataset for you. Please run [`data_settings.py`](https://github.com/Kaylee0501/FWRENCH/blob/main/fwrench/utils/data_settings.py) to download the specific dataset you need.
 
 | Name           | # class       | # train      |# valid       |# test        |
