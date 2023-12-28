@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
-from numpy.typing import NDArray
 from torch.utils.data import Dataset as TorchDataset
 
 
@@ -34,8 +33,8 @@ class FWRENCHDataset(ABC, TorchDataset):
 
     @dataclass
     class _FeatureLabel:
-        feature: NDArray
-        label: NDArray
+        feature: np.ndarray
+        label: np.ndarray
 
         def __getitem__(self, index: int):
             return self.feature[index], self.label[index]
