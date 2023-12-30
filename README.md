@@ -45,6 +45,16 @@ Please run (feel free to change the argument):
 python fwrench/applications/pipeline.py --dataset='cifar10' --embedding='openai' --lf_selector='iws'
 python fwrench/applications/pipeline.py --dataset='ember' --embedding='pca' --lf_selector='snuba'
 ```
+note: if the above command does not work, please try to run the following command:
+```
+python -m fwrench.applications.pipeline --dataset='cifar10' --embedding='openai' --lf_selector='iws'
+python -m fwrench.applications.pipeline --dataset='ember' --embedding='pca' --lf_selector='snuba'
+```
+Another way is drag the pipeline.py outside the folder and run with the following command:
+```
+python pipeline.py --dataset='cifar10' --embedding='openai' --lf_selector='iws'
+python pipeline.py --dataset='ember' --embedding='pca' --lf_selector='snuba'
+```
 
 ## Examples
 
