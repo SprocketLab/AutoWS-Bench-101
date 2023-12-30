@@ -10,7 +10,7 @@ import numpy as np
 import torch
 from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
-from wrench.logging import LoggingHandler
+from wrench._logging import LoggingHandler
 
 
 def main(

@@ -216,7 +216,7 @@ dependencies:
     - googledrivedownloader==0.4
     - lightgbm==3.3.2
     - lief==0.12.1
-
+    - ws-benchmark==1.1.2rc0
 
 
 

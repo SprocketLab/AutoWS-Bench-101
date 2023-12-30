@@ -12,7 +12,7 @@ from fwrench.datasets import (
     EmberDataset,
     NavierStokesDataset,
 )
-from wrench.dataset import load_dataset
+from fwrench.dataset import load_dataset
 from wrench.endmodel import EndClassifierModel
 import os, shutil
 
@@ -28,7 +28,7 @@ def get_mnist(
 
     data = data_dir
     train_data, valid_data, test_data = load_dataset(
-        dataset_home, data, extract_feature=True, dataset_type="NumericDataset"
+        dataset_home, data, extract_feature=True, dataset_type="    "
     )
 
     # Create subset of labeled dataset
@@ -45,7 +45,7 @@ def get_mnist(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -83,7 +83,7 @@ def get_fashion_mnist(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -121,7 +121,7 @@ def get_kmnist(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -159,7 +159,8 @@ def get_cifar10(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        # here
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -198,7 +199,7 @@ def get_spherical_mnist(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -241,7 +242,7 @@ def get_permuted_mnist(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -272,7 +273,7 @@ def get_ecg(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -312,7 +313,7 @@ def get_ember_2017(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -343,7 +344,7 @@ def get_navier_stokes(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -374,7 +375,7 @@ def get_imdb(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -406,7 +407,7 @@ def get_yelp(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,
@@ -438,7 +439,7 @@ def get_youtube(
         batch_size=256,
         test_batch_size=512,
         n_steps=1_000,
-        backbone="LENET",
+        backbone="ImageClassifier",
         optimizer="SGD",
         optimizer_lr=1e-1,
         optimizer_weight_decay=0.0,

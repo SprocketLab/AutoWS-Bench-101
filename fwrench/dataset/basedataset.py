@@ -70,6 +70,7 @@ class BaseDataset(ABC):
             self.ids.append(i)
             self.labels.append(item['label'])
             self.weak_labels.append(item['weak_labels'])
+            # missing in real wrench
             for key in item['data']:
                 if key == "text":
                     self.examples.append(item['data'])
