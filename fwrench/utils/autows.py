@@ -8,7 +8,7 @@ import fwrench.lf_selectors.goggles_inference as GOGGLES_Inferencer
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
-from wrench.labelmodel import Snorkel
+from fwrench.labelmodel import Snorkel
 from sklearn.semi_supervised import LabelPropagation
 
 def run_zero_shot_clip(
@@ -390,6 +390,7 @@ def run_snuba(
     test_data.weak_labels = test_weak_labels.tolist()
 
     label_model = Snorkel()
+    #
     label_model.fit(dataset_train=train_data, dataset_valid=valid_data)
 
     #### Filter out uncovered training data
